@@ -1,15 +1,15 @@
 #include <lexer.h>
 #include <sstream>
+#include <spdlog/spdlog.h>
 
 std::vector<Token> Lexer::lex() {
 
-#ifdef DEBUG
-	logger << "lexing...\n";
-#endif
+	spdlog::info("lexing");
+
 	while (!end()) {
 		skip_whitespace();
 		auto current = next();
-		logger << "current " << current << "\n";
+		spdlog::info("current {} ", current);
 		switch (current) {
 			// @TODO these are sequential i.e. \r\n is a newline
 		case '\n': index = 0; line++; reset_save_point(); break;
@@ -59,9 +59,7 @@ std::vector<Token> Lexer::lex() {
 	}
 
 	tokens.push_back(Token(Token::Type::END, { 0,0,0,0 }));
-#ifdef DEBUG
-	logger << "done lexing\n";
-#endif
+	spdlog::info("done lexing.");
 	return tokens;
 }
 

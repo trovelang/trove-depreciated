@@ -1,27 +1,37 @@
-﻿// trove.cpp : Defines the entry point for the application.
-//
+﻿#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <spdlog/spdlog.h>
 
-#include <trove.h>
 #include <lexer.h>
+#include <parser.h>
 
-using namespace std;
-
-int main()
+int main(int argc, char** argv)
 {
 
 
-	const auto source = "x : 123";
-
-
-	auto lexer = Lexer(source);
-	
-	
-	auto tokens = lexer.lex();
-	
-
-	for (auto token : tokens) {
-		cout << "token = " << token.to_string() << endl;
+	std::string source;
+	if (argc > 1) {
+		std::ifstream t(argv[1]);
+		std::stringstream buffer;
+		buffer << t.rdbuf();
+		source = buffer.str();
+	}
+	else {
+		std::cout << ">";
+		std::getline(std::cin, source);
 	}
 
+	auto lexer = Lexer(source);
+	auto tokens = lexer.lex();
+	for (auto token : tokens) {
+		spdlog::info("token {}", token.to_string());
+	}
+
+	auto parser = Parser(tokens);
+	auto ast = parser.parse();
+
+
+	// ideally we want to be able to to_string an ast
 	return 0;
 }
