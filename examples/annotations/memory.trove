@@ -1,0 +1,18 @@
+
+
+
+
+
+
+// this function won't compile as we are doing an unsafe operation
+some_unsafe_fn {
+	ptr = Ptr(0)
+	ptr[0] = 123
+}
+
+// this function will compile as we have explicity set it to be unsafe
+#Compiler["unsafe"]
+some_unsafe_fn {
+	ptr = Ptr(0)
+	ptr[0] = 123
+}

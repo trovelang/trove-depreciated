@@ -1,0 +1,24 @@
+
+
+MultiBootInfo : type
+	version : String
+end
+
+VIDEO_MEM : 0x100000
+
+#safety["memory_unsafe"]
+write : (location : i32, data : String) {
+	counter = 0
+
+	ptr = Ptr(location)
+
+	for i in [0..data.size]
+		ptr[i] = data[i]		
+}
+	
+
+kmain : (MultiBootInfo) {
+	write(VIDEO_MEM, "hello, world!")
+	for true
+		pass
+}	

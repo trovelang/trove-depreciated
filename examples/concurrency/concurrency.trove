@@ -1,0 +1,11 @@
+import"concurrency")
+
+some_task : fn x : int32 {
+  task.sleep 10000
+	ret x
+}
+
+main : fn {
+  for x : i32 in [1..999999]
+    task.spawn some_task 123
+}

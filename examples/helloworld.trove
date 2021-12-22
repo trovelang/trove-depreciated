@@ -1,0 +1,7 @@
+import("io")
+
+
+// how do we infer this is a fn
+hello : fn = println "hello, world!"
+
+hello()
