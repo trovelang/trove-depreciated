@@ -1,0 +1,19 @@
+
+#Layout=packed
+SomeType : type {
+    x : u32
+    y : u32
+}
+
+main {
+
+
+    import("reflection", "io")
+
+    annotations = annotations(SomeType)
+
+    for annotation in annotations {
+        println("annoatation name {} value(s) {}", annotation.name, annotation.value)
+    }
+
+}

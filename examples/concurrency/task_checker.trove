@@ -1,0 +1,58 @@
+
+// the below example will not compile, because the global variable can be set by multiple threads
+
+some_global_value = 0
+
+
+#compiler["unsafe"]
+some_task {
+    some_global_value += 1
+}
+
+main {
+    import("task")
+    for [0..999] {
+        safe_await(some_task)
+    }
+}
+
+
+
+// the below example will compile, because we are specifying we don't want to be safe
+
+some_global_value = 0
+
+
+some_task {
+    some_global_value += 1
+}
+
+main {
+    import("task")
+    for [0..999] {
+        await(some_task)
+    }
+}
+
+
+// The below code is safe, the compiler will automatically insert locks
+
+import("task")
+
+some_global_value = 0
+some_global_value_lock = Lock()
+
+#concurrency["safe"]
+some_task {
+    some_global_value_lock.lock()
+    some_global_value += 1
+    some_global_value_lock.unlock()
+}
+
+main {
+    for [0..999] {
+        await(some_task)
+    }
+}
+
+

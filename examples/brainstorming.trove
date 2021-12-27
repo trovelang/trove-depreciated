@@ -1,0 +1,41 @@
+
+io = @import("io")
+
+
+x = "I am a string"
+
+
+
+Vector type {
+    x string
+    y u32
+}
+
+x = Vector{}
+
+
+// theres no need for a : is there?
+main fn {
+    
+}
+
+@no_optimise
+no_optimise_fn {
+    for [0..999_999_999] {
+
+    }
+    io.println("this is not optimised!")
+}
+
+i_am_generic fn (@comp x type) type {
+    return {
+        elems x[]
+    }
+}
+
+
+
+
+i_throw_error fn {
+    @panic
+}

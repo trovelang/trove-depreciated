@@ -1,76 +1,83 @@
 #include <token.h>
 #include <sstream>
 
-const char* token_type_debug[] = {
-	"END",
-		"NUM",
-		"IDENTIFIER",
-		"STRING",
+namespace trove {
+	const char* token_type_debug[] = {
+		"END",
+			"NUM",
+			"IDENTIFIER",
+			"STRING",
 
-		"HASH",
-		"DIRECTIVE",
+			"HASH",
+			"DIRECTIVE",
 
-		"PLUS",
-		"MINUS",
-		"STAR",
-		"DIV",
+			"PLUS",
+			"MINUS",
+			"STAR",
+			"DIV",
 
-		"LPAREN",
-		"RPAREN",
-		"LBRACKET",
-		"RBRACKET",
-		"LCURLY",
-		"RCURLY",
+			"LPAREN",
+			"RPAREN",
+			"LBRACKET",
+			"RBRACKET",
+			"LCURLY",
+			"RCURLY",
 
-		"SEMI_COLON",
-		"POINTER",
-		"COMMA",
+			"SEMI_COLON",
+			"POINTER",
+			"COMMA",
 
-		"BAND",
-		"LAND",
-		"BOR",
-		"LOR",
+			"BAND",
+			"LAND",
+			"BOR",
+			"LOR",
 
-		"BANG",
-		"NEQ",
+			"BANG",
+			"NEQ",
 
-		"ASSIGN",
-		"EQUALS",
+			"ASSIGN",
+			"EQUALS",
 
-		"COLON",
-		"QUICK_ASSIGN",
+			"COLON",
+			"QUICK_ASSIGN",
 
-		"DOT",
-		"DOUBLE_DOT",
-		"TRIPLE_DOT",
+			"DOT",
+			"DOUBLE_DOT",
+			"TRIPLE_DOT",
 
-		"GREATER",
-		"GREATER_EQ",
+			"GREATER",
+			"GREATER_EQ",
 
-		"LESS",
-		"LESS_EQ",
+			"LESS",
+			"LESS_EQ",
 
-		"RSHIFT",
-		"LSHIFT",
+			"RSHIFT",
+			"LSHIFT",
 
-		"FN",
-		"FOR",
-		"LOOP",
-		"IF",
-		"ELSE",
-		"RET",
+			"FN",
+			"FOR",
+			"LOOP",
+			"IF",
+			"ELSE",
+			"RET",
 
-		"U32",
-		"S32",
-		"TYPE",
-		"STRUCT",
+			"U32",
+			"S32",
+			"TYPE",
+			"STRUCT",
 
-		"COMP"
-};
+			"COMP",
 
+			"PUB",
+			"PRIV",
+			"VAR",
+			"CONST"
+	};
 
-std::string Token::to_string() {
-	std::stringstream ss;
-	ss << token_type_debug[type];
-	return ss.str();
+	std::string Token::to_string() {
+		std::stringstream ss;
+		ss << token_type_debug[type];
+		return ss.str();
+	}
+
 }

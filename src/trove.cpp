@@ -5,10 +5,12 @@
 
 #include <lexer.h>
 #include <parser.h>
+#include <cgenerator.h>
 
 int main(int argc, char** argv)
 {
 
+	using namespace trove;
 
 	std::string source;
 	if (argc > 1) {
@@ -31,6 +33,9 @@ int main(int argc, char** argv)
 	auto parser = Parser(tokens);
 	auto ast = parser.parse();
 
+
+	auto cgenerator = CGenerator(ast);
+	cgenerator.gen();
 
 	// ideally we want to be able to to_string an ast
 	return 0;

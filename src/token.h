@@ -4,127 +4,114 @@
 #include <types.h>
 #include <string_view>
 #include <string>
+#include <position.h>
 
-class SourcePosition {
-public:
-	SourcePosition() {}
-	SourcePosition(u32 index_start, u32 index_end, u32 line_start, u32 line_end)
-		: index_start(index_start), index_end(index_end), line_start(line_start), line_end(line_end) {}
+namespace trove {
+	
+	class Token {
+	public:
+		enum Type : u8 {
+			END,
+			NUM,
+			IDENTIFIER,
+			STRING,
 
-	SourcePosition merge(SourcePosition other) {
-		SourcePosition merged;
-		merged.index_start = index_start < other.index_start ? index_start : other.index_start;
-		merged.index_end = index_end > other.index_end ? index_end : other.index_end;
-		merged.line_start = line_start < other.line_start ? line_start : other.line_start;
-		merged.line_end = line_end > other.line_end ? line_end : other.line_end;
-		return merged;
-	}
+			HASH,
+			DIRECTIVE,
 
-private:
-	u32 index_start = 0;
-	u32 index_end = 0;
-	u32 line_start = 0;
-	u32 line_end = 0;
-};
+			PLUS,
+			MINUS,
+			STAR,
+			DIV,
 
-class Token {
-public:
-	enum Type : u8 {
-		END,
-		NUM,
-		IDENTIFIER,
-		STRING,
+			LPAREN,
+			RPAREN,
+			LBRACKET,
+			RBRACKET,
+			LCURLY,
+			RCURLY,
 
-		HASH,
-		DIRECTIVE,
+			SEMI_COLON,
+			POINTER,
+			COMMA,
 
-		PLUS,
-		MINUS,
-		STAR,
-		DIV,
+			BAND,
+			LAND,
+			BOR,
+			LOR,
 
-		LPAREN,
-		RPAREN,
-		LBRACKET,
-		RBRACKET,
-		LCURLY,
-		RCURLY,
+			BANG,
+			NEQ,
 
-		SEMI_COLON,
-		POINTER,
-		COMMA,
+			ASSIGN,
+			EQUALS,
 
-		BAND,
-		LAND,
-		BOR,
-		LOR,
+			COLON,
+			QUICK_ASSIGN,
 
-		BANG,
-		NEQ,
+			DOT,
+			DOUBLE_DOT,
+			TRIPLE_DOT,
 
-		ASSIGN,
-		EQUALS,
+			GREATER,
+			GREATER_EQ,
 
-		COLON,
-		QUICK_ASSIGN,
+			LESS,
+			LESS_EQ,
 
-		DOT,
-		DOUBLE_DOT,
-		TRIPLE_DOT,
+			RSHIFT,
+			LSHIFT,
 
-		GREATER,
-		GREATER_EQ,
+			FN,
+			FOR,
+			LOOP,
+			IF,
+			ELSE,
+			RET,
 
-		LESS,
-		LESS_EQ,
+			U32,
+			S32,
+			TYPE,
+			STRUCT,
 
-		RSHIFT,
-		LSHIFT,
+			COMP,
 
-		FN,
-		FOR,
-		LOOP,
-		IF,
-		ELSE,
-		RET,
+			PUB,
+			PRIV,
+			VAR,
+			CONST
+		};
 
-		U32,
-		S32,
-		TYPE,
-		STRUCT,
+		Token() {}
+		Token(Type type, SourcePosition source_position) : type(type), source_position(source_position) {}
+		Token(Type type, SourcePosition source_position, std::string value)
+			: type(type), source_position(source_position), value(value) {}
 
-		COMP
+		SourcePosition& get_position() {
+			return source_position;
+		}
+		std::string to_string();
 
+		std::string& get_value() {
+			return value;
+		}
+
+		s32 as_num() {
+			return atoi(value.c_str());
+		}
+
+		f32 as_float() {}
+
+		Type& get_type() {
+			return type;
+		}
+
+	private:
+		Type type;
+		SourcePosition source_position;
+		std::string value;
 	};
 
-	Token() {}
-	Token(Type type, SourcePosition source_position) : type(type), source_position(source_position) {}
-	Token(Type type, SourcePosition source_position, std::string value)
-		: type(type), source_position(source_position), value(value) {}
+	extern const char* token_type_debug[];
 
-	SourcePosition& get_position() {
-		return source_position;
-	}
-	std::string to_string();
-
-	std::string& get_value() {
-		return value;
-	}
-
-	s32 as_num() {
-		return atoi(value.c_str());
-	}
-
-	f32 as_float() {}
-
-	Type& get_type() {
-		return type;
-	}
-
-private:
-	Type type;
-	SourcePosition source_position;
-	std::string value;
-};
-
-extern const char* token_type_debug[];
+}

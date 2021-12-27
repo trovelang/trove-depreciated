@@ -1,0 +1,25 @@
+
+
+CustomData {
+    x, y, z : u32
+}
+
+
+
+my_global_data : CustomData = null
+
+
+do_something (CustomData) {
+    // here, custom_data is heap allocated as a reference to it is used outside of this scope
+    custom_data : CustomData = {}    
+    my_global_data = &custom_data
+}
+
+main {
+    do_something()
+
+    import("io")
+
+    println("my_global_data {}", my_global_data);
+
+}

@@ -1,0 +1,12 @@
+
+
+
+
+Container (comp x : type) {
+    return {
+        some_variable : x
+    }
+}
+
+
+x : Container(u32)
