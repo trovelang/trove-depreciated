@@ -1,0 +1,13 @@
+// we can add code that runs when expressions are evaluated at compile time
+
+
+
+print_the_stmt : pub fn (ast : AST){
+    println("ast {}", ast)
+}
+
+// during compilation this will print the ast
+generic_fn : pub fn (comp t : type |e| print_the_stmt(e)) {
+    
+}
+

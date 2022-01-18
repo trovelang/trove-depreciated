@@ -1,0 +1,22 @@
+
+
+
+// virtues are similar to rust traits but they are restricted to single functions
+// if the first param is self, its automatically considered a virtue
+
+
+debuggable : pub fn (self) string;
+
+debuggable : pub fn (self : u32) string {
+    String.parse(self)
+}
+
+
+println : pub fn (comp t : type, data : t){
+    comp if !t.has_virtue(debuggable) panic("type {} must have virtue 'debuggable'", t)
+}
+
+
+println(u32, 123)
+// this will cause a panic
+println(string, "hello, world")

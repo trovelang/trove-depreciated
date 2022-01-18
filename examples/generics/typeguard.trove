@@ -1,0 +1,12 @@
+// we can use watchmens for type guards
+
+require_integer : pub fn (comp t : type){
+    if t!=u32 || t!=s32 panic("type must be u32 or s32.")
+}
+
+some_generic_fn : pub fn (comp t : type |t| require_integer(t), value : t) {
+    println("I am a generic fn! {}", value)
+}
+
+some_generic_fn(u32, 123)
+some_generic_fn(string, "hello, world!") // will cause a panic

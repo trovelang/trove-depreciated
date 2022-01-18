@@ -1,0 +1,16 @@
+
+
+the for keyword simply calls iterator .next virtue until the iterator is empty
+
+
+
+for [1, 10] |i| println("i {}", i)
+
+
+// create an array between 1 and 10
+data : [u32, ..] = arr(u32, fn(i : u32){
+    i+1
+})
+
+
+for data |elem| println("elem {}", elem)

@@ -1,0 +1,12 @@
+// watchmen are snippets of code that will be ran and passed the previous expressions value
+
+// this will declare a variable and then print 1 
+x : u32 = 1 |x| println(x)
+
+{
+    x : u31 = 1
+    x++
+} |expr| println(expr) // this will print 2
+
+
+1 |e| |e| |e| println(e) // this will print 1

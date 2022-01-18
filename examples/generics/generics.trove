@@ -1,12 +1,20 @@
 
 
+a_generic_data : type {
+
+}
 
 
-Container (comp x : type) {
-    return {
-        some_variable : x
+a_generic_fn : fn (comp t : type){
+    comp if t.name == "string" {
+        panic("type must not be a string!")
     }
 }
 
 
-x : Container(u32)
+a_generic_fn(1.23) 
+a_generic_fn("hello, world")
+
+
+a_generic_data(u32)
+a_generic_data(string)

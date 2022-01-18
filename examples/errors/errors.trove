@@ -1,0 +1,31 @@
+
+
+// simple alias
+! : fn (comp t : type) = err(t)
+
+cause_an_error : fn () !u32 {
+     
+
+    x = input(u32, "enter a number!")
+
+    if x == 1 {
+        ret err.bad("x must not be !");
+    }
+
+    ret err.ok(x)
+
+
+}
+
+
+main : fn () !none {
+    // if cause_an_error doesn't return an error the value will be unwrapped
+    // else it will return the error up the function.
+    x = try do_something()
+
+    try do_something() catch |e| println(e)
+
+}
+
+
+

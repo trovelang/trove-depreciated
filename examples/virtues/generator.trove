@@ -1,0 +1,33 @@
+
+
+
+
+next : pub fn (self);
+
+GeneratorState : pub fn (comp t : type, value : t) type {
+    done : bool
+    next_elem : t
+}
+
+GeneratorState : pub fn (comp t : type) type {
+    done : bool
+    next_elem : t
+}
+
+
+
+MyGenerator : type {
+    counter : u32 = 0
+}
+
+next : pub fn (self : MyGenerator) GeneratorState(u32) {
+    if self.counter < 10 {
+        GeneratorState(u32, self.counter++)
+    }
+    GeneratorState(u32)
+}
+
+
+x : MyGenerator = {}
+
+for x |elem| println("elem {}", elem)
