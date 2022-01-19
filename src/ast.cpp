@@ -90,6 +90,12 @@ namespace trove {
 		return ss.str();
 	}
 
+	std::string FnAST::to_string() {
+		std::stringstream ss;
+		ss << "FnAST " << body->to_string();
+		return ss.str();
+	}
+
 	std::string StructDefAST::to_string() {
 		std::stringstream ss;
 		ss << "StructDefAST \n";

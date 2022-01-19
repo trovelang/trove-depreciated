@@ -315,6 +315,8 @@ namespace trove {
 
 	AST* Parser::parse_fn() {
 
+		spdlog::info("parse_fn");
+
 		auto fn = next();
 
 		auto params = std::vector<AST*>();

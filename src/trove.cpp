@@ -12,7 +12,8 @@ int main(int argc, char** argv)
 
 	using namespace trove;
 
-	std::string source = "x fn = {}";
+	std::string source = "x u32 = 1";
+
 	/*if (argc > 1) {
 		std::ifstream t(argv[1]);
 		std::stringstream buffer;

@@ -67,6 +67,7 @@ namespace trove {
 	public:
 		FnAST() {}
 		FnAST(AST* body, std::vector<AST*> params, u32 local_count, Type type) : body(body), params(params), local_count(local_count), type(type) {}
+		std::string to_string();
 		AST* get_body() {
 			return body;
 		}
@@ -451,11 +452,13 @@ namespace trove {
 			spdlog::info("ast to_string {}", type);
 			switch (type) {
 			case Type::PROGRAM: return as_program().to_string();
+			case Type::BLOCK: return as_block().to_string();
 			case Type::DECL: return as_decl().to_string();
 			case Type::ASSIGN: return as_assign().to_string();
 			case Type::BIN: return as_bin().to_string();
 			case Type::VAR: return as_var().to_string();
 			case Type::NUM: return as_num().to_string();
+			case Type::FN: return as_fn().to_string();
 			case Type::STRUCT_DEF: return as_struct_def().to_string();
 			case Type::STRUCT_LITERAL: return as_struct_literal().to_string();
 			default: return "Unknown";
