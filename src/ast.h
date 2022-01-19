@@ -169,6 +169,7 @@ namespace trove {
 
 	class BinAST {
 	public:
+		static const char* type_lookup[4];
 		enum class Type : u8 {
 			ADD,
 			SUB,

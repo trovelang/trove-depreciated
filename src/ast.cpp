@@ -2,6 +2,10 @@
 
 namespace trove {
 
+	const char* BinAST::type_lookup[4] = {
+		   "+", "-", "*", "/"
+	};
+
 	const char* ast_type_debug[] = {
 		"AST_PROGRAM",
 		"AST_BLOCK",
@@ -70,9 +74,6 @@ namespace trove {
 	}
 
 	std::string BinAST::to_string() {
-		const char* type_lookup[4] = {
-			"+", "-", "*", "/"
-		};
 		std::stringstream ss;
 		ss << "BinAST " << lhs->to_string() << " " << type_lookup[(int)type] << " " << rhs->to_string() << "\n";
 		return ss.str();

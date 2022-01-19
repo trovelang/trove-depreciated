@@ -12,7 +12,7 @@ int main(int argc, char** argv)
 
 	using namespace trove;
 
-	std::string source = "x u32 = 1";
+	std::string source = "x u32 = 1+2";
 
 	/*if (argc > 1) {
 		std::ifstream t(argv[1]);

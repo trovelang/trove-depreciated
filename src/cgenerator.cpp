@@ -23,6 +23,7 @@ namespace trove {
 		switch (ast->get_type()) {
 		case AST::Type::PROGRAM: gen(ast->as_program()); break;
 		case AST::Type::DECL: gen(ast->as_decl()); break;
+		case AST::Type::BIN: gen(ast->as_bin()); break;
 		case AST::Type::NUM: gen(ast->as_num()); break;
 		}
 	}
@@ -46,6 +47,15 @@ namespace trove {
 		emit("{\n");
 		emit("}\n");
 	}
+
+	void CGenerator::gen(BinAST& ast) {
+		gen(ast.get_lhs());
+		emit(" ");
+		emit(BinAST::type_lookup[(int)ast.get_type()]);
+		emit(" ");
+		gen(ast.get_rhs());
+	}
+
 	void CGenerator::gen(FnAST& fn_ast) {
 		emit("{\n");
 		emit("}\n");

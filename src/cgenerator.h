@@ -17,6 +17,7 @@ namespace trove {
         void gen(DeclAST&);
         void gen(ProgramAST&);
         void gen(BlockAST&);
+        void gen(BinAST&);
         void gen(FnAST&);
         void gen(NumAST&);
     private:
