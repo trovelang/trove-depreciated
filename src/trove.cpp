@@ -12,8 +12,8 @@ int main(int argc, char** argv)
 
 	using namespace trove;
 
-	std::string source;
-	if (argc > 1) {
+	std::string source = "x fn = {}";
+	/*if (argc > 1) {
 		std::ifstream t(argv[1]);
 		std::stringstream buffer;
 		buffer << t.rdbuf();
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	else {
 		std::cout << ">";
 		std::getline(std::cin, source);
-	}
+	}*/
 
 	auto lexer = Lexer(source);
 	auto tokens = lexer.lex();
@@ -33,6 +33,7 @@ int main(int argc, char** argv)
 	auto parser = Parser(tokens);
 	auto ast = parser.parse();
 
+	std::cout << ast->to_string() << "\n";
 
 	auto cgenerator = CGenerator(ast);
 	cgenerator.gen();

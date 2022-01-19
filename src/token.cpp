@@ -29,7 +29,7 @@ namespace trove {
 
 			"BAND",
 			"LAND",
-			"BOR",
+			"PIPE",
 			"LOR",
 
 			"BANG",

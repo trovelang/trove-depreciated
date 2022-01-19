@@ -5,6 +5,8 @@
 #include <vector>
 #include <token.h>
 #include <type.h>
+#include <sstream>
+#include <spdlog/spdlog.h>
 
 namespace trove {
 
@@ -14,6 +16,7 @@ namespace trove {
 	public:
 		ProgramAST() {}
 		ProgramAST(std::vector<AST*> body) : body(body) {}
+		std::string to_string();
 		std::vector<AST*>& get_body() {
 			return body;
 		}
@@ -25,11 +28,28 @@ namespace trove {
 	public:
 		BlockAST() {}
 		BlockAST(std::vector<AST*> body) : body(body) {}
+		std::string to_string();
 		std::vector<AST*> get_body() {
 			return body;
 		}
 	private:
 		std::vector<AST*> body;
+	};
+
+	class WatchmanAST {
+	public:
+		WatchmanAST() {}
+		WatchmanAST(AST* lhs, AST* body) : lhs(lhs), body(body) {}
+		std::string to_string();
+		AST* get_lhs() {
+			return lhs;
+		}
+		AST* get_body() {
+			return body;
+		}
+	private:
+		AST* lhs;
+		AST* body;
 	};
 
 	class CompAST {
@@ -68,6 +88,7 @@ namespace trove {
 		NumAST() {}
 		NumAST(Token* token) : token(token) {
 		}
+		std::string to_string();
 		Token* get_token() {
 			return token;
 		}
@@ -84,6 +105,7 @@ namespace trove {
 		};
 		VarAST() {}
 		VarAST(Token* token) : token(token) {}
+		std::string to_string();
 		Token* get_token() {
 			return token;
 		}
@@ -113,6 +135,7 @@ namespace trove {
 		DeclAST(Token* token) : token(token) {}
 		DeclAST(Token* token, Type type) : token(token), type(type) {}
 		DeclAST(Token* token, Type type, AST* value) : token(token), type(type), value(value) {}
+		std::string to_string();
 		Token* get_token() {
 			return token;
 		}
@@ -154,7 +177,7 @@ namespace trove {
 		BinAST() {}
 		BinAST(AST* lhs, Type type, AST* rhs)
 			: lhs(lhs), type(type), rhs(rhs) {}
-
+		std::string to_string();
 		AST* get_lhs() {
 			return lhs;
 		}
@@ -209,6 +232,7 @@ namespace trove {
 		// fixme this should not have a type associated with it (it should be infered when generating)
 		StructDefAST() : type(TypeType::STRUCT) {}
 		StructDefAST(std::vector<AST*> member_decls) : member_decls(member_decls), type(TypeType::STRUCT) {}
+		std::string to_string();
 		std::vector<AST*>& get_member_decls() {
 			return member_decls;
 		}
@@ -224,6 +248,7 @@ namespace trove {
 	public:
 		StructLiteralAST() {}
 		StructLiteralAST(std::vector<AST*> member_values) : member_values(member_values) {}
+		std::string to_string();
 		std::vector<AST*>& get_member_values() {
 			return member_values;
 		}
@@ -256,6 +281,7 @@ namespace trove {
 	public:
 		AssignAST() {}
 		AssignAST(AST* assignee, AST* value) : assignee(assignee), value(value) {}
+		std::string to_string();
 		AST* get_assignee() {
 			return assignee;
 		}
@@ -297,6 +323,7 @@ namespace trove {
 		enum Type {
 			PROGRAM,
 			BLOCK,
+			WATCHMAN,
 			STRUCT_DEF,
 			STRUCT_LITERAL,
 			STRUCT_ACCESS,
@@ -317,6 +344,7 @@ namespace trove {
 		using ASTValue = std::variant<
 			ProgramAST,
 			BlockAST,
+			WatchmanAST,
 			CompAST,
 			FnAST,
 			NumAST,
@@ -418,6 +446,22 @@ namespace trove {
 		SourcePosition& get_position() {
 			return source_position;
 		}
+
+		std::string to_string() {
+			spdlog::info("ast to_string {}", type);
+			switch (type) {
+			case Type::PROGRAM: return as_program().to_string();
+			case Type::DECL: return as_decl().to_string();
+			case Type::ASSIGN: return as_assign().to_string();
+			case Type::BIN: return as_bin().to_string();
+			case Type::VAR: return as_var().to_string();
+			case Type::NUM: return as_num().to_string();
+			case Type::STRUCT_DEF: return as_struct_def().to_string();
+			case Type::STRUCT_LITERAL: return as_struct_literal().to_string();
+			default: return "Unknown";
+			}
+		}
+
 	private:
 		Type type;
 		SourcePosition source_position;

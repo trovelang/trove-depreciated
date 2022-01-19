@@ -120,6 +120,18 @@ namespace trove {
 		return parse_decl_or_assign();
 	}
 
+	AST* Parser::parse_watchman() {
+		auto higher_precedence = parse_block();
+
+		if (consume(Token::Type::PIPE).has_value()) {
+			consume(Token::Type::PIPE);
+			auto body = parse_stmt();
+			return new AST(AST::Type::WATCHMAN, higher_precedence->get_position().merge(body->get_position()), WatchmanAST(higher_precedence, body));
+		}
+
+		return higher_precedence;
+	}
+
 	AST* Parser::parse_block() {
 
 		auto stmts = std::vector<AST*>();
@@ -202,6 +214,7 @@ namespace trove {
 	}
 
 	AST* Parser::parse_assign() {
+		spdlog::info("parsing_assign");
 		auto higher_precedence = parse_plus_minus();
 		if (expect(Token::Type::ASSIGN)) {
 			auto assign_token = consume(Token::Type::ASSIGN);
@@ -214,6 +227,7 @@ namespace trove {
 	AST* Parser::parse_plus_minus() {
 		auto higher_precedence = parse_mul_div();
 		if (expect(Token::Type::PLUS) || expect(Token::Type::MINUS)) {
+			spdlog::info("parse_plus_minus");
 			auto op = next();
 			auto rhs = parse_plus_minus();
 

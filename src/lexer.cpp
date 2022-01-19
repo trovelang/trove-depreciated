@@ -32,7 +32,7 @@ namespace trove {
 			case ',': token(Token::Type::COMMA); break;
 
 			case '&': decide(Token::Type::BAND, Token::Type::LAND); break;
-			case '|': decide(Token::Type::BOR, Token::Type::LOR); break;
+			case '|': decide(Token::Type::PIPE, Token::Type::LOR); break;
 			case '!': decide(Token::Type::BANG, Token::Type::NEQ); break;
 			case '=': decide(Token::Type::ASSIGN, Token::Type::EQUALS); break;
 			case ':': decide(Token::Type::COLON, Token::Type::QUICK_ASSIGN); break;

@@ -22,6 +22,7 @@ namespace trove {
 		std::optional<Type> parse_type();
 		AST* parse_stmt();
 		AST* parse_comp();
+		AST* parse_watchman();
 		AST* parse_block();
 		AST* parse_if();
 		AST* parse_loop();

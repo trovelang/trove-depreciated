@@ -11,7 +11,12 @@ namespace trove {
 		case AST::Type::PROGRAM: gen(ast->as_program());
 		}
 	}
-	void CGenerator::gen(ProgramAST&) {}
-	void CGenerator::gen(BlockAST&) {}
+	void CGenerator::gen(ProgramAST& program) {
+		for (auto& ast : program.get_body()) {
+			gen(ast);
+		}
+	}
+	void CGenerator::gen(BlockAST&) {
+	}
 	void CGenerator::gen(FnAST&) {}
 }
