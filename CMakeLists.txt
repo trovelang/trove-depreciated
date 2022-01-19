@@ -12,7 +12,7 @@ find_package(spdlog)
 include_directories("src")
 
 # Add source to this project's executable.
-add_executable(trove "src/trove.cpp" "src/trove.h" "src/lexer.h" "src/lexer.cpp" "src/parser.h" "src/parser.cpp" "src/token.h" "src/token.cpp" "src/types.h" "src/log.h" "src/log.cpp" "src/ast.h" "src/ast.cpp" "src/type.h" "src/borrowchecker.h" "src/borrowchecker.cpp" "src/cli.h" "src/clr.h" "src/typechecker.h" "src/typechecker.cpp" "src/cgenerator.cpp"  "src/type.cpp")
+add_executable(trove "src/trove.cpp" "src/trove.h" "src/lexer.h" "src/lexer.cpp" "src/parser.h" "src/parser.cpp" "src/token.h" "src/token.cpp" "src/types.h" "src/log.h" "src/log.cpp" "src/ast.h" "src/ast.cpp" "src/type.h" "src/borrowchecker.h" "src/borrowchecker.cpp" "src/cli.h" "src/clr.h" "src/analyse.h" "src/analyse.cpp" "src/cgenerator.cpp"  "src/type.cpp" "src/symtable.h" "src/error.h")
 
 target_link_libraries(trove spdlog)
 

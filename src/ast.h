@@ -134,13 +134,13 @@ namespace trove {
 	public:
 		DeclAST() {}
 		DeclAST(Token* token) : token(token) {}
-		DeclAST(Token* token, Type type) : token(token), type(type) {}
-		DeclAST(Token* token, Type type, AST* value) : token(token), type(type), value(value) {}
+		DeclAST(Token* token, std::optional<Type> type) : token(token), type(type) {}
+		DeclAST(Token* token, std::optional<Type> type, AST* value) : token(token), type(type), value(value) {}
 		std::string to_string();
 		Token* get_token() {
 			return token;
 		}
-		Type& get_type() {
+		std::optional<Type>& get_type() {
 			return type;
 		}
 		std::optional<AST*>& get_value() {
@@ -148,7 +148,7 @@ namespace trove {
 		}
 	private:
 		Token* token;
-		Type type;
+		std::optional<Type> type;
 		std::optional<AST*> value;
 	};
 
@@ -450,7 +450,6 @@ namespace trove {
 		}
 
 		std::string to_string() {
-			spdlog::info("ast to_string {}", type);
 			switch (type) {
 			case Type::PROGRAM: return as_program().to_string();
 			case Type::BLOCK: return as_block().to_string();

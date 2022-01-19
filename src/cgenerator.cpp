@@ -7,6 +7,7 @@ namespace trove {
 		switch (type.get_type()) {
 		case TypeType::U32: return "unsigned int";
 		case TypeType::S32: return "int";
+		case TypeType::FN: return "fn";
 		}
 	}
 
@@ -23,8 +24,11 @@ namespace trove {
 		switch (ast->get_type()) {
 		case AST::Type::PROGRAM: gen(ast->as_program()); break;
 		case AST::Type::DECL: gen(ast->as_decl()); break;
+		case AST::Type::ASSIGN: gen(ast->as_assign()); break;
 		case AST::Type::BIN: gen(ast->as_bin()); break;
 		case AST::Type::NUM: gen(ast->as_num()); break;
+		case AST::Type::VAR: gen(ast->as_var()); break;
+		case AST::Type::FN: gen(ast->as_fn()); break;
 		}
 	}
 	void CGenerator::gen(ProgramAST& program) {
@@ -34,13 +38,31 @@ namespace trove {
 	}
 
 	void CGenerator::gen(DeclAST& ast) {
-		emit(type_to_str(ast.get_type()));
-		emit(" ");
-		emit(ast.get_token()->get_value());
-		if (ast.get_value().has_value()) {
-			emit(" = ");
+
+		// we are doing a global fn
+		// todo check for global
+		if (ast.get_type().value().get_type() == TypeType::FN 
+			&& ast.get_type().value().get_mutability_modifier()==MutabilityModifier::CONST){
 			gen(ast.get_value().value());
 		}
+		else {
+
+			emit(type_to_str(ast.get_type().value()));
+			emit(" ");
+			emit(ast.get_token()->get_value());
+			if (ast.get_value().has_value()) {
+				emit(" = ");
+				gen(ast.get_value().value());
+			}
+			emit(";\n");
+		}
+	}
+
+	void CGenerator::gen(AssignAST& ast) {
+		gen(ast.get_assignee());
+		emit(" = ");
+		gen(ast.get_value());
+		emit(";\n");
 	}
 
 	void CGenerator::gen(BlockAST&) {
@@ -57,10 +79,17 @@ namespace trove {
 	}
 
 	void CGenerator::gen(FnAST& fn_ast) {
-		emit("{\n");
+		emit("void ");
+		emit(fn_ast.get_type().get_token()->get_value());
+		emit("(){\n");
 		emit("}\n");
 	}
+	
 	void CGenerator::gen(NumAST& ast) {
+		emit(ast.get_token()->get_value());
+	}
+
+	void CGenerator::gen(VarAST& ast) {
 		emit(ast.get_token()->get_value());
 	}
 }

@@ -190,23 +190,22 @@ namespace trove {
 		auto higher_precedence = parse_plus_minus();
 
 		auto type = parse_type();
-		if (!type.has_value()) {
-			type = Type();
-		}
 
 		if (consume(Token::Type::ASSIGN)) {
 			spdlog::info("initialising decl!");
 			auto value = parse_expr();
+
+			spdlog::info("type value is {}", type.value().to_string());
 			return new AST(
 				AST::Type::DECL,
 				higher_precedence->get_position().merge(value->get_position()),
-				DeclAST(higher_precedence->as_var().get_token(), type.value(), value));
+				DeclAST(higher_precedence->as_var().get_token(), type, value));
 		}
 		else {
 			return new AST(
 				AST::Type::DECL,
 				higher_precedence->get_position().merge(type.value().get_token()->get_position()),
-				DeclAST(higher_precedence->as_var().get_token(), type.value()));
+				DeclAST(higher_precedence->as_var().get_token(), type));
 		}
 
 	

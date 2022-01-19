@@ -14,6 +14,16 @@ namespace trove {
 		FN
 	};
 
+	enum ScopeModifier : u8 {
+		GLOBAL,
+		LOCAL
+	};
+
+	enum MutabilityModifier : u8 {
+		MUT,
+		CONST
+	};
+
 	class Type {
 	public:
 		Type() {}
@@ -30,12 +40,20 @@ namespace trove {
 		std::vector<Type>& get_multiple() {
 			return multiple;
 		}
+		ScopeModifier& get_scope_modifier() {
+			return scope_modifier;
+		}
+		MutabilityModifier& get_mutability_modifier() {
+			return mutability_modifier;
+		}
 		std::string to_string();
 	private:
 		std::vector<Type> multiple;
 		TypeType type;
 		Type* contained;
-		Token* token;
+		Token* token; // this can be for structs, and lambdas
+		ScopeModifier scope_modifier = ScopeModifier::GLOBAL;
+		MutabilityModifier mutability_modifier = MutabilityModifier::CONST;
 	};
 
 	extern const char* type_debug[];

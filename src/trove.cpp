@@ -5,6 +5,7 @@
 
 #include <lexer.h>
 #include <parser.h>
+#include <analyse.h>
 #include <cgenerator.h>
 
 int main(int argc, char** argv)
@@ -12,7 +13,7 @@ int main(int argc, char** argv)
 
 	using namespace trove;
 
-	std::string source = "x u32 = 1+2";
+	std::string source = "x s32 = 1+2";
 
 	/*if (argc > 1) {
 		std::ifstream t(argv[1]);
@@ -25,6 +26,11 @@ int main(int argc, char** argv)
 		std::getline(std::cin, source);
 	}*/
 
+	std::ifstream t("C:/trovelang/trove/tests/trove/test.trove");
+	std::stringstream buffer;
+	buffer << t.rdbuf();
+	source = buffer.str();
+
 	auto lexer = Lexer(source);
 	auto tokens = lexer.lex();
 	for (auto token : tokens) {
@@ -35,6 +41,9 @@ int main(int argc, char** argv)
 	auto ast = parser.parse();
 
 	std::cout << ast->to_string() << "\n";
+
+	auto analyser = Analyser(ast);
+	analyser.analyse();
 
 	auto cgenerator = CGenerator(ast);
 	cgenerator.gen();

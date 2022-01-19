@@ -15,11 +15,13 @@ namespace trove {
         void gen();
         void gen(AST*);
         void gen(DeclAST&);
+        void gen(AssignAST&);
         void gen(ProgramAST&);
         void gen(BlockAST&);
         void gen(BinAST&);
         void gen(FnAST&);
         void gen(NumAST&);
+        void gen(VarAST&);
     private:
         AST* ast;
         std::stringstream ss;
