@@ -7,6 +7,8 @@
 #include <parser.h>
 #include <analyse.h>
 #include <cgenerator.h>
+#include <typecheck.h>
+#include <unit.h>
 
 int main(int argc, char** argv)
 {
@@ -31,6 +33,9 @@ int main(int argc, char** argv)
 	buffer << t.rdbuf();
 	source = buffer.str();
 
+	auto compilation_unit = CompilationUnit(source);
+	auto err_reporter = ErrorReporter(compilation_unit);
+
 	auto lexer = Lexer(source);
 	auto tokens = lexer.lex();
 	for (auto token : tokens) {
@@ -42,8 +47,11 @@ int main(int argc, char** argv)
 
 	std::cout << ast->to_string() << "\n";
 
-	auto analyser = Analyser(ast);
-	analyser.analyse();
+	//auto analyser = Analyser(ast);
+	//analyser.analyse();
+
+	auto type_checker = TypeCheckPass(err_reporter, ast);
+	type_checker.analyse();
 
 	auto cgenerator = CGenerator(ast);
 	cgenerator.gen();

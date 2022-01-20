@@ -18,7 +18,6 @@ namespace trove {
 			return merged;
 		}
 
-	private:
 		u32 index_start = 0;
 		u32 index_end = 0;
 		u32 line_start = 0;

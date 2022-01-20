@@ -17,5 +17,8 @@ namespace trove {
 		return type_debug[type];
 	}
 
+	u1 Type::equals(Type other) {
+		return false;
+	}
 
 }

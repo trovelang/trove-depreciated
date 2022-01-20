@@ -1,10 +1,11 @@
-/*#pragma once
+#pragma once
 
 #include <ast.h>
 #include <type.h>
 #include <string>
 #include <sstream>
 #include <symtable.h>
+#include <error.h>
 
 namespace trove {
 
@@ -21,22 +22,24 @@ namespace trove {
         Type* type;
     };
 
-    class Analyser {
+    class TypeCheckPass {
     public:
-        Analyser(AST* ast) : ast(ast) {}
+        TypeCheckPass(ErrorReporter& err_reporter, AST* ast) : err_reporter(err_reporter), ast(ast) {}
         void analyse();
         AnalysisUnit analyse(AnalysisCtx&, AST*);
-        AnalysisUnit analyse(AnalysisCtx&, DeclAST&);
-        AnalysisUnit analyse(AnalysisCtx&, AssignAST&);
-        AnalysisUnit analyse(AnalysisCtx&, ProgramAST&);
+        AnalysisUnit analyse_decl_ast(AnalysisCtx&, AST*);
+        AnalysisUnit analyse_block_ast(AnalysisCtx&, AST*);
+        AnalysisUnit analyse_assign_ast(AnalysisCtx&, AST*);
+        AnalysisUnit analyse_program_ast(AnalysisCtx&, AST*);
+        AnalysisUnit analyse_var(AnalysisCtx&, AST*);
         AnalysisUnit analyse(AnalysisCtx&, BlockAST&);
-        AnalysisUnit analyse(AnalysisCtx&, BinAST&);
+        AnalysisUnit analyse_bin(AnalysisCtx&, AST*);
         AnalysisUnit analyse(AnalysisCtx&, FnAST&);
         AnalysisUnit analyse(AnalysisCtx&, NumAST&);
-        AnalysisUnit analyse(AnalysisCtx&, VarAST&);
     private:
+        ErrorReporter& err_reporter;
         AST* ast;
-        SymTable<Type> sym_table;
+        SymTable<Type*> sym_table;
     };
 
-}*/
+}

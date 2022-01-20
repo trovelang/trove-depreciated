@@ -59,7 +59,6 @@ namespace trove {
 
 	std::string DeclAST::to_string() {
 		std::stringstream ss;
-		spdlog::info("umm {}", type.has_value());
 		ss << "DeclAST " << token->get_value() << " " << type.value().to_string();
 		if (value.has_value()) {
 			ss << " " << value.value()->to_string();

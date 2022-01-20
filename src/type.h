@@ -47,6 +47,8 @@ namespace trove {
 			return mutability_modifier;
 		}
 		std::string to_string();
+
+		u1 equals(Type other);
 	private:
 		std::vector<Type> multiple;
 		TypeType type;

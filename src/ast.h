@@ -12,6 +12,15 @@ namespace trove {
 
 	class AST;
 
+	class AnnotationAST {
+	public:
+		AnnotationAST() {
+		}
+		AnnotationAST(AST* ast) : ast(ast) {}
+	private:
+		AST* ast;
+	};
+
 	class ProgramAST {
 	public:
 		ProgramAST() {}
@@ -87,14 +96,14 @@ namespace trove {
 	class NumAST {
 	public:
 		NumAST() {}
-		NumAST(Token* token) : token(token) {
+		NumAST(Token* token, Type type) : token(token), type(type) {
 		}
 		std::string to_string();
 		Token* get_token() {
 			return token;
 		}
-	private:
 		Token* token;
+		Type type;
 	};
 
 	class VarAST {
@@ -279,18 +288,10 @@ namespace trove {
 		u32 index = 0;
 	};
 
-	class AssignAST {
-	public:
+	struct AssignAST {
 		AssignAST() {}
 		AssignAST(AST* assignee, AST* value) : assignee(assignee), value(value) {}
 		std::string to_string();
-		AST* get_assignee() {
-			return assignee;
-		}
-		AST* get_value() {
-			return value;
-		}
-	private:
 		AST* assignee;
 		AST* value;
 	};
@@ -464,10 +465,8 @@ namespace trove {
 			default: return "Unknown";
 			}
 		}
-
-	private:
-		Type type;
 		SourcePosition source_position;
+		Type type;
 		ASTValue value;
 	};
 

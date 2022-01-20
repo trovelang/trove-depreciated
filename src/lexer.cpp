@@ -84,8 +84,8 @@ namespace trove {
 		return source[--current];
 	}
 	void Lexer::reset_save_point() {
-		index = index_save_point;
-		line = line_save_point;
+		index_save_point = index;
+		line_save_point = line;
 	}
 	void Lexer::skip_whitespace() {
 		while (peek() == ' ' || peek() == '\t') {
@@ -94,11 +94,13 @@ namespace trove {
 		}
 	}
 	void Lexer::token(Token::Type type) {
-		auto token = Token(type, SourcePosition{ index_save_point, line_save_point, index, line });
+		auto token = Token(type, SourcePosition{ index_save_point, index, line_save_point, line });
+		spdlog::info("{} {} {} {} {}", token.to_string(), index_save_point, index, line_save_point, line);
 		tokens.push_back(token);
 	}
 	void Lexer::token(Token::Type type, std::string value) {
-		auto token = Token(type, SourcePosition{ index_save_point, line_save_point, index, line }, value);
+		auto token = Token(type, SourcePosition{ index_save_point, index, line_save_point, line }, value);
+		spdlog::info("{} {} {} {} {}", token.to_string(), index_save_point, index, line_save_point, line);
 		tokens.push_back(token);
 	}
 

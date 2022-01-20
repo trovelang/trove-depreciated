@@ -23,6 +23,7 @@ namespace trove {
 	void CGenerator::gen(AST* ast) {
 		switch (ast->get_type()) {
 		case AST::Type::PROGRAM: gen(ast->as_program()); break;
+		case AST::Type::BLOCK: gen(ast->as_block()); break;
 		case AST::Type::DECL: gen(ast->as_decl()); break;
 		case AST::Type::ASSIGN: gen(ast->as_assign()); break;
 		case AST::Type::BIN: gen(ast->as_bin()); break;
@@ -31,10 +32,19 @@ namespace trove {
 		case AST::Type::FN: gen(ast->as_fn()); break;
 		}
 	}
-	void CGenerator::gen(ProgramAST& program) {
-		for (auto& ast : program.get_body()) {
-			gen(ast);
+
+	void CGenerator::gen(ProgramAST& ast) {
+		for (auto& expr : ast.get_body()) {
+			gen(expr);
 		}
+	}
+
+	void CGenerator::gen(BlockAST& ast) {
+		emit("{\n");
+		for (auto& expr : ast.get_body()) {
+			gen(expr);
+		}
+		emit("}\n");
 	}
 
 	void CGenerator::gen(DeclAST& ast) {
@@ -46,7 +56,6 @@ namespace trove {
 			gen(ast.get_value().value());
 		}
 		else {
-
 			emit(type_to_str(ast.get_type().value()));
 			emit(" ");
 			emit(ast.get_token()->get_value());
@@ -59,15 +68,10 @@ namespace trove {
 	}
 
 	void CGenerator::gen(AssignAST& ast) {
-		gen(ast.get_assignee());
+		gen(ast.assignee);
 		emit(" = ");
-		gen(ast.get_value());
+		gen(ast.value);
 		emit(";\n");
-	}
-
-	void CGenerator::gen(BlockAST&) {
-		emit("{\n");
-		emit("}\n");
 	}
 
 	void CGenerator::gen(BinAST& ast) {
@@ -82,6 +86,7 @@ namespace trove {
 		emit("void ");
 		emit(fn_ast.get_type().get_token()->get_value());
 		emit("(){\n");
+		gen(fn_ast.get_body());
 		emit("}\n");
 	}
 	

@@ -4,8 +4,6 @@
 namespace trove {
 	AST* Parser::parse() {
 
-		spdlog::info("parsing!");
-
 		for (auto token : tokens) {
 			spdlog::info("token {}", token.to_string());
 		}
@@ -192,7 +190,6 @@ namespace trove {
 		auto type = parse_type();
 
 		if (consume(Token::Type::ASSIGN)) {
-			spdlog::info("initialising decl!");
 			auto value = parse_expr();
 
 			spdlog::info("type value is {}", type.value().to_string());
@@ -218,7 +215,19 @@ namespace trove {
 		if (expect(Token::Type::ASSIGN)) {
 			auto assign_token = consume(Token::Type::ASSIGN);
 			auto value = parse_expr();
-			return new AST(AST::Type::ASSIGN, higher_precedence->get_position().merge(value->get_position()), AssignAST(higher_precedence, value));
+			spdlog::info("assign lhs pos {} {} {} {}",
+				higher_precedence->get_position().index_start,
+				higher_precedence->get_position().index_end,
+				higher_precedence->get_position().line_start,
+				higher_precedence->get_position().line_end);
+
+			spdlog::info("assign rhs pos {} {} {} {}",
+				value->get_position().index_start,
+				value->get_position().index_end,
+				value->get_position().line_start,
+				value->get_position().line_end);
+			return new AST(AST::Type::ASSIGN, higher_precedence->get_position().merge(value->get_position()), 
+				AssignAST(higher_precedence, value));
 		}
 		return higher_precedence;
 	}
@@ -303,7 +312,7 @@ namespace trove {
 	AST* Parser::parse_single() {
 		auto tok = peek();
 		switch (tok->get_type()) {
-		case Token::Type::NUM: next(); return new AST(AST::Type::NUM, tok->get_position(), NumAST(tok));
+		case Token::Type::NUM: next(); return new AST(AST::Type::NUM, tok->get_position(), NumAST(tok, Type(TypeType::U32)));
 		case Token::Type::IDENTIFIER: next(); return new AST(AST::Type::VAR, tok->get_position(), VarAST(tok));
 		case Token::Type::STRING: next(); return new AST(AST::Type::STRING, tok->get_position(), StringAST(tok));
 		case Token::Type::FN: return parse_fn();
