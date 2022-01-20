@@ -18,7 +18,7 @@ namespace trove {
 	}
 
 	u1 Type::equals(Type other) {
-		return false;
+		return type == other.type;
 	}
 
 }

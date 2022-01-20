@@ -69,7 +69,9 @@ namespace trove {
         auto rhs = analyse(ctx, assign.value);
 
         if (!lhs.type->equals(*rhs.type)) {
-            err_reporter.compile_error("types do not equal", ast->source_position);
+            std::stringstream ss;
+            ss << "types do not equal, expected " << lhs.type->to_string() << " but got " << rhs.type->to_string();
+            err_reporter.compile_error(ss.str(), ast->source_position);
         }
 
         return {};
