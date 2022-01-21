@@ -8,6 +8,7 @@
 #include <analyse.h>
 #include <cgenerator.h>
 #include <typecheck.h>
+#include <borrowchecker.h>
 #include <unit.h>
 
 int main(int argc, char** argv)
@@ -52,6 +53,8 @@ int main(int argc, char** argv)
 
 	auto type_checker = TypeCheckPass(err_reporter, ast);
 	type_checker.analyse();
+
+	auto borrow_checker = BorrowCheckPass(err_reporter, ast);
 
 	auto cgenerator = CGenerator(ast);
 	cgenerator.gen();

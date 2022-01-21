@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <token.h>
 #include <unit.h>

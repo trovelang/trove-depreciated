@@ -1,4 +1,3 @@
-
 #include <typecheck.h>
 
 namespace trove {

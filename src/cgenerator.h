@@ -9,6 +9,7 @@ namespace trove {
 
     class CGenerator {
     public:
+        std::string execute(const char* cmd);
         CGenerator(AST* ast) : ast(ast) {}
         std::string type_to_str(Type type);
         void emit(std::string code);

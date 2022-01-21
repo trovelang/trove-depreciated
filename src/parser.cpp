@@ -57,7 +57,13 @@ namespace trove {
 		// todo as this is optional, this should be peek
 		auto token = peek();
 
-		if (token->get_type() == Token::Type::CONST || token->get_type() == Token::Type::VAR) {
+		auto mutability = MutabilityModifier::CONST;
+
+		if (token->get_type() == Token::Type::CONST) {
+			mutability = MutabilityModifier::CONST;
+			next();
+		}else if (token->get_type() == Token::Type::VAR) {
+			mutability = MutabilityModifier::MUT;
 			next();
 		}
 
@@ -67,11 +73,11 @@ namespace trove {
 
 
 		switch (token->get_type()) {
-		case Token::Type::U32: return Type(TypeType::U32, token);
-		case Token::Type::S32: return Type(TypeType::S32, token);
-		case Token::Type::TYPE: return Type(TypeType::TYPE, token);
-		case Token::Type::STRUCT: return Type(TypeType::STRUCT, token);
-		case Token::Type::STRING: return Type(TypeType::STRING, token);
+		case Token::Type::U32: return Type(TypeType::U32, token, mutability);
+		case Token::Type::S32: return Type(TypeType::S32, token, mutability);
+		case Token::Type::TYPE: return Type(TypeType::TYPE, token, mutability);
+		case Token::Type::STRUCT: return Type(TypeType::STRUCT, token, mutability);
+		case Token::Type::STRING: return Type(TypeType::STRING, token, mutability);
 		case Token::Type::FN: {
 			auto params = std::vector<Type>();
 			if (consume(Token::Type::LPAREN)) {
@@ -91,7 +97,7 @@ namespace trove {
 				consume(Token::Type::RPAREN);
 			}
 
-			return Type(TypeType::FN, token, params);
+			return Type(TypeType::FN, token, params, mutability);
 		}
 		}
 		return {};
@@ -175,12 +181,14 @@ namespace trove {
 	}
 
 	AST* Parser::parse_decl_or_assign() {
-		spdlog::info("parse_decl_or_assign");
 		auto first = peek();
 		auto second = peek(1);
+		spdlog::info("parse_decl_or_assign {} {}", first->get_value(), second->get_value());
 		if (is_type(second->get_type())) {
+			spdlog::info("doing decl!");
 			return parse_decl();
 		}
+		spdlog::info("doing assign...");
 		return parse_assign();
 	}
 
@@ -188,6 +196,8 @@ namespace trove {
 		auto higher_precedence = parse_plus_minus();
 
 		auto type = parse_type();
+
+		spdlog::info("PARSING DECL {} {}", higher_precedence->to_string(), type.value().to_string());
 
 		if (consume(Token::Type::ASSIGN)) {
 			auto value = parse_expr();

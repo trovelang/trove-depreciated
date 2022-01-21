@@ -28,9 +28,12 @@ namespace trove {
 	public:
 		Type() {}
 		Type(TypeType type) : type(type) {}
-		Type(TypeType type, Token* token) : type(type), token(token) {}
+		Type(TypeType type, Token* token, MutabilityModifier mutability_modifier) 
+			: type(type), token(token), mutability_modifier(mutability_modifier) {}
 		Type(TypeType type, std::vector<Type> multiple) : type(type), multiple(multiple) {}
 		Type(TypeType type, Token* token, std::vector<Type> multiple) : type(type), token(token), multiple(multiple) {}
+		Type(TypeType type, Token* token, std::vector<Type> multiple, MutabilityModifier mutability_modifier)
+			: type(type), token(token), multiple(multiple), mutability_modifier(mutability_modifier) {}
 		TypeType& get_type() {
 			return type;
 		}

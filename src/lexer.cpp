@@ -5,12 +5,10 @@
 namespace trove {
 	std::vector<Token> Lexer::lex() {
 
-		spdlog::info("lexing");
 
 		while (!end()) {
 			skip_whitespace();
 			auto current = next();
-			spdlog::info("current {} ", current);
 			switch (current) {
 				// @TODO these are sequential i.e. \r\n is a newline
 			case '\n': index = 0; line++; reset_save_point(); break;
@@ -60,7 +58,6 @@ namespace trove {
 		}
 
 		tokens.push_back(Token(Token::Type::END, { 0,0,0,0 }));
-		spdlog::info("done lexing.");
 		return tokens;
 	}
 
@@ -95,12 +92,12 @@ namespace trove {
 	}
 	void Lexer::token(Token::Type type) {
 		auto token = Token(type, SourcePosition{ index_save_point, index, line_save_point, line });
-		spdlog::info("{} {} {} {} {}", token.to_string(), index_save_point, index, line_save_point, line);
+		//spdlog::info("{} {} {} {} {}", token.to_string(), index_save_point, index, line_save_point, line);
 		tokens.push_back(token);
 	}
 	void Lexer::token(Token::Type type, std::string value) {
 		auto token = Token(type, SourcePosition{ index_save_point, index, line_save_point, line }, value);
-		spdlog::info("{} {} {} {} {}", token.to_string(), index_save_point, index, line_save_point, line);
+		//spdlog::info("{} {} {} {} {}", token.to_string(), index_save_point, index, line_save_point, line);
 		tokens.push_back(token);
 	}
 
@@ -165,13 +162,13 @@ namespace trove {
 
 		switch (current) {
 		case 'c': {
-			found_keyword = check_keyword("omp", Token::Type::COMP); break;
+			found_keyword = check_keyword("omp", Token::Type::COMP);
 			if (!found_keyword) found_keyword = check_keyword("onst", Token::Type::CONST);
 			break;
 		}
 		case 'e': found_keyword = check_keyword("lse", Token::Type::ELSE); break;
 		case 'f': {
-			found_keyword = check_keyword("n", Token::Type::FN); break;
+			found_keyword = check_keyword("n", Token::Type::FN);
 			if (!found_keyword) found_keyword = check_keyword("or", Token::Type::FOR);
 			break;
 		}
