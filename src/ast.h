@@ -249,8 +249,8 @@ namespace trove {
 	class StructDefAST {
 	public:
 		// fixme this should not have a type associated with it (it should be infered when generating)
-		StructDefAST() : type(TypeType::STRUCT) {}
-		StructDefAST(std::vector<AST*> member_decls) : member_decls(member_decls), type(TypeType::STRUCT) {}
+		StructDefAST() : type(TypeType::TYPE) {}
+		StructDefAST(std::vector<AST*> member_decls) : member_decls(member_decls), type(TypeType::TYPE) {}
 		std::string to_string();
 		std::vector<AST*>& get_member_decls() {
 			return member_decls;

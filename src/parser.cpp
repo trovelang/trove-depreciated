@@ -47,6 +47,7 @@ namespace trove {
 		case Token::Type::TYPE:
 		case Token::Type::STRUCT:
 		case Token::Type::STRING:
+		//case Token::Type::IDENTIFIER:
 		case Token::Type::FN:
 			return true;
 		}
@@ -78,6 +79,7 @@ namespace trove {
 		case Token::Type::TYPE: return Type(TypeType::TYPE, token, mutability);
 		case Token::Type::STRUCT: return Type(TypeType::STRUCT, token, mutability);
 		case Token::Type::STRING: return Type(TypeType::STRING, token, mutability);
+		//case Token::Type::IDENTIFIER: return Type(TypeType::STRUCT, token, mutability);
 		case Token::Type::FN: {
 			auto params = std::vector<Type>();
 			if (consume(Token::Type::LPAREN)) {

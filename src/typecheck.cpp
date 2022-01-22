@@ -18,6 +18,7 @@ namespace trove {
         case AST::Type::VAR: return analyse_var(ctx, ast);
         case AST::Type::LOOP: return analyse_loop(ctx, ast);
         case AST::Type::FN: return analyse(ctx, ast->as_fn());
+        case AST::Type::STRUCT_DEF: return analyse_struct_def(ctx, ast);
         }
         return {};
     }
@@ -35,24 +36,31 @@ namespace trove {
             // if we are dealing with a function we need to process it
             if (decl.get_type()->get_mutability_modifier()==MutabilityModifier::CONST
             && value_analysis_unit.type->get_type() == TypeType::FN) {
-
                 // set the global fn name
                 value_analysis_unit.type->get_token() = decl.get_token();
-
             }
             // if we are dealing with a lambda we need to process it
             else if (decl.get_type()->get_mutability_modifier() == MutabilityModifier::MUT
                     && value_analysis_unit.type->get_type() == TypeType::FN) {
-                
-                spdlog::info("analysing lambda!");
                 // set the global fn name
-
                 auto tok = new Token(Token::Type::IDENTIFIER, {}, "lambda");
                 value_analysis_unit.type->get_token() = tok;
-
                 decl.get_type().value().token = tok;
+            }
 
-
+            // if we are dealing with a function we need to process it
+            if (decl.get_type()->get_mutability_modifier() == MutabilityModifier::CONST
+                && value_analysis_unit.type->get_type() == TypeType::TYPE) {
+                // set the global fn name
+                value_analysis_unit.type->get_token() = decl.get_token();
+            }
+            // if we are dealing with a lambda we need to process it
+            else if (decl.get_type()->get_mutability_modifier() == MutabilityModifier::MUT
+                && value_analysis_unit.type->get_type() == TypeType::TYPE) {
+                // set the global fn name
+                auto tok = new Token(Token::Type::IDENTIFIER, {}, "lambda_type");
+                value_analysis_unit.type->get_token() = tok;
+                decl.get_type().value().token = tok;
             }
         }
 
@@ -135,5 +143,10 @@ namespace trove {
     AnalysisUnit TypeCheckPass::analyse_loop(AnalysisCtx& ctx, AST* ast) {
        
         return AnalysisUnit{  };
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_struct_def(AnalysisCtx& ctx, AST* ast) {
+
+        return AnalysisUnit{ &ast->as_struct_def().get_type() };
     }
 }

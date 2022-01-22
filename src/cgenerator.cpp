@@ -35,6 +35,7 @@ namespace trove {
 		case TypeType::U32: return "unsigned int";
 		case TypeType::S32: return "int";
 		case TypeType::FN: return "fn";
+		case TypeType::TYPE: return "struct";
 		}
 	}
 
@@ -68,11 +69,17 @@ namespace trove {
 		case AST::Type::CALL: gen_call(ctx, ast); break;
 		case AST::Type::LOOP: gen_loop(ctx, ast); break;
 		case AST::Type::BOOL: gen_bool(ctx, ast); break;
+		case AST::Type::STRUCT_DEF: gen_struct_def(ctx, ast); break;
 		}
 	}
 
-	void CGenerator::gen(CGeneratorContext& ctx, ProgramAST& ast) {
+	void CGenerator::gen_runtime() {
 		emit("#include <stdio.h>\n");
+		emit("struct __type_info{\nconst char* __type_name;\n};\n");
+	}
+
+	void CGenerator::gen(CGeneratorContext& ctx, ProgramAST& ast) {
+		gen_runtime();
 		for (auto& expr : ast.get_body()) {
 			gen(ctx, expr);
 		}
@@ -92,11 +99,10 @@ namespace trove {
 		// todo check for global
 		if (ast.get_type().value().get_type() == TypeType::FN 
 			&& ast.get_type().value().get_mutability_modifier()==MutabilityModifier::CONST){
-			spdlog::info("generating fn!");
 			gen(ctx, ast.get_value().value());
 		}else if (ast.get_type().value().get_type() == TypeType::FN
 			&& ast.get_type().value().get_mutability_modifier() == MutabilityModifier::MUT) {
-			spdlog::info("generating lambda!");
+
 			gen(ctx, ast.get_value().value());
 			emit("void (*");
 			emit(ast.get_token()->get_value());
@@ -114,7 +120,24 @@ namespace trove {
 			emit(") = &");
 			emit(ast.get_type().value().get_token()->get_value());
 			emit(";");
-		}else {
+		
+		
+		}else if (ast.get_type().value().get_type() == TypeType::TYPE
+			&& ast.get_type().value().get_mutability_modifier() == MutabilityModifier::CONST) {
+			gen(ctx, ast.get_value().value());
+		}
+		else if (ast.get_type().value().get_type() == TypeType::TYPE
+			&& ast.get_type().value().get_mutability_modifier() == MutabilityModifier::MUT) {
+
+			emit("struct __type_info ");
+			emit(ast.get_token()->get_value());
+			emit("={");
+			emit("\"ummm\"");
+			emit("};");
+				
+
+		}
+		else {
 			emit(type_to_str(ast.get_type().value()));
 			emit(" ");
 			emit(ast.get_token()->get_value());
@@ -193,5 +216,18 @@ namespace trove {
 	void CGenerator::gen_loop(CGeneratorContext& ctx, AST* ast) {
 		emit("for (int i=0;i<10;i++)");
 		gen(ctx, ast->as_loop().get_body());
+	}
+
+	void CGenerator::gen_struct_def(CGeneratorContext& ctx, AST* ast) {
+		
+		auto struct_def = ast->as_struct_def();
+		emit("struct ");
+		emit(struct_def.get_type().token->get_value());
+		emit(" {");
+		for (auto& member : struct_def.get_member_decls()) {
+			gen(ctx, member);
+		}
+		emit("};");
+
 	}
 }

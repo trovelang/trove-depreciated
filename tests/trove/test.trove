@@ -1,13 +1,10 @@
 
 
-
-z var fn = fn (){
-	printf("Hello, world!")
+y const type = {
+	meme u32
+	meme12 s32
 }
 
 
-main const fn = fn {
-
-	z()
-
-}
+main fn = 
+	fn printf("hello, world!")

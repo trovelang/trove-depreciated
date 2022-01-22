@@ -17,6 +17,7 @@ namespace trove {
         CGenerator(AST* ast) : ast(ast) {}
         std::string type_to_str(Type type);
         void emit(std::string code);
+        void gen_runtime();
         void gen();
         void gen(CGeneratorContext&, AST*);
         void gen(CGeneratorContext&, DeclAST&);
@@ -31,6 +32,7 @@ namespace trove {
         void gen_string(CGeneratorContext&, AST*);
         void gen_loop(CGeneratorContext&, AST*);
         void gen_bool(CGeneratorContext&, AST*);
+        void gen_struct_def(CGeneratorContext&, AST*);
     private:
         AST* ast;
         std::stringstream ss;

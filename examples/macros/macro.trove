@@ -1,0 +1,15 @@
+
+
+
+
+add_debug const = fn (debug_lvl &string, ast &AST){
+	comp.as_type().add_method("debug", Params.None, fn {
+		return ast.to_string()
+	})
+}
+
+
+MyType const = #add_debug type {
+	
+}
+

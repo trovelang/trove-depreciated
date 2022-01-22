@@ -1,0 +1,13 @@
+
+
+
+
+add_debug
+
+
+my_fn const = #no_mangle {
+	
+	for [0,99999999] |i| {
+		continue
+	}
+}

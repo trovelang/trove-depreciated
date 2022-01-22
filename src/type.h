@@ -6,6 +6,7 @@
 
 namespace trove {
 	enum TypeType : u8 {
+		NONE,
 		U32,
 		S32,
 		STRING,
