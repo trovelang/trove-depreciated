@@ -170,6 +170,7 @@ namespace trove {
 		case 'f': {
 			found_keyword = check_keyword("n", Token::Type::FN);
 			if (!found_keyword) found_keyword = check_keyword("or", Token::Type::FOR);
+			if (!found_keyword) found_keyword = check_keyword("alse", Token::Type::FALSE);
 			break;
 		}
 		case 'i': {
@@ -201,6 +202,7 @@ namespace trove {
 		}
 		case 't': {
 			found_keyword = check_keyword("ype", Token::Type::TYPE);
+			if (!found_keyword) found_keyword = check_keyword("rue", Token::Type::TRUE);
 			break;
 		}
 		case 'u': {

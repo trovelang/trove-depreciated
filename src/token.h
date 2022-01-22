@@ -79,7 +79,10 @@ namespace trove {
 			PUB,
 			PRIV,
 			VAR,
-			CONST
+			CONST,
+
+			TRUE,
+			FALSE
 		};
 
 		Token() {}

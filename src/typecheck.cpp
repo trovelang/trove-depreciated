@@ -16,6 +16,7 @@ namespace trove {
         case AST::Type::BIN: return analyse_bin(ctx, ast);
         case AST::Type::NUM: return analyse(ctx, ast->as_num());
         case AST::Type::VAR: return analyse_var(ctx, ast);
+        case AST::Type::LOOP: return analyse_loop(ctx, ast);
         case AST::Type::FN: return analyse(ctx, ast->as_fn());
         }
         return {};
@@ -37,6 +38,20 @@ namespace trove {
 
                 // set the global fn name
                 value_analysis_unit.type->get_token() = decl.get_token();
+
+            }
+            // if we are dealing with a lambda we need to process it
+            else if (decl.get_type()->get_mutability_modifier() == MutabilityModifier::MUT
+                    && value_analysis_unit.type->get_type() == TypeType::FN) {
+                
+                spdlog::info("analysing lambda!");
+                // set the global fn name
+
+                auto tok = new Token(Token::Type::IDENTIFIER, {}, "lambda");
+                value_analysis_unit.type->get_token() = tok;
+
+                decl.get_type().value().token = tok;
+
 
             }
         }
@@ -115,5 +130,10 @@ namespace trove {
         }
         spdlog::info("analysing var {}", type.value()->get_type());
         return AnalysisUnit{ type.value() };
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_loop(AnalysisCtx& ctx, AST* ast) {
+       
+        return AnalysisUnit{  };
     }
 }

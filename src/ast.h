@@ -93,6 +93,17 @@ namespace trove {
 		Type type;
 	};
 
+	struct StringAST {
+		StringAST() {}
+		StringAST(Token* token) : token(token) {
+		}
+		std::string to_string();
+		Token* get_token() {
+			return token;
+		}
+		Token* token;
+	};
+
 	class NumAST {
 	public:
 		NumAST() {}
@@ -104,6 +115,14 @@ namespace trove {
 		}
 		Token* token;
 		Type type;
+	};
+
+	struct BoolAST {
+		BoolAST() {}
+		BoolAST(Token* token) : token(token) {
+		}
+		std::string to_string();
+		Token* token;
 	};
 
 	class VarAST {
@@ -125,18 +144,6 @@ namespace trove {
 	private:
 		Token* token;
 		Type type;
-	};
-
-	class StringAST {
-	public:
-		StringAST() {}
-		StringAST(Token* token) : token(token) {
-		}
-		Token* get_token() {
-			return token;
-		}
-	private:
-		Token* token;
 	};
 
 	class DeclAST {
@@ -165,6 +172,7 @@ namespace trove {
 	public:
 		CallAST() {}
 		CallAST(AST* callee, std::vector<AST*> args) : callee(callee), args(args) {}
+		std::string to_string();
 		AST* get_callee() {
 			return callee;
 		}
@@ -296,14 +304,13 @@ namespace trove {
 		AST* value;
 	};
 
-	class LoopAST {
-	public:
+	struct LoopAST {
 		enum LoopType : u8 {
 			BASIC
 		};
 		LoopAST() {}
 		LoopAST(LoopType loop_type, AST* cond, AST* body) : loop_type(loop_type), cond(cond), body(body) {}
-
+		std::string to_string();
 		AST* get_cond() {
 			return cond;
 		}
@@ -313,7 +320,6 @@ namespace trove {
 		LoopType& get_loop_type() {
 			return loop_type;
 		}
-	private:
 		AST* cond;
 		AST* body;
 		LoopType loop_type;
@@ -332,6 +338,7 @@ namespace trove {
 			STRUCT_ACCESS,
 			FN,
 			NUM,
+			BOOL,
 			VAR,
 			STRING,
 			CALL,
@@ -351,6 +358,7 @@ namespace trove {
 			CompAST,
 			FnAST,
 			NumAST,
+			BoolAST,
 			VarAST,
 			StringAST,
 			BinAST,
@@ -410,6 +418,10 @@ namespace trove {
 			return std::get<VarAST>(value);
 		}
 
+		BoolAST& as_bool() {
+			return std::get<BoolAST>(value);
+		}
+
 		StringAST& as_str() {
 			return std::get<StringAST>(value);
 		}
@@ -459,9 +471,13 @@ namespace trove {
 			case Type::BIN: return as_bin().to_string();
 			case Type::VAR: return as_var().to_string();
 			case Type::NUM: return as_num().to_string();
+			case Type::STRING: return as_str().to_string();
 			case Type::FN: return as_fn().to_string();
 			case Type::STRUCT_DEF: return as_struct_def().to_string();
 			case Type::STRUCT_LITERAL: return as_struct_literal().to_string();
+			case Type::CALL: return as_call().to_string();
+			case Type::LOOP: return as_loop().to_string();
+			case Type::BOOL: return as_bool().to_string();
 			default: return "Unknown";
 			}
 		}

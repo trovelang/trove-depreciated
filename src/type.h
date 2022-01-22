@@ -24,8 +24,7 @@ namespace trove {
 		CONST
 	};
 
-	class Type {
-	public:
+	struct Type {
 		Type() {}
 		Type(TypeType type) : type(type) {}
 		Type(TypeType type, Token* token, MutabilityModifier mutability_modifier) 
@@ -52,7 +51,7 @@ namespace trove {
 		std::string to_string();
 
 		u1 equals(Type other);
-	private:
+		u1 is_lambda;
 		std::vector<Type> multiple;
 		TypeType type;
 		Type* contained;

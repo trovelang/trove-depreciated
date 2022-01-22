@@ -1,9 +1,13 @@
 
 
 
+z var fn = fn (){
+	printf("Hello, world!")
+}
 
 
-main const fn = fn(x u32, z s32) {
-	y s32 = 123
-	y = y + 22
+main const fn = fn {
+
+	z()
+
 }

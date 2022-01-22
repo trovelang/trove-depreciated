@@ -71,7 +71,10 @@ namespace trove {
 			"PUB",
 			"PRIV",
 			"VAR",
-			"CONST"
+			"CONST",
+
+			"TRUE",
+			"FALSE"
 	};
 
 	std::string Token::to_string() {

@@ -15,6 +15,7 @@ namespace trove {
 		"AST_STRUCT_ACCESS",
 		"AST_FN",
 		"AST_NUM",
+		"AST_BOOL",
 		"AST_VAR",
 		"AST_STRING",
 		"AST_CALL",
@@ -79,9 +80,37 @@ namespace trove {
 		return ss.str();
 	}
 
+	std::string LoopAST::to_string() {
+		std::stringstream ss;
+		ss << "LoopAST " << cond->to_string() << " " << body->to_string() << "\n";
+		return ss.str();
+	}
+
 	std::string VarAST::to_string() {
 		std::stringstream ss;
 		ss << "VarAST " << token->get_value();
+		return ss.str();
+	}
+
+	std::string BoolAST::to_string() {
+		std::stringstream ss;
+		ss << "BoolAST " << token->get_value();
+		return ss.str();
+	}
+
+	std::string StringAST::to_string() {
+		std::stringstream ss;
+		ss << "StringAST " << token->get_value();
+		return ss.str();
+	}
+
+	std::string CallAST::to_string() {
+		std::stringstream ss;
+		ss << "CallAST " << callee->to_string() << "( ";
+		for(auto& arg : args){
+			ss << arg->to_string() << ", ";
+		}
+		ss << " )";
 		return ss.str();
 	}
 

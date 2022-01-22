@@ -325,6 +325,8 @@ namespace trove {
 		case Token::Type::NUM: next(); return new AST(AST::Type::NUM, tok->get_position(), NumAST(tok, Type(TypeType::U32)));
 		case Token::Type::IDENTIFIER: next(); return new AST(AST::Type::VAR, tok->get_position(), VarAST(tok));
 		case Token::Type::STRING: next(); return new AST(AST::Type::STRING, tok->get_position(), StringAST(tok));
+		case Token::Type::TRUE: next(); return new AST(AST::Type::BOOL, tok->get_position(), BoolAST(tok));
+		case Token::Type::FALSE: next(); return new AST(AST::Type::BOOL, tok->get_position(), BoolAST(tok));
 		case Token::Type::FN: return parse_fn();
 		case Token::Type::LCURLY: return parse_struct_def();
 		}
