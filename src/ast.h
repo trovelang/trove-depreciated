@@ -220,14 +220,13 @@ namespace trove {
 		AST* rhs;
 	};
 
-	class IfAST {
-	public:
+	struct IfAST {
 		IfAST() {}
 		IfAST(AST* cond, AST* body)
 			: cond(cond), body(body) {}
 		IfAST(AST* cond, AST* body, AST* else_body)
 			: cond(cond), body(body), else_body(else_body) {}
-
+		std::string to_string();
 		AST* get_cond() {
 			return cond;
 		}
@@ -237,7 +236,6 @@ namespace trove {
 		std::optional<AST*> get_else_body() {
 			return else_body;
 		}
-	private:
 		AST* cond;
 		AST* body;
 		std::optional<AST*> else_body;
@@ -496,6 +494,7 @@ namespace trove {
 			case Type::STRUCT_LITERAL: return as_struct_literal().to_string();
 			case Type::CALL: return as_call().to_string();
 			case Type::LOOP: return as_loop().to_string();
+			case Type::IF: return as_if().to_string();
 			case Type::BOOL: return as_bool().to_string();
 			default: return "Unknown";
 			}

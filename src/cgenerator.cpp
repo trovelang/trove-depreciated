@@ -91,6 +91,7 @@ namespace trove {
 		case AST::Type::FN: gen(ctx, ast->as_fn()); break;
 		case AST::Type::CALL: gen_call(ctx, ast); break;
 		case AST::Type::LOOP: gen_loop(ctx, ast); break;
+		case AST::Type::IF: gen_if(ctx, ast); break;
 		case AST::Type::BOOL: gen_bool(ctx, ast); break;
 		case AST::Type::STRUCT_DEF: gen_struct_def(ctx, ast); break;
 		case AST::Type::STRUCT_LITERAL: gen_struct_literal(ctx, ast); break;
@@ -252,6 +253,17 @@ namespace trove {
 	void CGenerator::gen_loop(CGeneratorContext& ctx, AST* ast) {
 		emit_raw("for (int i=0;i<10;i++)");
 		gen(ctx, ast->as_loop().get_body());
+	}
+
+	void CGenerator::gen_if(CGeneratorContext& ctx, AST* ast) {
+		emit_raw("if (");
+		gen(ctx, ast->as_if().cond);
+		emit_raw(")");
+		gen(ctx, ast->as_if().body);
+		if (ast->as_if().else_body.has_value()) {
+			emit_raw(" else ");
+			gen(ctx, ast->as_if().else_body.value());
+		}
 	}
 
 	void CGenerator::gen_struct_def(CGeneratorContext& ctx, AST* ast) {

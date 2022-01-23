@@ -33,6 +33,7 @@ namespace trove {
         void gen_call(CGeneratorContext&, AST*);
         void gen_string(CGeneratorContext&, AST*);
         void gen_loop(CGeneratorContext&, AST*);
+        void gen_if(CGeneratorContext&, AST*);
         void gen_bool(CGeneratorContext&, AST*);
         void gen_struct_def(CGeneratorContext&, AST*);
         void gen_struct_literal(CGeneratorContext&, AST*);

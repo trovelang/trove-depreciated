@@ -1,3 +1,14 @@
 
 
-x var = struct { 123 }
+
+
+main const fn = fn {
+	x var = struct { 123 }
+
+	if 0 {
+		printf("true!")
+	}
+
+
+	printf("umm %d", x)
+}

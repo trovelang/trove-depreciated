@@ -49,6 +49,15 @@ namespace trove {
 		return ss.str();
 	}
 
+	std::string IfAST::to_string() {
+		std::stringstream ss;
+		ss << "IfAST " << cond->to_string();
+		ss << "{\n";
+		ss << body->to_string();
+		ss << "\n}";
+		return ss.str();
+	}
+
 	std::string StatementAST::to_string() {
 		std::stringstream ss;
 		ss << "StatementAST " << body->to_string() << "\n";
