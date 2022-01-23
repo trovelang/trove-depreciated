@@ -27,6 +27,7 @@ namespace trove {
         TypeCheckPass(ErrorReporter& err_reporter, AST* ast) : err_reporter(err_reporter), ast(ast) {}
         void analyse();
         AnalysisUnit analyse(AnalysisCtx&, AST*);
+        AnalysisUnit analyse_statement(AnalysisCtx&, AST*);
         AnalysisUnit analyse_decl_ast(AnalysisCtx&, AST*);
         AnalysisUnit analyse_block_ast(AnalysisCtx&, AST*);
         AnalysisUnit analyse_assign_ast(AnalysisCtx&, AST*);

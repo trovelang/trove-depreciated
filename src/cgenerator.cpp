@@ -59,6 +59,7 @@ namespace trove {
 		switch (ast->get_type()) {
 		case AST::Type::PROGRAM: gen(ctx, ast->as_program()); break;
 		case AST::Type::BLOCK: gen(ctx, ast->as_block()); break;
+		case AST::Type::STATEMENT: gen_statement(ctx, ast); break;
 		case AST::Type::DECL: gen(ctx, ast->as_decl()); break;
 		case AST::Type::ASSIGN: gen(ctx, ast->as_assign()); break;
 		case AST::Type::BIN: gen(ctx, ast->as_bin()); break;
@@ -90,7 +91,12 @@ namespace trove {
 		for (auto& expr : ast.get_body()) {
 			gen(ctx, expr);
 		}
-		emit("}\n");
+		emit("}");
+	}
+
+	void CGenerator::gen_statement(CGeneratorContext& ctx, AST* ast) {
+		gen(ctx, ast->as_statement().body);
+		emit(";\n");
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, DeclAST& ast) {
@@ -119,7 +125,6 @@ namespace trove {
 
 			emit(") = &");
 			emit(ast.get_type().value().get_token()->get_value());
-			emit(";");
 		
 		
 		}else if (ast.get_type().value().get_type() == TypeType::TYPE
@@ -133,7 +138,7 @@ namespace trove {
 			emit(ast.get_token()->get_value());
 			emit("={");
 			emit("\"ummm\"");
-			emit("};");
+			emit("}");
 				
 
 		}
@@ -145,7 +150,6 @@ namespace trove {
 				emit(" = ");
 				gen(ctx, ast.get_value().value());
 			}
-			emit(";\n");
 			//emit("printf(\"%d\", ");
 			//emit(ast.get_token()->get_value());
 			//emit(");\n");
@@ -156,7 +160,6 @@ namespace trove {
 		gen(ctx, ast.assignee);
 		emit(" = ");
 		gen(ctx, ast.value);
-		emit(";\n");
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, BinAST& ast) {
@@ -180,7 +183,7 @@ namespace trove {
 		}
 		emit("){\n");
 		gen(ctx, fn_ast.get_body());
-		emit("}\n");
+		emit("}");
 	}
 	
 	void CGenerator::gen(CGeneratorContext&, NumAST& ast) {
@@ -200,7 +203,7 @@ namespace trove {
 				emit(", ");
 			}
 		}
-		emit(");");
+		emit(")");
 	}
 
 	void CGenerator::gen_string(CGeneratorContext& ctx, AST* ast) {
@@ -223,11 +226,12 @@ namespace trove {
 		auto struct_def = ast->as_struct_def();
 		emit("struct ");
 		emit(struct_def.get_type().token->get_value());
-		emit(" {");
+		emit(" {\n");
 		for (auto& member : struct_def.get_member_decls()) {
 			gen(ctx, member);
+			emit(";\n");
 		}
-		emit("};");
+		emit("}");
 
 	}
 }

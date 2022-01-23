@@ -45,6 +45,13 @@ namespace trove {
 		std::vector<AST*> body;
 	};
 
+	struct StatementAST {
+		StatementAST() {}
+		StatementAST(AST* body) : body(body) {}
+		std::string to_string();
+		AST* body;
+	};
+
 	class WatchmanAST {
 	public:
 		WatchmanAST() {}
@@ -332,6 +339,7 @@ namespace trove {
 		enum Type {
 			PROGRAM,
 			BLOCK,
+			STATEMENT,
 			WATCHMAN,
 			STRUCT_DEF,
 			STRUCT_LITERAL,
@@ -354,6 +362,7 @@ namespace trove {
 		using ASTValue = std::variant<
 			ProgramAST,
 			BlockAST,
+			StatementAST,
 			WatchmanAST,
 			CompAST,
 			FnAST,
@@ -392,6 +401,10 @@ namespace trove {
 
 		BlockAST& as_block() {
 			return std::get<BlockAST>(value);
+		}
+
+		StatementAST& as_statement() {
+			return std::get<StatementAST>(value);
 		}
 
 		CompAST& as_comp() {
@@ -466,6 +479,7 @@ namespace trove {
 			switch (type) {
 			case Type::PROGRAM: return as_program().to_string();
 			case Type::BLOCK: return as_block().to_string();
+			case Type::STATEMENT: return as_statement().to_string();
 			case Type::DECL: return as_decl().to_string();
 			case Type::ASSIGN: return as_assign().to_string();
 			case Type::BIN: return as_bin().to_string();

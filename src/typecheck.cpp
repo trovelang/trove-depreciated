@@ -2,15 +2,16 @@
 
 namespace trove {
 
-    void TypeCheckPass::analyse(){
+    void TypeCheckPass::analyse() {
         auto ctx = AnalysisCtx{ AnalysisCtx::Scope::GLOBAL };
         analyse(ctx, ast);
     }
 
-    AnalysisUnit TypeCheckPass::analyse(AnalysisCtx& ctx, AST* ast){
+    AnalysisUnit TypeCheckPass::analyse(AnalysisCtx& ctx, AST* ast) {
         switch (ast->get_type()) {
         case AST::Type::PROGRAM: return analyse_program_ast(ctx, ast);
         case AST::Type::BLOCK: return analyse_block_ast(ctx, ast);
+        case AST::Type::STATEMENT: return analyse_statement(ctx, ast);
         case AST::Type::DECL: return analyse_decl_ast(ctx, ast);
         case AST::Type::ASSIGN: return analyse_assign_ast(ctx, ast);
         case AST::Type::BIN: return analyse_bin(ctx, ast);
@@ -20,6 +21,11 @@ namespace trove {
         case AST::Type::FN: return analyse(ctx, ast->as_fn());
         case AST::Type::STRUCT_DEF: return analyse_struct_def(ctx, ast);
         }
+        return {};
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_statement(AnalysisCtx& ctx, AST* ast) {
+        analyse(ctx, ast->as_statement().body);
         return {};
     }
 

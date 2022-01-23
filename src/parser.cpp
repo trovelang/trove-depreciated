@@ -107,18 +107,25 @@ namespace trove {
 
 	AST* Parser::parse_stmt() {
 		spdlog::info("parse_stmt");
+		AST* child = nullptr;
 		switch (peek()->get_type()) {
 		case Token::Type::LCURLY:
-			return parse_block();
+			child = parse_block();
+			break;
 		case Token::Type::IF:
-			return parse_if();
+			child = parse_if();
+			break;
 		case Token::Type::LOOP:
-			return parse_loop();
+			child = parse_loop();
+			break;
 		case Token::Type::RET:
-			return parse_return();
+			child = parse_return();
+			break;
 		default:
-			return parse_decl_or_assign();
+			child = parse_decl_or_assign();
+			break;
 		}
+		return new AST(AST::Type::STATEMENT, child->get_position(), StatementAST(child));
 	}
 
 	// todo a comp time thing should be done ahead of expressions aswel

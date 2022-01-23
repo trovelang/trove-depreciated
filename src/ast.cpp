@@ -49,6 +49,11 @@ namespace trove {
 		return ss.str();
 	}
 
+	std::string StatementAST::to_string() {
+		std::stringstream ss;
+		ss << "StatementAST " << body->to_string() << "\n";
+		return ss.str();
+	}
 
 	std::string WatchmanAST::to_string() {
 		std::stringstream ss;
