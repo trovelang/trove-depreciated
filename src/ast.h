@@ -158,7 +158,8 @@ namespace trove {
 		DeclAST() {}
 		DeclAST(Token* token) : token(token) {}
 		DeclAST(Token* token, std::optional<Type> type) : token(token), type(type) {}
-		DeclAST(Token* token, std::optional<Type> type, AST* value) : token(token), type(type), value(value) {}
+		DeclAST(Token* token, std::optional<Type> type, AST* value, u1 requires_infering) 
+			: token(token), type(type), value(value), requires_infering(requires_infering) {}
 		std::string to_string();
 		Token* get_token() {
 			return token;
@@ -169,10 +170,10 @@ namespace trove {
 		std::optional<AST*>& get_value() {
 			return value;
 		}
-	private:
 		Token* token;
 		std::optional<Type> type;
 		std::optional<AST*> value;
+		u1 requires_infering;
 	};
 
 	class CallAST {
@@ -272,7 +273,12 @@ namespace trove {
 
 	struct StructLiteralAST {
 		StructLiteralAST() {}
-		StructLiteralAST(std::vector<AST*> member_values) : member_values(member_values), type(Type(TypeType::STRUCT)) {}
+		StructLiteralAST(std::vector<AST*> member_values) : member_values(member_values) {
+			this->type = TypeBuilder{}
+				.type(TypeType::STRUCT)
+				.set_anonymous(true)
+				.build();
+		}
 		std::string to_string();
 		std::vector<AST*>& get_member_values() {
 			return member_values;

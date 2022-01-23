@@ -1,7 +1,3 @@
 
-MyType const type = type {
-	x u32
-}
 
-
-x MyType = struct { 123 }
+x var = struct { 123 }

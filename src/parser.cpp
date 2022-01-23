@@ -54,7 +54,7 @@ namespace trove {
 		return false;
 	}
 
-	std::optional<Type> Parser::parse_type() {
+	Type Parser::parse_type() {
 		// todo as this is optional, this should be peek
 		auto token = peek();
 
@@ -69,32 +69,30 @@ namespace trove {
 		}
 
 
-		token = next();
+		token = peek();
 
 
 
 		switch (token->get_type()) {
-		case Token::Type::U32: return Type(TypeType::U32, token, mutability);
-		case Token::Type::S32: return Type(TypeType::S32, token, mutability);
-		case Token::Type::TYPE: return Type(TypeType::TYPE, token, mutability);
-		case Token::Type::STRUCT: return Type(TypeType::STRUCT, token, mutability);
-		case Token::Type::STRING: return Type(TypeType::STRING, token, mutability);
-		case Token::Type::IDENTIFIER: return Type(TypeType::STRUCT, token, mutability);
+		case Token::Type::U32: next();  return Type(TypeType::U32, token, mutability);
+		case Token::Type::S32: next();  return Type(TypeType::S32, token, mutability);
+		case Token::Type::TYPE: next();  return Type(TypeType::TYPE, token, mutability);
+		case Token::Type::STRUCT: next();  return Type(TypeType::STRUCT, token, mutability);
+		case Token::Type::STRING: next();  return Type(TypeType::STRING, token, mutability);
+		case Token::Type::IDENTIFIER: next();  return Type(TypeType::STRUCT, token, mutability);
 		case Token::Type::FN: {
+			next();
 			auto params = std::vector<Type>();
 			if (consume(Token::Type::LPAREN)) {
 				while (!expect(Token::Type::RPAREN)) {
 					auto param = parse_type();
-					if (param.has_value()) {
-						params.push_back(param.value());
-						if (expect(Token::Type::RPAREN)) {
-							break;
-						}
-						consume(Token::Type::COMMA);
+					
+					params.push_back(param);
+					if (expect(Token::Type::RPAREN)) {
+						break;
 					}
-					else {
-						// todo err
-					}
+					consume(Token::Type::COMMA);
+		
 				}
 				consume(Token::Type::RPAREN);
 			}
@@ -102,7 +100,7 @@ namespace trove {
 			return Type(TypeType::FN, token, params, mutability);
 		}
 		}
-		return {};
+		return Type(token, mutability);
 	}
 
 	AST* Parser::parse_stmt() {
@@ -206,22 +204,24 @@ namespace trove {
 		auto higher_precedence = parse_plus_minus();
 
 		auto type = parse_type();
+		auto requires_infering = !type.complete;
 
-		spdlog::info("PARSING DECL {} {}", higher_precedence->to_string(), type.value().to_string());
 
 		if (consume(Token::Type::ASSIGN)) {
 			auto value = parse_expr();
-
-			spdlog::info("type value is {}", type.value().to_string());
 			return new AST(
 				AST::Type::DECL,
 				higher_precedence->get_position().merge(value->get_position()),
-				DeclAST(higher_precedence->as_var().get_token(), type, value));
+				DeclAST(higher_precedence->as_var().get_token(), type, value, requires_infering));
 		}
 		else {
+			// check if we have x var or x const (i.e. we haven't fully quantified the type)
+			if (requires_infering) {
+				err_reporter.compile_error("Type is not fully quantified (you can't just put 'var' or 'const' without an initialiser!)", higher_precedence->source_position);
+			}
 			return new AST(
 				AST::Type::DECL,
-				higher_precedence->get_position().merge(type.value().get_token()->get_position()),
+				higher_precedence->get_position().merge(type.get_token()->get_position()),
 				DeclAST(higher_precedence->as_var().get_token(), type));
 		}
 

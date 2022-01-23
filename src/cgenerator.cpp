@@ -43,7 +43,21 @@ namespace trove {
 		case TypeType::S32: return "int";
 		case TypeType::FN: return "fn";
 		case TypeType::TYPE: return "struct";
-		case TypeType::STRUCT: return std::string("struct ").append(type.token->get_value());
+		case TypeType::STRUCT: {
+			if (type.anonymous) {
+				// if we are an anonymous type we need to define the members
+				std::stringstream ss;
+				ss << "struct {";
+				for (u32 i = 0; i < type.multiple.size(); i++) {
+					ss << type_to_str(type.multiple[i]) << " member_" << i << ";";
+				}
+				ss << "}";
+				return ss.str();
+			}
+			else {
+				return std::string("struct ").append(type.token->get_value());
+			}
+		}
 		}
 	}
 

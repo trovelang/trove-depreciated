@@ -5,6 +5,7 @@
 namespace trove {
 
 	const char* type_debug[] = {
+		"INCOMPLETE",
 		"NONE",
 		"U32",
 		"S32",

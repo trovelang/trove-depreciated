@@ -39,6 +39,12 @@ namespace trove {
 
         if (decl.get_value().has_value()) {
             value_analysis_unit = analyse(ctx, decl.get_value().value());
+            
+            if (!decl.get_type().value().complete) {
+                decl.get_type().value() = *value_analysis_unit.type;
+                spdlog::info("infering type! {}", decl.type.value().to_string());
+            }
+
 
             // if we are dealing with a function we need to process it
             if (decl.get_type()->get_mutability_modifier()==MutabilityModifier::CONST
@@ -169,11 +175,10 @@ namespace trove {
 
 
 
-        auto struct_literal = ast->as_struct_literal();
-        for (auto& member : struct_literal.get_member_values()) {
+        for (auto& member : ast->as_struct_literal().get_member_values()) {
             auto member_analysis = analyse(ctx, member);
             spdlog::info("DOING MEMBER! {}", member_analysis.type->to_string());
-            struct_literal.type.multiple.push_back(*member_analysis.type);
+            ast->as_struct_literal().type.multiple.push_back(*member_analysis.type);
 
         }
 

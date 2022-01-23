@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 		spdlog::info("token {}", token.to_string());
 	}
 
-	auto parser = Parser(tokens);
+	auto parser = Parser(err_reporter, tokens);
 	auto ast = parser.parse();
 
 	std::cout << ast->to_string() << "\n";

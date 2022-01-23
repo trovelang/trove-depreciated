@@ -5,21 +5,22 @@
 #include <ast.h>
 #include <token.h>
 #include <type.h>
+#include <error.h>
 
 namespace trove {
 	class Parser {
 	public:
-		Parser() {}
-		Parser(std::vector<Token> tokens) : tokens(tokens) {}
+		Parser(ErrorReporter err_reporter, std::vector<Token> tokens) : err_reporter(err_reporter), tokens(tokens) {}
 		AST* parse();
 		u1 expect(Token::Type);
 		std::optional<Token*> consume(Token::Type);
 		Token* next();
 		Token* peek(u32 ahead);
 	private:
+		ErrorReporter err_reporter;
 		u32 current = 0;
 		u1 is_type(Token::Type t);
-		std::optional<Type> parse_type();
+		Type parse_type();
 		AST* parse_stmt();
 		AST* parse_comp();
 		AST* parse_watchman();
