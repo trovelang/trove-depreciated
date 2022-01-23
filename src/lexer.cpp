@@ -135,7 +135,7 @@ namespace trove {
 	}
 
 	u1 Lexer::is_letter(char current) {
-		return current >= 'a' && current <= 'z';
+		return (current >= 'a' && current <= 'z') || (current >= 'A' && current <= 'Z');
 	}
 	u1 Lexer::is_num(char current) {
 		return current >= '0' && current <= '9';

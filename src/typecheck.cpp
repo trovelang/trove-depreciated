@@ -20,6 +20,7 @@ namespace trove {
         case AST::Type::LOOP: return analyse_loop(ctx, ast);
         case AST::Type::FN: return analyse(ctx, ast->as_fn());
         case AST::Type::STRUCT_DEF: return analyse_struct_def(ctx, ast);
+        case AST::Type::STRUCT_LITERAL: return analyse_struct_literal(ctx, ast);
         }
         return {};
     }
@@ -79,7 +80,7 @@ namespace trove {
 
 
         sym_table.place(decl.get_token()->get_value(), &ast->as_decl().get_type().value());
-        return {};
+        return AnalysisUnit{ &ast->as_decl().get_type().value() };
     }
 
     AnalysisUnit TypeCheckPass::analyse_block_ast(AnalysisCtx& ctx, AST* ast) {
@@ -153,6 +154,29 @@ namespace trove {
 
     AnalysisUnit TypeCheckPass::analyse_struct_def(AnalysisCtx& ctx, AST* ast) {
 
+        auto struct_def = ast->as_struct_def();
+        for (auto& member : struct_def.get_member_decls()) {
+            auto member_analysis = analyse(ctx, member);
+            spdlog::info("DOING MEMBER! {}", member_analysis.type->to_string());
+            struct_def.get_type().multiple.push_back(*member_analysis.type);
+
+        }
+
         return AnalysisUnit{ &ast->as_struct_def().get_type() };
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_struct_literal(AnalysisCtx& ctx, AST* ast) {
+
+
+
+        auto struct_literal = ast->as_struct_literal();
+        for (auto& member : struct_literal.get_member_values()) {
+            auto member_analysis = analyse(ctx, member);
+            spdlog::info("DOING MEMBER! {}", member_analysis.type->to_string());
+            struct_literal.type.multiple.push_back(*member_analysis.type);
+
+        }
+
+        return AnalysisUnit{ &ast->as_struct_literal().type };
     }
 }

@@ -47,7 +47,7 @@ namespace trove {
 		case Token::Type::TYPE:
 		case Token::Type::STRUCT:
 		case Token::Type::STRING:
-		//case Token::Type::IDENTIFIER:
+		case Token::Type::IDENTIFIER:
 		case Token::Type::FN:
 			return true;
 		}
@@ -79,7 +79,7 @@ namespace trove {
 		case Token::Type::TYPE: return Type(TypeType::TYPE, token, mutability);
 		case Token::Type::STRUCT: return Type(TypeType::STRUCT, token, mutability);
 		case Token::Type::STRING: return Type(TypeType::STRING, token, mutability);
-		//case Token::Type::IDENTIFIER: return Type(TypeType::STRUCT, token, mutability);
+		case Token::Type::IDENTIFIER: return Type(TypeType::STRUCT, token, mutability);
 		case Token::Type::FN: {
 			auto params = std::vector<Type>();
 			if (consume(Token::Type::LPAREN)) {
@@ -192,8 +192,9 @@ namespace trove {
 	AST* Parser::parse_decl_or_assign() {
 		auto first = peek();
 		auto second = peek(1);
-		spdlog::info("parse_decl_or_assign {} {}", first->get_value(), second->get_value());
-		if (is_type(second->get_type())) {
+		spdlog::info("parse_decl_or_assign first: {} second: {}", first->get_value(), second->get_value());
+		// FIXME: This is probably bad...
+		if (first->get_type()==Token::Type::IDENTIFIER && is_type(second->get_type())) {
 			spdlog::info("doing decl!");
 			return parse_decl();
 		}
@@ -337,7 +338,9 @@ namespace trove {
 		case Token::Type::TRUE: next(); return new AST(AST::Type::BOOL, tok->get_position(), BoolAST(tok));
 		case Token::Type::FALSE: next(); return new AST(AST::Type::BOOL, tok->get_position(), BoolAST(tok));
 		case Token::Type::FN: return parse_fn();
-		case Token::Type::LCURLY: return parse_struct_def();
+		// TODO WE WANT TO BE ABLE TO PARSE BLOCKS, OR STRUCT LITERALS without the prepending
+		case Token::Type::TYPE: return parse_struct_def();
+		case Token::Type::STRUCT: return parse_struct_literal();
 		}
 		return 0;
 	}
@@ -368,6 +371,7 @@ namespace trove {
 
 	AST* Parser::parse_struct_def() {
 
+		auto t = consume(Token::Type::TYPE);
 		auto left_curly = consume(Token::Type::LCURLY);
 
 		std::vector<AST*> member_decls;
@@ -377,10 +381,11 @@ namespace trove {
 
 		auto right_curly = consume(Token::Type::RCURLY);
 
-		return new AST(AST::Type::STRUCT_DEF, left_curly.value()->get_position().merge(right_curly.value()->get_position()), StructDefAST(member_decls));
+		return new AST(AST::Type::STRUCT_DEF, t.value()->get_position().merge(right_curly.value()->get_position()), StructDefAST(member_decls));
 	}
 
 	AST* Parser::parse_struct_literal() {
+		auto s = consume(Token::Type::STRUCT);
 		auto left_curly = consume(Token::Type::LCURLY);
 
 		std::vector<AST*> member_values;
@@ -390,7 +395,7 @@ namespace trove {
 
 		auto right_curly = consume(Token::Type::RCURLY);
 
-		return new AST(AST::Type::STRUCT_LITERAL, left_curly.value()->get_position().merge(right_curly.value()->get_position()), StructLiteralAST(member_values));
+		return new AST(AST::Type::STRUCT_LITERAL, s.value()->get_position().merge(right_curly.value()->get_position()), StructLiteralAST(member_values));
 	}
 
 }

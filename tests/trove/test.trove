@@ -1,10 +1,7 @@
 
-
-y const type = {
-	meme u32
-	meme12 s32
+MyType const type = type {
+	x u32
 }
 
 
-main fn = 
-	fn printf("hello, world!")
+x MyType = struct { 123 }

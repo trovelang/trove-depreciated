@@ -270,16 +270,15 @@ namespace trove {
 		Type type; // either struct or type (defaults to struct)
 	};
 
-	class StructLiteralAST {
-	public:
+	struct StructLiteralAST {
 		StructLiteralAST() {}
-		StructLiteralAST(std::vector<AST*> member_values) : member_values(member_values) {}
+		StructLiteralAST(std::vector<AST*> member_values) : member_values(member_values), type(Type(TypeType::STRUCT)) {}
 		std::string to_string();
 		std::vector<AST*>& get_member_values() {
 			return member_values;
 		}
-	private:
 		std::vector<AST*> member_values;
+		Type type;
 	};
 
 

@@ -37,6 +37,7 @@ namespace trove {
         AnalysisUnit analyse_bin(AnalysisCtx&, AST*);
         AnalysisUnit analyse_loop(AnalysisCtx&, AST*);
         AnalysisUnit analyse_struct_def(AnalysisCtx&, AST*);
+        AnalysisUnit analyse_struct_literal(AnalysisCtx&, AST*);
         AnalysisUnit analyse(AnalysisCtx&, FnAST&);
         AnalysisUnit analyse(AnalysisCtx&, NumAST&);
     private:
