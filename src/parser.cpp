@@ -15,10 +15,7 @@ namespace trove {
 			block_body.push_back(parse_stmt());
 		}
 
-		spdlog::info("ast size {}", block_body[0]->get_type());
-
 		return new AST(AST::Type::PROGRAM, {}, ProgramAST(block_body));
-
 	}
 
 	std::optional<Token*> Parser::consume(Token::Type type) {
@@ -110,7 +107,6 @@ namespace trove {
 	}
 
 	AST* Parser::parse_stmt() {
-		spdlog::info("parse_stmt");
 		AST* child = nullptr;
 		auto peeking = peek();
 		switch (peek()->type) {
@@ -127,7 +123,6 @@ namespace trove {
 			child = parse_return();
 			break;
 		default:
-			spdlog::info("parse_decl_or_assign");
 			child = parse_decl_or_assign();
 			break;
 		}

@@ -41,6 +41,13 @@ namespace trove {
         IF_VALUE(decl.value){
             value_analysis_unit = analyse(ctx, decl.value.value());
             
+            // check if the types need to be 'coerced'
+            // e.g. if we have x var = fn {}
+            // a fn {} is a const type, therefore we need to co-erce it to a var
+            // WE CO-ERCE LEFT TO RIGHT
+
+            decl.type.value().coerce(*value_analysis_unit.type);
+
             if (!decl.type.value().complete) {
                 decl.type.value() = *value_analysis_unit.type;
                 spdlog::info("infering type! {}", decl.type.value().to_string());

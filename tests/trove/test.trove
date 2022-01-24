@@ -1,14 +1,16 @@
 
 
 
+blob var = fn(a u32, b u32){
+	printf("hello! %d", a)
+}
 
 main const fn = fn {
 	x var = struct { 123 }
 
+	blob(1,2)
+
 	if 0 {
 		printf("true!")
 	}
-
-
-	printf("umm %d", x)
 }

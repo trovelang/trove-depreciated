@@ -118,8 +118,9 @@ namespace trove {
 			: token(token), type(type), value(value), requires_infering(requires_infering) {}
 		std::string to_string();
 		Token* token;
+		// fixme this should be non-optional
 		std::optional<Type> type;
-		std::optional<AST*> value;
+		std::optional<AST*> value; 
 		u1 requires_infering;
 	};
 

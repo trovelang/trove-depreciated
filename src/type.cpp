@@ -15,6 +15,7 @@ namespace trove {
 		"FN"
 	};
 
+
 	std::string Type::to_string() {
 		return type_debug[(u8)base_type];
 	}
@@ -23,4 +24,7 @@ namespace trove {
 		return base_type == other.base_type;
 	}
 
+	void Type::coerce(Type& other) {
+		other.mutability = mutability;
+	}
 }

@@ -34,6 +34,7 @@ namespace trove {
 
 		u1 equals(Type other);
 		std::string to_string();
+		void coerce(Type& other);
 
 		u1 complete = true;  // 'var u32' is complete, 'var' alone is not
 		BaseType base_type;
