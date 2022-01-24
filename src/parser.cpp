@@ -1,5 +1,6 @@
 #include <parser.h>
 #include <spdlog/spdlog.h>
+#include <trove.h>
 
 namespace trove {
 	AST* Parser::parse() {
@@ -141,7 +142,7 @@ namespace trove {
 	AST* Parser::parse_watchman() {
 		auto higher_precedence = parse_block();
 
-		if (consume(Token::Type::PIPE).has_value()) {
+		IF_VALUE(consume(Token::Type::PIPE)) {
 			consume(Token::Type::PIPE);
 			auto body = parse_stmt();
 			return new AST(AST::Type::WATCHMAN, higher_precedence->get_position().merge(body->get_position()), WatchmanAST(higher_precedence, body));
@@ -167,7 +168,7 @@ namespace trove {
 		auto cond = parse_expr();
 		auto body = parse_stmt();
 		auto else_token = consume(Token::Type::ELSE);
-		if (else_token.has_value()) {
+		IF_VALUE(else_token) {
 			auto else_body = parse_stmt();
 			return new AST(AST::Type::IF, if_token.value()->source_position.merge(else_body->get_position()), IfAST(cond, body, else_body));
 		}

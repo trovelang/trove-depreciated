@@ -1,4 +1,5 @@
 #include <ast.h>
+#include <trove.h>
 
 namespace trove {
 
@@ -75,7 +76,7 @@ namespace trove {
 	std::string DeclAST::to_string() {
 		std::stringstream ss;
 		ss << "DeclAST " << token->value << " " << type.value().to_string();
-		if (value.has_value()) {
+		IF_VALUE(value){
 			ss << " " << value.value()->to_string();
 		}
 		ss << "\n";

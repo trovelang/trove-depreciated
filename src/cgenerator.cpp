@@ -181,7 +181,7 @@ namespace trove {
 			emit_raw(type_to_str(ast.type.value()));
 			emit_raw(" ");
 			emit_raw(ast.token->value);
-			if (ast.value.has_value()) {
+			IF_VALUE(ast.value) {
 				emit_raw(" = ");
 				gen(ctx, ast.value.value());
 			}
@@ -261,7 +261,7 @@ namespace trove {
 		gen(ctx, ast->as_if().cond);
 		emit_raw(")");
 		gen(ctx, ast->as_if().body);
-		if (ast->as_if().else_body.has_value()) {
+		IF_VALUE(ast->as_if().else_body) {
 			emit_raw(" else ");
 			gen(ctx, ast->as_if().else_body.value());
 		}

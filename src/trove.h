@@ -6,3 +6,6 @@
 #include <iostream>
 
 #define TO_STRING std::string to_string();
+
+#define IF_VALUE(optional) if(optional.has_value())
+#define IF_NO_VALUE(optional) if(!optional.has_value())

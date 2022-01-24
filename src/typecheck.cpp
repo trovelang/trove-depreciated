@@ -1,4 +1,5 @@
 #include <typecheck.h>
+#include <trove.h>
 
 namespace trove {
 
@@ -37,7 +38,7 @@ namespace trove {
         Type* type;
         AnalysisUnit value_analysis_unit;
 
-        if (decl.value.has_value()) {
+        IF_VALUE(decl.value){
             value_analysis_unit = analyse(ctx, decl.value.value());
             
             if (!decl.type.value().complete) {
@@ -83,10 +84,10 @@ namespace trove {
             }
         }
 
-        if(!decl.type.has_value()){
+
+        IF_NO_VALUE(decl.type){
             type = value_analysis_unit.type;
-        }
-        else {
+        }else {
             type = &decl.type.value();
         }
 
@@ -151,7 +152,7 @@ namespace trove {
     AnalysisUnit TypeCheckPass::analyse_var(AnalysisCtx& ctx, AST* ast){
         auto var = ast->as_var();
         auto type = m_symtable.lookup(var.token->value);
-        if (!type.has_value()) {
+        IF_NO_VALUE(type) {
             m_error_reporter.compile_error("unknown variable", ast->source_position);
         }
         spdlog::info("analysing var {}", type.value()->base_type);
