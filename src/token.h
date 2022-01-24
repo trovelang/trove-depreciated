@@ -8,9 +8,8 @@
 
 namespace trove {
 	
-	class Token {
-	public:
-		enum Type : u8 {
+	struct Token {
+		enum class Type : u8 {
 			END,
 			NUM,
 			IDENTIFIER,
@@ -85,34 +84,40 @@ namespace trove {
 			FALSE
 		};
 
-		Token() {}
-		Token(Type type, SourcePosition source_position) : type(type), source_position(source_position) {}
-		Token(Type type, SourcePosition source_position, std::string value)
-			: type(type), source_position(source_position), value(value) {}
-
-		SourcePosition& get_position() {
-			return source_position;
-		}
 		std::string to_string();
 
-		std::string& get_value() {
-			return value;
+		Type type;
+		std::string value {};
+		SourcePosition source_position {};
+	};
+
+	class TokenBuilder {
+	public:
+		static TokenBuilder builder() {
+			return {};
 		}
 
-		s32 as_num() {
-			return atoi(value.c_str());
+		Token build() {
+			return m_internal_token;
 		}
 
-		f32 as_float() {}
+		TokenBuilder& type(Token::Type type) {
+			m_internal_token.type = type;
+			return *this;
+		}
 
-		Type& get_type() {
-			return type;
+		TokenBuilder& value(std::string value) {
+			m_internal_token.value = value;
+			return *this;
+		}
+
+		TokenBuilder& position(SourcePosition position) {
+			m_internal_token.source_position = position;
+			return *this;
 		}
 
 	private:
-		Type type;
-		SourcePosition source_position;
-		std::string value;
+		Token m_internal_token;
 	};
 
 	extern const char* token_type_debug[];

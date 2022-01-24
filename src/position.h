@@ -3,8 +3,7 @@
 #include <types.h>
 
 namespace trove {
-    class SourcePosition {
-	public:
+    struct SourcePosition {
 		SourcePosition() {}
 		SourcePosition(u32 index_start, u32 index_end, u32 line_start, u32 line_end)
 			: index_start(index_start), index_end(index_end), line_start(line_start), line_end(line_end) {}

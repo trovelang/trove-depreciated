@@ -79,7 +79,7 @@ namespace trove {
 
 	std::string Token::to_string() {
 		std::stringstream ss;
-		ss << token_type_debug[type];
+		ss << token_type_debug[(u8)type];
 		return ss.str();
 	}
 

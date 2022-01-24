@@ -14,7 +14,7 @@ namespace trove {
     class CGenerator {
     public:
         std::string execute(const char* cmd);
-        CGenerator(AST* ast) : ast(ast) {}
+        CGenerator(AST* ast) : m_ast(ast) {}
         std::string type_to_str(Type type);
         void emit_raw(std::string code);
         void emit_c_str(std::string str);
@@ -38,8 +38,8 @@ namespace trove {
         void gen_struct_def(CGeneratorContext&, AST*);
         void gen_struct_literal(CGeneratorContext&, AST*);
     private:
-        AST* ast;
-        std::stringstream ss;
+        AST* m_ast;
+        std::stringstream m_output_stream;
     };
 
 }

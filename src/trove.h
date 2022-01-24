@@ -5,6 +5,4 @@
 
 #include <iostream>
 
-// TODO: Reference additional headers your program requires here.
-
-#define DO_IF_VALUE(optional, body) if (optional.has_value()) body
+#define TO_STRING std::string to_string();

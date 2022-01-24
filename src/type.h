@@ -5,80 +5,98 @@
 #include <token.h>
 
 namespace trove {
-	enum TypeType : u8 {
-		INCOMPLETE,
-		NONE,
-		U32,
-		S32,
-		STRING,
-		STRUCT,
-		TYPE,
-		FN
-	};
-
-	enum ScopeModifier : u8 {
-		GLOBAL,
-		LOCAL
-	};
-
-	enum MutabilityModifier : u8 {
-		MUT,
-		CONST
-	};
 
 	struct Type {
-		Type() {}
-		Type(Token* token, MutabilityModifier mutability_modifier) 
-			: token(token), mutability_modifier(mutability_modifier), complete(false), type(TypeType::INCOMPLETE) {}
-		Type(TypeType type) : type(type) {}
-		Type(TypeType type, Token* token, MutabilityModifier mutability_modifier) 
-			: type(type), token(token), mutability_modifier(mutability_modifier) {}
-		Type(TypeType type, std::vector<Type> multiple) : type(type), multiple(multiple) {}
-		Type(TypeType type, Token* token, std::vector<Type> multiple) : type(type), token(token), multiple(multiple) {}
-		Type(TypeType type, Token* token, std::vector<Type> multiple, MutabilityModifier mutability_modifier)
-			: type(type), token(token), multiple(multiple), mutability_modifier(mutability_modifier) {}
-		TypeType& get_type() {
-			return type;
-		}
-		Token*& get_token() {
-			return token;
-		}
-		std::vector<Type>& get_multiple() {
-			return multiple;
-		}
-		ScopeModifier& get_scope_modifier() {
-			return scope_modifier;
-		}
-		MutabilityModifier& get_mutability_modifier() {
-			return mutability_modifier;
-		}
+
+		enum class BaseType : u8 {
+			INCOMPLETE,
+			NONE,
+			U32,
+			S32,
+			STRING,
+			STRUCT,
+			TYPE,
+			FN
+		};
+
+		enum class Mutability : u8 {
+			MUT,
+			CONST
+		};
+
+		struct FnType {
+			u1 is_lambda = false;
+		};
+
+		struct StructType {
+			u1 is_anonymous = false;
+		};
+
+		u1 equals(Type other);
 		std::string to_string();
 
 		u1 complete = true;  // 'var u32' is complete, 'var' alone is not
-		u1 equals(Type other);
-		u1 is_lambda;
-		u1 anonymous;
-		std::vector<Type> multiple;
-		TypeType type;
-		Type* contained;
-		Token* token; // this can be for structs, and lambdas
-		ScopeModifier scope_modifier = ScopeModifier::GLOBAL;
-		MutabilityModifier mutability_modifier = MutabilityModifier::CONST;
+		BaseType base_type;
+		FnType fn_type;
+		StructType struct_type;
+		Type* contained_type;
+		std::vector<Type> contained_types;
+		Token* associated_token;
+		Mutability mutability{ Mutability::CONST };
 	};
 
-	struct TypeBuilder {
+	class TypeBuilder {
+	public:
+		static TypeBuilder builder() {
+			return {};
+		}
+
 		Type build() {
-			return internal_type;
+			return m_internal_type;
 		}
-		TypeBuilder& type(TypeType type) {
-			internal_type.type = type;
+
+		TypeBuilder& complete(u1 complete) {
+			m_internal_type.complete = complete;
 			return *this;
 		}
-		TypeBuilder& set_anonymous(u1 anonymous) {
-			internal_type.anonymous = true;
+
+		TypeBuilder& base_type(Type::BaseType type) {
+			m_internal_type.base_type = type;
 			return *this;
 		}
-		Type internal_type;
+
+		TypeBuilder& lambda(u1 lambda) {
+			m_internal_type.fn_type.is_lambda = lambda;
+			return *this;
+		}
+
+		TypeBuilder& anonymous(u1 anonymous) {
+			m_internal_type.struct_type.is_anonymous = true;
+			return *this;
+		}
+
+		TypeBuilder& contained_type(Type* contained_type) {
+			m_internal_type.contained_type = contained_type;
+			return *this;
+		}
+
+		TypeBuilder& contained_types(std::vector<Type> contained_types) {
+			m_internal_type.contained_types = contained_types;
+			return *this;
+		}
+
+		TypeBuilder& associated_token(Token* associated_token) {
+			m_internal_type.associated_token = associated_token;
+			return *this;
+		}
+
+		TypeBuilder& mutability(Type::Mutability mutability) {
+			m_internal_type.mutability = mutability;
+			return *this;
+		}
+
+	private:
+		Type m_internal_type;
 	};
 
 	extern const char* type_debug[];

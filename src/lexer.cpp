@@ -11,8 +11,8 @@ namespace trove {
 			auto current = next();
 			switch (current) {
 				// @TODO these are sequential i.e. \r\n is a newline
-			case '\n': index = 0; line++; reset_save_point(); break;
-			case '\r': index = 0; line++; reset_save_point(); break;
+			case '\n': m_index = 0; m_line++; reset_save_point(); break;
+			case '\r': m_index = 0; m_line++; reset_save_point(); break;
 			case '#': token(Token::Type::HASH); break;
 			case '@': token(Token::Type::DIRECTIVE); break;
 			case '+': token(Token::Type::PLUS); break;
@@ -57,48 +57,60 @@ namespace trove {
 			}
 		}
 
-		tokens.push_back(Token(Token::Type::END, { 0,0,0,0 }));
-		return tokens;
+		m_tokens.push_back(Token(Token::Type::END, { 0,0,0,0 }));
+		return m_tokens;
 	}
 
 	u1 Lexer::end() {
-		return current >= source.size();
+		return m_current >= m_source.size();
 	}
 
 	char Lexer::advance(u32 amount) {
-		index += amount;
-		char c = source[current];
-		current += amount;
+		m_index += amount;
+		char c = m_source[m_current];
+		m_current += amount;
 		return c;
 	}
+	
 	char Lexer::peek(u32 ahead = 0) {
-		return source[current + ahead];
+		return m_source[m_current + ahead];
 	}
+	
 	char Lexer::next() {
 		return advance(1);
 	}
+
 	char Lexer::prev() {
-		return source[--current];
+		return m_source[--m_current];
 	}
+	
 	void Lexer::reset_save_point() {
-		index_save_point = index;
-		line_save_point = line;
+		m_index_save_point = m_index;
+		m_line_save_point = m_line;
 	}
+	
 	void Lexer::skip_whitespace() {
 		while (peek() == ' ' || peek() == '\t') {
 			next();
 			reset_save_point();
 		}
 	}
+
 	void Lexer::token(Token::Type type) {
-		auto token = Token(type, SourcePosition{ index_save_point, index, line_save_point, line });
-		//spdlog::info("{} {} {} {} {}", token.to_string(), index_save_point, index, line_save_point, line);
-		tokens.push_back(token);
+		auto token = TokenBuilder::builder()
+			.type(type)
+			.position(SourcePosition{ m_index_save_point, m_index, m_line_save_point, m_line })
+			.build();
+		m_tokens.push_back(token);
 	}
+
 	void Lexer::token(Token::Type type, std::string value) {
-		auto token = Token(type, SourcePosition{ index_save_point, index, line_save_point, line }, value);
-		//spdlog::info("{} {} {} {} {}", token.to_string(), index_save_point, index, line_save_point, line);
-		tokens.push_back(token);
+		auto token = TokenBuilder::builder()
+			.type(type)
+			.value(value)
+			.position(SourcePosition{ m_index_save_point, m_index, m_line_save_point, m_line })
+			.build();
+		m_tokens.push_back(token);
 	}
 
 	void Lexer::decide(Token::Type type1, Token::Type type2) {
@@ -149,7 +161,7 @@ namespace trove {
 		for (i; i < rest.size() && !end(); i++)
 			if (peek(i) != rest.at(i))
 				return 0;
-		if (!(current + i > source.length() - 1) && (is_letter(peek(i)) || is_num(peek(i)) || peek(i) == '_'))
+		if (!(m_current + i > m_source.length() - 1) && (is_letter(peek(i)) || is_num(peek(i)) || peek(i) == '_'))
 			return 0;
 		advance((u32)rest.size());
 		token(t);

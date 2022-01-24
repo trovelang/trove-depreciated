@@ -16,11 +16,11 @@ namespace trove {
 	};
 
 	std::string Type::to_string() {
-		return type_debug[type];
+		return type_debug[(u8)base_type];
 	}
 
 	u1 Type::equals(Type other) {
-		return type == other.type;
+		return base_type == other.base_type;
 	}
 
 }

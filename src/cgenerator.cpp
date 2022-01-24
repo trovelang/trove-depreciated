@@ -38,37 +38,38 @@ namespace trove {
 	}
 
 	std::string CGenerator::type_to_str(Type type){
-		switch (type.get_type()) {
-		case TypeType::U32: return "unsigned int";
-		case TypeType::S32: return "int";
-		case TypeType::FN: return "fn";
-		case TypeType::TYPE: return "struct";
-		case TypeType::STRUCT: {
-			if (type.anonymous) {
+		switch (type.base_type) {
+		case Type::BaseType::INCOMPLETE: return "INCOMPLETE"; // todo assert unreachable
+		case Type::BaseType::U32: return "unsigned int";
+		case Type::BaseType::S32: return "int";
+		case Type::BaseType::FN: return "fn";
+		case Type::BaseType::TYPE: return "struct";
+		case Type::BaseType::STRUCT: {
+			if (type.struct_type.is_anonymous) {
 				// if we are an anonymous type we need to define the members
 				std::stringstream ss;
 				ss << "struct {";
-				for (u32 i = 0; i < type.multiple.size(); i++) {
-					ss << type_to_str(type.multiple[i]) << " member_" << i << ";";
+				for (u32 i = 0; i < type.contained_types.size(); i++) {
+					ss << type_to_str(type.contained_types[i]) << " member_" << i << ";";
 				}
 				ss << "}";
 				return ss.str();
 			}
 			else {
-				return std::string("struct ").append(type.token->get_value());
+				return std::string("struct ").append(type.associated_token->value);
 			}
 		}
 		}
 	}
 
 	void CGenerator::emit_raw(std::string code) {
-		ss << code;
+		m_output_stream << code;
 	}
 
 	void CGenerator::gen() {
 		CGeneratorContext ctx;
-		gen(ctx, ast);
-		auto code = ss.str();
+		gen(ctx, m_ast);
+		auto code = m_output_stream.str();
 		std::ofstream myfile;
 		myfile.open("c:/trovelang/trove/tmp/tmp.c");
 		myfile << code;
@@ -105,14 +106,14 @@ namespace trove {
 
 	void CGenerator::gen(CGeneratorContext& ctx, ProgramAST& ast) {
 		gen_runtime();
-		for (auto& expr : ast.get_body()) {
+		for (auto& expr : ast.body) {
 			gen(ctx, expr);
 		}
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, BlockAST& ast) {
 		emit_raw("{\n");
-		for (auto& expr : ast.get_body()) {
+		for (auto& expr : ast.body) {
 			gen(ctx, expr);
 		}
 		emit_raw("}");
@@ -127,18 +128,18 @@ namespace trove {
 
 		// we are doing a global fn
 		// todo check for global
-		if (ast.get_type().value().get_type() == TypeType::FN 
-			&& ast.get_type().value().get_mutability_modifier()==MutabilityModifier::CONST){
-			gen(ctx, ast.get_value().value());
-		}else if (ast.get_type().value().get_type() == TypeType::FN
-			&& ast.get_type().value().get_mutability_modifier() == MutabilityModifier::MUT) {
+		if (ast.type.value().base_type == Type::BaseType::FN 
+			&& ast.type.value().mutability==Type::Mutability::CONST){
+			gen(ctx, ast.value.value());
+		}else if (ast.type.value().base_type == Type::BaseType::FN
+			&& ast.type.value().mutability == Type::Mutability::MUT) {
 
-			gen(ctx, ast.get_value().value());
+			gen(ctx, ast.value.value());
 			emit_raw("void (*");
-			emit_raw(ast.get_token()->get_value());
+			emit_raw(ast.token->value);
 			emit_raw(")(");
 
-			auto params = ast.get_type().value().multiple;
+			auto params = ast.type.value().contained_types;
 			// do the type params
 			for (u32 i = 0; i < params.size(); i++) {
 				emit_raw(type_to_str(params[i]));
@@ -148,26 +149,26 @@ namespace trove {
 			}
 
 			emit_raw(") = &");
-			emit_raw(ast.get_type().value().get_token()->get_value());
+			emit_raw(ast.type.value().associated_token->value);
 		
 		
-		}else if (ast.get_type().value().get_type() == TypeType::TYPE
-			&& ast.get_type().value().get_mutability_modifier() == MutabilityModifier::CONST) {
-			gen(ctx, ast.get_value().value());
+		}else if (ast.type.value().base_type == Type::BaseType::TYPE
+			&& ast.type.value().mutability == Type::Mutability::CONST) {
+			gen(ctx, ast.value.value());
 		}
-		else if (ast.get_type().value().get_type() == TypeType::TYPE
-			&& ast.get_type().value().get_mutability_modifier() == MutabilityModifier::MUT) {
+		else if (ast.type.value().base_type == Type::BaseType::TYPE
+			&& ast.type.value().mutability == Type::Mutability::MUT) {
 
-			auto t = ast.get_type().value();
+			auto t = ast.type.value();
 			emit_raw("struct __type_info ");
-			emit_raw(ast.get_token()->get_value());
+			emit_raw(ast.token->value);
 			emit_raw("={");
-			emit_c_str(t.get_token()->get_value());
+			emit_c_str(t.associated_token->value);
 			emit_raw(", {");
 
-			auto members = ast.get_value().value()->as_struct_def().get_member_decls();
+			auto members = ast.value.value()->as_struct_def().member_decls;
 			for (u32 i = 0; i < members.size(); i++) {
-				emit_c_str(members[i]->as_decl().get_token()->get_value());
+				emit_c_str(members[i]->as_decl().token->value);
 				if (i < members.size() - 1) {
 					emit_raw(",");
 				}
@@ -177,12 +178,12 @@ namespace trove {
 
 		}
 		else {
-			emit_raw(type_to_str(ast.get_type().value()));
+			emit_raw(type_to_str(ast.type.value()));
 			emit_raw(" ");
-			emit_raw(ast.get_token()->get_value());
-			if (ast.get_value().has_value()) {
+			emit_raw(ast.token->value);
+			if (ast.value.has_value()) {
 				emit_raw(" = ");
-				gen(ctx, ast.get_value().value());
+				gen(ctx, ast.value.value());
 			}
 			//emit("printf(\"%d\", ");
 			//emit(ast.get_token()->get_value());
@@ -197,43 +198,43 @@ namespace trove {
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, BinAST& ast) {
-		gen(ctx, ast.get_lhs());
+		gen(ctx, ast.lhs);
 		emit_raw(" ");
-		emit_raw(BinAST::type_lookup[(int)ast.get_type()]);
+		emit_raw(BinAST::type_lookup[(int)ast.type]);
 		emit_raw(" ");
-		gen(ctx, ast.get_rhs());
+		gen(ctx, ast.rhs);
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, FnAST& fn_ast) {
 		emit_raw("void ");
-		emit_raw(fn_ast.get_type().get_token()->get_value());
+		emit_raw(fn_ast.type.associated_token->value);
 		//emit("(){\n");
 		emit_raw("(");
-		for (u32 i = 0; i < fn_ast.get_params().size(); i++) {
-			gen(ctx, fn_ast.get_params()[i]);
-			if (i < fn_ast.get_params().size() - 1) {
+		for (u32 i = 0; i < fn_ast.params.size(); i++) {
+			gen(ctx, fn_ast.params[i]);
+			if (i < fn_ast.params.size() - 1) {
 				emit_raw(",");
 			}
 		}
 		emit_raw("){\n");
-		gen(ctx, fn_ast.get_body());
+		gen(ctx, fn_ast.body);
 		emit_raw("}");
 	}
 	
 	void CGenerator::gen(CGeneratorContext&, NumAST& ast) {
-		emit_raw(ast.get_token()->get_value());
+		emit_raw(ast.token->value);
 	}
 
 	void CGenerator::gen(CGeneratorContext&, VarAST& ast) {
-		emit_raw(ast.get_token()->get_value());
+		emit_raw(ast.get_token()->value);
 	}
 
 	void CGenerator::gen_call(CGeneratorContext& ctx, AST* ast) {
-		gen(ctx, ast->as_call().get_callee());
+		gen(ctx, ast->as_call().callee);
 		emit_raw("(");
-		for (u32 i = 0; i < ast->as_call().get_args().size(); i++) {
-			gen(ctx, ast->as_call().get_args()[i]);
-			if(i<ast->as_call().get_args().size()-1){
+		for (u32 i = 0; i < ast->as_call().args.size(); i++) {
+			gen(ctx, ast->as_call().args[i]);
+			if(i<ast->as_call().args.size()-1){
 				emit_raw(", ");
 			}
 		}
@@ -242,17 +243,17 @@ namespace trove {
 
 	void CGenerator::gen_string(CGeneratorContext& ctx, AST* ast) {
 		emit_raw("\"");
-		emit_raw(ast->as_str().token->get_value());
+		emit_raw(ast->as_str().token->value);
 		emit_raw("\"");
 	}
 
 	void CGenerator::gen_bool(CGeneratorContext& ctx, AST* ast) {
-		emit_raw(ast->as_bool().token->get_value());
+		emit_raw(ast->as_bool().token->value);
 	}
 
 	void CGenerator::gen_loop(CGeneratorContext& ctx, AST* ast) {
 		emit_raw("for (int i=0;i<10;i++)");
-		gen(ctx, ast->as_loop().get_body());
+		gen(ctx, ast->as_loop().body);
 	}
 
 	void CGenerator::gen_if(CGeneratorContext& ctx, AST* ast) {
@@ -270,9 +271,9 @@ namespace trove {
 		
 		auto struct_def = ast->as_struct_def();
 		emit_raw("struct ");
-		emit_raw(struct_def.get_type().token->get_value());
+		emit_raw(struct_def.type.associated_token->value);
 		emit_raw(" {\n");
-		for (auto& member : struct_def.get_member_decls()) {
+		for (auto& member : struct_def.member_decls) {
 			gen(ctx, member);
 			emit_raw(";\n");
 		}
@@ -284,7 +285,7 @@ namespace trove {
 
 		auto struct_literal = ast->as_struct_literal();
 		emit_raw("{");
-		for (u32 i = 0; i < struct_literal.get_member_values().size();i++) {
+		for (u32 i = 0; i < struct_literal.member_values.size();i++) {
 			gen(ctx, struct_literal.member_values[i]);
 			if (i < struct_literal.member_values.size() - 1) {
 				emit_raw(", ");

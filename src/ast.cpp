@@ -74,7 +74,7 @@ namespace trove {
 
 	std::string DeclAST::to_string() {
 		std::stringstream ss;
-		ss << "DeclAST " << token->get_value() << " " << type.value().to_string();
+		ss << "DeclAST " << token->value << " " << type.value().to_string();
 		if (value.has_value()) {
 			ss << " " << value.value()->to_string();
 		}
@@ -102,19 +102,19 @@ namespace trove {
 
 	std::string VarAST::to_string() {
 		std::stringstream ss;
-		ss << "VarAST " << token->get_value();
+		ss << "VarAST " << token->value;
 		return ss.str();
 	}
 
 	std::string BoolAST::to_string() {
 		std::stringstream ss;
-		ss << "BoolAST " << token->get_value();
+		ss << "BoolAST " << token->value;
 		return ss.str();
 	}
 
 	std::string StringAST::to_string() {
 		std::stringstream ss;
-		ss << "StringAST " << token->get_value();
+		ss << "StringAST " << token->value;
 		return ss.str();
 	}
 
@@ -130,7 +130,7 @@ namespace trove {
 
 	std::string NumAST::to_string() {
 		std::stringstream ss;
-		ss << "NumAST " << token->get_value();
+		ss << "NumAST " << token->value;
 		return ss.str();
 	}
 

@@ -4,13 +4,13 @@
 namespace trove {
 	AST* Parser::parse() {
 
-		for (auto token : tokens) {
+		for (auto token : m_tokens) {
 			spdlog::info("token {}", token.to_string());
 		}
 
 		auto block_body = std::vector<AST*>();
 
-		while (tokens[current].get_type() != Token::Type::END) {
+		while (m_tokens[m_current].type != Token::Type::END) {
 			block_body.push_back(parse_stmt());
 		}
 
@@ -27,86 +27,92 @@ namespace trove {
 		return std::optional<Token*>();
 	}
 	u1 Parser::expect(Token::Type type) {
-		return tokens[current].get_type() == type;
+		return m_tokens[m_current].type == type;
 	}
 
 	Token* Parser::next() {
-		return &tokens[current++];
+		return &m_tokens[m_current++];
 	}
 
 	Token* Parser::peek(u32 ahead = 0) {
-		return &tokens[current + ahead];
+		return &m_tokens[m_current + ahead];
 	}
 
 	u1 Parser::is_type(Token::Type t) {
 		switch (t) {
-		case Token::Type::CONST:
-		case Token::Type::VAR:
-		case Token::Type::U32:
-		case Token::Type::S32:
-		case Token::Type::TYPE:
-		case Token::Type::STRUCT:
-		case Token::Type::STRING:
-		case Token::Type::IDENTIFIER:
-		case Token::Type::FN:
-			return true;
+			case Token::Type::CONST:
+			case Token::Type::VAR:
+			case Token::Type::U32:
+			case Token::Type::S32:
+			case Token::Type::TYPE:
+			case Token::Type::STRUCT:
+			case Token::Type::STRING:
+			case Token::Type::IDENTIFIER:
+			case Token::Type::FN:
+				return true;
 		}
 		return false;
 	}
 
 	Type Parser::parse_type() {
-		// todo as this is optional, this should be peek
+
 		auto token = peek();
 
-		auto mutability = MutabilityModifier::CONST;
+		auto mutability = Type::Mutability::CONST;
 
-		if (token->get_type() == Token::Type::CONST) {
-			mutability = MutabilityModifier::CONST;
+		if (token->type == Token::Type::CONST) {
+			mutability = Type::Mutability::CONST;
 			next();
-		}else if (token->get_type() == Token::Type::VAR) {
-			mutability = MutabilityModifier::MUT;
+		}else if (token->type == Token::Type::VAR) {
+			mutability = Type::Mutability::MUT;
 			next();
 		}
-
 
 		token = peek();
 
-
-
-		switch (token->get_type()) {
-		case Token::Type::U32: next();  return Type(TypeType::U32, token, mutability);
-		case Token::Type::S32: next();  return Type(TypeType::S32, token, mutability);
-		case Token::Type::TYPE: next();  return Type(TypeType::TYPE, token, mutability);
-		case Token::Type::STRUCT: next();  return Type(TypeType::STRUCT, token, mutability);
-		case Token::Type::STRING: next();  return Type(TypeType::STRING, token, mutability);
-		case Token::Type::IDENTIFIER: next();  return Type(TypeType::STRUCT, token, mutability);
-		case Token::Type::FN: {
-			next();
-			auto params = std::vector<Type>();
-			if (consume(Token::Type::LPAREN)) {
-				while (!expect(Token::Type::RPAREN)) {
-					auto param = parse_type();
+		switch (token->type) {
+			case Token::Type::U32: next();  return TypeBuilder::builder().base_type(Type::BaseType::U32).associated_token(token).mutability(mutability).build();
+			case Token::Type::S32: next();  return TypeBuilder::builder().base_type(Type::BaseType::S32).associated_token(token).mutability(mutability).build();
+			case Token::Type::TYPE: next();  return TypeBuilder::builder().base_type(Type::BaseType::TYPE).associated_token(token).mutability(mutability).build();
+			case Token::Type::STRUCT: next();  return TypeBuilder::builder().base_type(Type::BaseType::STRUCT).associated_token(token).mutability(mutability).build();
+			case Token::Type::STRING: next();  return TypeBuilder::builder().base_type(Type::BaseType::STRING).associated_token(token).mutability(mutability).build();
+			case Token::Type::IDENTIFIER: next(); return TypeBuilder::builder().base_type(Type::BaseType::STRUCT).associated_token(token).mutability(mutability).build();
+			case Token::Type::FN: {
+				next();
+				auto params = std::vector<Type>();
+				if (consume(Token::Type::LPAREN)) {
+					while (!expect(Token::Type::RPAREN)) {
+						auto param = parse_type();
 					
-					params.push_back(param);
-					if (expect(Token::Type::RPAREN)) {
-						break;
-					}
-					consume(Token::Type::COMMA);
+						params.push_back(param);
+						if (expect(Token::Type::RPAREN)) {
+							break;
+						}
+						consume(Token::Type::COMMA);
 		
+					}
+					consume(Token::Type::RPAREN);
 				}
-				consume(Token::Type::RPAREN);
-			}
 
-			return Type(TypeType::FN, token, params, mutability);
+				return TypeBuilder::builder()
+					.base_type(Type::BaseType::FN)
+					.associated_token(token)
+					.contained_types(params)
+					.mutability(mutability)
+					.build();
+			}
 		}
-		}
-		return Type(token, mutability);
+		return TypeBuilder::builder()
+			.complete(false)
+			.mutability(mutability)
+			.build();
 	}
 
 	AST* Parser::parse_stmt() {
 		spdlog::info("parse_stmt");
 		AST* child = nullptr;
-		switch (peek()->get_type()) {
+		auto peeking = peek();
+		switch (peek()->type) {
 		case Token::Type::LCURLY:
 			child = parse_block();
 			break;
@@ -120,6 +126,7 @@ namespace trove {
 			child = parse_return();
 			break;
 		default:
+			spdlog::info("parse_decl_or_assign");
 			child = parse_decl_or_assign();
 			break;
 		}
@@ -151,7 +158,7 @@ namespace trove {
 			stmts.push_back(parse_stmt());
 		}
 		auto rcurly = consume(Token::Type::RCURLY);
-		return new AST(AST::Type::BLOCK, lcurly.value()->get_position().merge(rcurly.value()->get_position()), BlockAST(stmts));
+		return new AST(AST::Type::BLOCK, lcurly.value()->source_position.merge(rcurly.value()->source_position), BlockAST(stmts));
 
 	}
 
@@ -162,25 +169,25 @@ namespace trove {
 		auto else_token = consume(Token::Type::ELSE);
 		if (else_token.has_value()) {
 			auto else_body = parse_stmt();
-			return new AST(AST::Type::IF, if_token.value()->get_position().merge(else_body->get_position()), IfAST(cond, body, else_body));
+			return new AST(AST::Type::IF, if_token.value()->source_position.merge(else_body->get_position()), IfAST(cond, body, else_body));
 		}
-		return new AST(AST::Type::IF, if_token.value()->get_position().merge(body->get_position()), IfAST(cond, body));
+		return new AST(AST::Type::IF, if_token.value()->source_position.merge(body->get_position()), IfAST(cond, body));
 	}
 
 	AST* Parser::parse_loop() {
 		auto loop_token = consume(Token::Type::LOOP);
 
-		spdlog::info("parsing loop {}!", peek()->get_value());
+		spdlog::info("parsing loop {}!", peek()->value);
 
 		auto cond = parse_expr();
 		auto body = parse_stmt();
-		return new AST(AST::Type::LOOP, loop_token.value()->get_position().merge(body->get_position()), LoopAST(LoopAST::LoopType::BASIC, cond, body));
+		return new AST(AST::Type::LOOP, loop_token.value()->source_position.merge(body->get_position()), LoopAST(LoopAST::LoopType::BASIC, cond, body));
 	}
 
 	AST* Parser::parse_return() {
 		auto return_token = consume(Token::Type::RET);
 		auto value = parse_expr();
-		return new AST(AST::Type::RET, return_token.value()->get_position().merge(value->get_position()), RetAST(value));
+		return new AST(AST::Type::RET, return_token.value()->source_position.merge(value->get_position()), RetAST(value));
 	}
 
 	AST* Parser::parse_expr() {
@@ -190,9 +197,9 @@ namespace trove {
 	AST* Parser::parse_decl_or_assign() {
 		auto first = peek();
 		auto second = peek(1);
-		spdlog::info("parse_decl_or_assign first: {} second: {}", first->get_value(), second->get_value());
+		spdlog::info("parse_decl_or_assign first: {} second: {}", first->value, second->value);
 		// FIXME: This is probably bad...
-		if (first->get_type()==Token::Type::IDENTIFIER && is_type(second->get_type())) {
+		if (first->type==Token::Type::IDENTIFIER && is_type(second->type)) {
 			spdlog::info("doing decl!");
 			return parse_decl();
 		}
@@ -217,11 +224,11 @@ namespace trove {
 		else {
 			// check if we have x var or x const (i.e. we haven't fully quantified the type)
 			if (requires_infering) {
-				err_reporter.compile_error("Type is not fully quantified (you can't just put 'var' or 'const' without an initialiser!)", higher_precedence->source_position);
+				m_error_reporter.compile_error("Type is not fully quantified (you can't just put 'var' or 'const' without an initialiser!)", higher_precedence->source_position);
 			}
 			return new AST(
 				AST::Type::DECL,
-				higher_precedence->get_position().merge(type.get_token()->get_position()),
+				higher_precedence->get_position().merge(type.associated_token->source_position),
 				DeclAST(higher_precedence->as_var().get_token(), type));
 		}
 
@@ -260,7 +267,7 @@ namespace trove {
 			auto rhs = parse_plus_minus();
 
 			BinAST::Type type;
-			switch (op->get_type()) {
+			switch (op->type) {
 			case Token::Type::PLUS: type = BinAST::Type::ADD; break;
 			case Token::Type::MINUS: type = BinAST::Type::SUB; break;
 			}
@@ -280,7 +287,7 @@ namespace trove {
 			auto rhs = parse_mul_div();
 
 			BinAST::Type type;
-			switch (op->get_type()) {
+			switch (op->type) {
 			case Token::Type::STAR: type = BinAST::Type::MUL; break;
 			case Token::Type::DIV: type = BinAST::Type::DIV; break;
 			}
@@ -298,7 +305,7 @@ namespace trove {
 		auto higher_precedence = parse_call();
 		if (consume(Token::Type::DOT)) {
 			auto member = next();
-			return new AST(AST::Type::STRUCT_ACCESS, higher_precedence->get_position().merge(member->get_position()), StructAccessAST(higher_precedence, member));
+			return new AST(AST::Type::STRUCT_ACCESS, higher_precedence->get_position().merge(member->source_position), StructAccessAST(higher_precedence, member));
 		}
 		return higher_precedence;
 	}
@@ -322,7 +329,7 @@ namespace trove {
 
 			return new AST(
 				AST::Type::CALL,
-				higher_precedence->get_position().merge(right_paren->get_position()),
+				higher_precedence->get_position().merge(right_paren->source_position),
 				CallAST(higher_precedence, args));
 		}
 		return higher_precedence;
@@ -331,12 +338,12 @@ namespace trove {
 
 	AST* Parser::parse_single() {
 		auto tok = peek();
-		switch (tok->get_type()) {
-		case Token::Type::NUM: next(); return new AST(AST::Type::NUM, tok->get_position(), NumAST(tok, Type(TypeType::U32)));
-		case Token::Type::IDENTIFIER: next(); return new AST(AST::Type::VAR, tok->get_position(), VarAST(tok));
-		case Token::Type::STRING: next(); return new AST(AST::Type::STRING, tok->get_position(), StringAST(tok));
-		case Token::Type::TRUE: next(); return new AST(AST::Type::BOOL, tok->get_position(), BoolAST(tok));
-		case Token::Type::FALSE: next(); return new AST(AST::Type::BOOL, tok->get_position(), BoolAST(tok));
+		switch (tok->type) {
+		case Token::Type::NUM: next(); return new AST(AST::Type::NUM, tok->source_position, NumAST(tok, TypeBuilder::builder().base_type(Type::BaseType::U32).build()));
+		case Token::Type::IDENTIFIER: next(); return new AST(AST::Type::VAR, tok->source_position, VarAST(tok));
+		case Token::Type::STRING: next(); return new AST(AST::Type::STRING, tok->source_position, StringAST(tok));
+		case Token::Type::TRUE: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(tok));
+		case Token::Type::FALSE: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(tok));
 		case Token::Type::FN: return parse_fn();
 		// TODO WE WANT TO BE ABLE TO PARSE BLOCKS, OR STRUCT LITERALS without the prepending
 		case Token::Type::TYPE: return parse_struct_def();
@@ -365,7 +372,10 @@ namespace trove {
 
 		auto body = parse_stmt();
 
-		return new AST(AST::Type::FN, fn->get_position().merge(body->get_position()), FnAST(body, params, 0, Type(TypeType::FN)));
+		auto type = TypeBuilder::builder()
+			.base_type(Type::BaseType::FN)
+			.build();
+		return new AST(AST::Type::FN, fn->source_position.merge(body->get_position()), FnAST(body, params, 0, type));
 
 	}
 
@@ -381,7 +391,7 @@ namespace trove {
 
 		auto right_curly = consume(Token::Type::RCURLY);
 
-		return new AST(AST::Type::STRUCT_DEF, t.value()->get_position().merge(right_curly.value()->get_position()), StructDefAST(member_decls));
+		return new AST(AST::Type::STRUCT_DEF, t.value()->source_position.merge(right_curly.value()->source_position), StructDefAST(member_decls));
 	}
 
 	AST* Parser::parse_struct_literal() {
@@ -395,7 +405,7 @@ namespace trove {
 
 		auto right_curly = consume(Token::Type::RCURLY);
 
-		return new AST(AST::Type::STRUCT_LITERAL, s.value()->get_position().merge(right_curly.value()->get_position()), StructLiteralAST(member_values));
+		return new AST(AST::Type::STRUCT_LITERAL, s.value()->source_position.merge(right_curly.value()->source_position), StructLiteralAST(member_values));
 	}
 
 }

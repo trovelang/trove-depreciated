@@ -9,7 +9,7 @@ namespace trove {
 	class Lexer {
 	public:
 		Lexer() {}
-		Lexer(std::string_view source) : source(source) {}
+		Lexer(std::string_view source) : m_source(source) {}
 		std::vector<Token> lex();
 	private:
 		u1 end();
@@ -32,13 +32,13 @@ namespace trove {
 		void do_number(char current);
 		void do_string(char current);
 
-		u32 current = 0;
-		u32 index = 0;
-		u32 index_save_point = 0;
-		u32 line = 0;
-		u32 line_save_point = 0;
-		std::string_view source;
-		std::vector<Token> tokens;
+		u32 m_current = 0;
+		u32 m_index = 0;
+		u32 m_index_save_point = 0;
+		u32 m_line = 0;
+		u32 m_line_save_point = 0;
+		std::string_view m_source;
+		std::vector<Token> m_tokens;
 	};
 
 }

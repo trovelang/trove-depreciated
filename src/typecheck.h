@@ -24,7 +24,7 @@ namespace trove {
 
     class TypeCheckPass {
     public:
-        TypeCheckPass(ErrorReporter& err_reporter, AST* ast) : err_reporter(err_reporter), ast(ast) {}
+        TypeCheckPass(ErrorReporter& err_reporter, AST* ast) : m_error_reporter(err_reporter), m_ast(ast) {}
         void analyse();
         AnalysisUnit analyse(AnalysisCtx&, AST*);
         AnalysisUnit analyse_statement(AnalysisCtx&, AST*);
@@ -41,9 +41,9 @@ namespace trove {
         AnalysisUnit analyse(AnalysisCtx&, FnAST&);
         AnalysisUnit analyse(AnalysisCtx&, NumAST&);
     private:
-        ErrorReporter& err_reporter;
-        AST* ast;
-        SymTable<Type*> sym_table;
+        ErrorReporter& m_error_reporter;
+        AST* m_ast;
+        SymTable<Type*> m_symtable;
     };
 
 }

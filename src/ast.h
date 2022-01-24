@@ -7,41 +7,23 @@
 #include <type.h>
 #include <sstream>
 #include <spdlog/spdlog.h>
+#include <trove.h>
 
 namespace trove {
 
-	class AST;
+	struct AST;
 
-	class AnnotationAST {
-	public:
-		AnnotationAST() {
-		}
-		AnnotationAST(AST* ast) : ast(ast) {}
-	private:
-		AST* ast;
-	};
-
-	class ProgramAST {
-	public:
+	struct ProgramAST {
 		ProgramAST() {}
 		ProgramAST(std::vector<AST*> body) : body(body) {}
 		std::string to_string();
-		std::vector<AST*>& get_body() {
-			return body;
-		}
-	private:
 		std::vector<AST*> body;
 	};
 
-	class BlockAST {
-	public:
+	struct BlockAST {
 		BlockAST() {}
 		BlockAST(std::vector<AST*> body) : body(body) {}
 		std::string to_string();
-		std::vector<AST*> get_body() {
-			return body;
-		}
-	private:
 		std::vector<AST*> body;
 	};
 
@@ -52,48 +34,27 @@ namespace trove {
 		AST* body;
 	};
 
-	class WatchmanAST {
-	public:
+	struct WatchmanAST {
 		WatchmanAST() {}
 		WatchmanAST(AST* lhs, AST* body) : lhs(lhs), body(body) {}
 		std::string to_string();
-		AST* get_lhs() {
-			return lhs;
-		}
-		AST* get_body() {
-			return body;
-		}
-	private:
 		AST* lhs;
 		AST* body;
 	};
 
-	class CompAST {
-	public:
+	struct CompAST {
 		CompAST() {}
 		CompAST(AST* stmt) : stmt(stmt) {}
 		AST* get_stmt() {
 			return stmt;
 		}
-	private:
 		AST* stmt;
 	};
 
-	class FnAST {
-	public:
+	struct FnAST {
 		FnAST() {}
 		FnAST(AST* body, std::vector<AST*> params, u32 local_count, Type type) : body(body), params(params), local_count(local_count), type(type) {}
 		std::string to_string();
-		AST* get_body() {
-			return body;
-		}
-		std::vector<AST*>& get_params() {
-			return params;
-		}
-		Type& get_type() {
-			return type;
-		}
-	private:
 		AST* body;
 		std::vector<AST*> params;
 		u32 local_count = 0;
@@ -111,15 +72,11 @@ namespace trove {
 		Token* token;
 	};
 
-	class NumAST {
-	public:
+	struct NumAST {
 		NumAST() {}
 		NumAST(Token* token, Type type) : token(token), type(type) {
 		}
 		std::string to_string();
-		Token* get_token() {
-			return token;
-		}
 		Token* token;
 		Type type;
 	};
@@ -132,13 +89,14 @@ namespace trove {
 		Token* token;
 	};
 
-	class VarAST {
-	public:
+	struct VarAST {
+
 		enum class Type : u8 {
 			LOCAL,
 			PARAM,
 			GLOBAL
 		};
+		
 		VarAST() {}
 		VarAST(Token* token) : token(token) {}
 		std::string to_string();
@@ -148,53 +106,35 @@ namespace trove {
 		Type& get_type() {
 			return type;
 		}
-	private:
 		Token* token;
 		Type type;
 	};
 
-	class DeclAST {
-	public:
+	struct DeclAST {
 		DeclAST() {}
 		DeclAST(Token* token) : token(token) {}
 		DeclAST(Token* token, std::optional<Type> type) : token(token), type(type) {}
 		DeclAST(Token* token, std::optional<Type> type, AST* value, u1 requires_infering) 
 			: token(token), type(type), value(value), requires_infering(requires_infering) {}
 		std::string to_string();
-		Token* get_token() {
-			return token;
-		}
-		std::optional<Type>& get_type() {
-			return type;
-		}
-		std::optional<AST*>& get_value() {
-			return value;
-		}
 		Token* token;
 		std::optional<Type> type;
 		std::optional<AST*> value;
 		u1 requires_infering;
 	};
 
-	class CallAST {
-	public:
+	struct CallAST {
 		CallAST() {}
 		CallAST(AST* callee, std::vector<AST*> args) : callee(callee), args(args) {}
 		std::string to_string();
-		AST* get_callee() {
-			return callee;
-		}
-		std::vector<AST*>& get_args() {
-			return args;
-		}
-	private:
 		AST* callee;
 		std::vector<AST*> args;
 	};
 
-	class BinAST {
-	public:
+	struct BinAST {
+
 		static const char* type_lookup[4];
+		
 		enum class Type : u8 {
 			ADD,
 			SUB,
@@ -205,16 +145,6 @@ namespace trove {
 		BinAST(AST* lhs, Type type, AST* rhs)
 			: lhs(lhs), type(type), rhs(rhs) {}
 		std::string to_string();
-		AST* get_lhs() {
-			return lhs;
-		}
-		Type& get_type() {
-			return type;
-		}
-		AST* get_rhs() {
-			return rhs;
-		}
-	private:
 		AST* lhs;
 		Type type;
 		AST* rhs;
@@ -227,44 +157,31 @@ namespace trove {
 		IfAST(AST* cond, AST* body, AST* else_body)
 			: cond(cond), body(body), else_body(else_body) {}
 		std::string to_string();
-		AST* get_cond() {
-			return cond;
-		}
-		AST* get_body() {
-			return body;
-		}
-		std::optional<AST*> get_else_body() {
-			return else_body;
-		}
 		AST* cond;
 		AST* body;
 		std::optional<AST*> else_body;
 	};
 
-	class RetAST {
-	public:
+	struct RetAST {
 		RetAST() {}
 		RetAST(AST* value) : value(value) {}
-		AST* get_value() {
-			return value;
-		}
-	private:
 		AST* value;
 	};
 
-	class StructDefAST {
-	public:
+	struct StructDefAST {
+		// FIXME a struct def ast should not have a type because it is a struct def! what else can it be?!
 		// fixme this should not have a type associated with it (it should be infered when generating)
-		StructDefAST() : type(TypeType::TYPE) {}
-		StructDefAST(std::vector<AST*> member_decls) : member_decls(member_decls), type(TypeType::TYPE) {}
+		StructDefAST(){
+			type = TypeBuilder::builder()
+				.base_type(Type::BaseType::TYPE)
+				.build();
+		}
+		StructDefAST(std::vector<AST*> member_decls) : member_decls(member_decls) {
+			type = TypeBuilder::builder()
+				.base_type(Type::BaseType::TYPE)
+				.build();
+		}
 		std::string to_string();
-		std::vector<AST*>& get_member_decls() {
-			return member_decls;
-		}
-		Type& get_type() {
-			return type;
-		}
-	private:
 		std::vector<AST*> member_decls;
 		Type type; // either struct or type (defaults to struct)
 	};
@@ -273,34 +190,20 @@ namespace trove {
 		StructLiteralAST() {}
 		StructLiteralAST(std::vector<AST*> member_values) : member_values(member_values) {
 			this->type = TypeBuilder{}
-				.type(TypeType::STRUCT)
-				.set_anonymous(true)
+				.base_type(Type::BaseType::STRUCT)
+				.anonymous(true)
 				.build();
 		}
 		std::string to_string();
-		std::vector<AST*>& get_member_values() {
-			return member_values;
-		}
 		std::vector<AST*> member_values;
 		Type type;
 	};
 
 
-	class StructAccessAST {
-	public:
+	struct StructAccessAST {
 		StructAccessAST() {}
 		StructAccessAST(AST* obj, Token* member) : obj(obj), member(member) {}
 		StructAccessAST(AST* obj, u32 index) : obj(obj), index(index) {}
-		AST* get_obj() {
-			return obj;
-		}
-		Token* get_member() {
-			return member;
-		}
-		u32& get_index() {
-			return index;
-		}
-	private:
 		AST* obj;
 		Token* member;
 		u32 index = 0;
@@ -315,31 +218,21 @@ namespace trove {
 	};
 
 	struct LoopAST {
-		enum LoopType : u8 {
+		enum class LoopType : u8 {
 			BASIC
 		};
 		LoopAST() {}
 		LoopAST(LoopType loop_type, AST* cond, AST* body) : loop_type(loop_type), cond(cond), body(body) {}
 		std::string to_string();
-		AST* get_cond() {
-			return cond;
-		}
-		AST* get_body() {
-			return body;
-		}
-		LoopType& get_loop_type() {
-			return loop_type;
-		}
 		AST* cond;
 		AST* body;
 		LoopType loop_type;
 	};
 
 
-	class AST {
-	public:
+	struct AST {
 
-		enum Type {
+		enum class Type : u8 {
 			PROGRAM,
 			BLOCK,
 			STATEMENT,

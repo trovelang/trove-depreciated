@@ -11,52 +11,52 @@ class SymTable {
 public:
 	SymTable() {
 		enter();
-		index = 0;
+		m_index = 0;
 	}
 	void enter() {
-		index++;
-		values.push_back(std::map<std::string, T>());
+		m_index++;
+		m_values.push_back(std::map<std::string, T>());
 	}
 	void exit() {
-		index--;
-		values.pop_back();
+		m_index--;
+		m_values.pop_back();
 	}
 	void place(std::string key, T value) {
-		values[index][key] = value;
+		m_values[m_index][key] = value;
 	}
 	u32 get_level() {
-		return index;
+		return m_index;
 	}
 	u1 contains(std::string key) {
-		for (s32 i = index; i >= 0; i--) {
-			if (values[i].contains(key)) {
+		for (s32 i = m_index; i >= 0; i--) {
+			if (m_values[i].contains(key)) {
 				return true;
 			}
 		}
 		return false;
 	}
 	u32 scope_size() {
-		return values[index].size();
+		return m_values[m_index].size();
 	}
 	std::optional<u32> lookup_level(std::string key) {
-		for (s32 i = index; i >= 0; i--) {
-			if (values[i].contains(key)) {
+		for (s32 i = m_index; i >= 0; i--) {
+			if (m_values[i].contains(key)) {
 				return i;
 			}
 		}
 		return std::optional<u32>();
 	}
 	std::optional<T> lookup(std::string key) {
-		for (s32 i = index; i >= 0; i--) {
-			if (values[i].contains(key)) {
-				return values[i][key];
+		for (s32 i = m_index; i >= 0; i--) {
+			if (m_values[i].contains(key)) {
+				return m_values[i][key];
 			}
 		}
 		return std::optional<T>();
 	}
 private:
-	u32 index = 0;
-	std::vector<std::map<std::string, T>> values;
+	u32 m_index = 0;
+	std::vector<std::map<std::string, T>> m_values;
 };
 
 }

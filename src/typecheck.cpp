@@ -4,7 +4,7 @@ namespace trove {
 
     void TypeCheckPass::analyse() {
         auto ctx = AnalysisCtx{ AnalysisCtx::Scope::GLOBAL };
-        analyse(ctx, ast);
+        analyse(ctx, m_ast);
     }
 
     AnalysisUnit TypeCheckPass::analyse(AnalysisCtx& ctx, AST* ast) {
@@ -37,60 +37,65 @@ namespace trove {
         Type* type;
         AnalysisUnit value_analysis_unit;
 
-        if (decl.get_value().has_value()) {
-            value_analysis_unit = analyse(ctx, decl.get_value().value());
+        if (decl.value.has_value()) {
+            value_analysis_unit = analyse(ctx, decl.value.value());
             
-            if (!decl.get_type().value().complete) {
-                decl.get_type().value() = *value_analysis_unit.type;
+            if (!decl.type.value().complete) {
+                decl.type.value() = *value_analysis_unit.type;
                 spdlog::info("infering type! {}", decl.type.value().to_string());
             }
 
 
             // if we are dealing with a function we need to process it
-            if (decl.get_type()->get_mutability_modifier()==MutabilityModifier::CONST
-            && value_analysis_unit.type->get_type() == TypeType::FN) {
+            if (decl.type->mutability==Type::Mutability::CONST
+            && value_analysis_unit.type->base_type == Type::BaseType::FN) {
                 // set the global fn name
-                value_analysis_unit.type->get_token() = decl.get_token();
+                value_analysis_unit.type->associated_token = decl.token;
             }
             // if we are dealing with a lambda we need to process it
-            else if (decl.get_type()->get_mutability_modifier() == MutabilityModifier::MUT
-                    && value_analysis_unit.type->get_type() == TypeType::FN) {
+            else if (decl.type->mutability == Type::Mutability::MUT
+                    && value_analysis_unit.type->base_type == Type::BaseType::FN) {
                 // set the global fn name
-                auto tok = new Token(Token::Type::IDENTIFIER, {}, "lambda");
-                value_analysis_unit.type->get_token() = tok;
-                decl.get_type().value().token = tok;
+                auto token = new Token(TokenBuilder::builder()
+                    .type(Token::Type::IDENTIFIER)
+                    .value("lambda")
+                    .build());
+                value_analysis_unit.type->associated_token = token;
+                decl.type.value().associated_token = token;
             }
 
             // if we are dealing with a function we need to process it
-            if (decl.get_type()->get_mutability_modifier() == MutabilityModifier::CONST
-                && value_analysis_unit.type->get_type() == TypeType::TYPE) {
+            if (decl.type->mutability == Type::Mutability::CONST
+                && value_analysis_unit.type->base_type == Type::BaseType::TYPE) {
                 // set the global fn name
-                value_analysis_unit.type->get_token() = decl.get_token();
+                value_analysis_unit.type->associated_token = decl.token;
             }
             // if we are dealing with a lambda we need to process it
-            else if (decl.get_type()->get_mutability_modifier() == MutabilityModifier::MUT
-                && value_analysis_unit.type->get_type() == TypeType::TYPE) {
+            else if (decl.type->mutability == Type::Mutability::MUT
+                && value_analysis_unit.type->base_type == Type::BaseType::TYPE) {
                 // set the global fn name
-                auto tok = new Token(Token::Type::IDENTIFIER, {}, "lambda_type");
-                value_analysis_unit.type->get_token() = tok;
-                decl.get_type().value().token = tok;
+                auto token = new Token(TokenBuilder::builder()
+                    .type(Token::Type::IDENTIFIER)
+                    .value("lambda_type")
+                    .build());
+                value_analysis_unit.type->associated_token = token;
+                decl.type.value().associated_token = token;
             }
         }
 
-        if(!decl.get_type().has_value()){
+        if(!decl.type.has_value()){
             type = value_analysis_unit.type;
         }
         else {
-            type = &decl.get_type().value();
+            type = &decl.type.value();
         }
 
-
-        sym_table.place(decl.get_token()->get_value(), &ast->as_decl().get_type().value());
-        return AnalysisUnit{ &ast->as_decl().get_type().value() };
+        m_symtable.place(decl.token->value, &ast->as_decl().type.value());
+        return AnalysisUnit{ &ast->as_decl().type.value() };
     }
 
     AnalysisUnit TypeCheckPass::analyse_block_ast(AnalysisCtx& ctx, AST* ast) {
-        for (auto& elem : ast->as_block().get_body()) {
+        for (auto& elem : ast->as_block().body) {
             analyse(ctx, elem);
         }
         return {};
@@ -106,37 +111,37 @@ namespace trove {
         if (!lhs.type->equals(*rhs.type)) {
             std::stringstream ss;
             ss << "types do not equal, expected " << lhs.type->to_string() << " but got " << rhs.type->to_string();
-            err_reporter.compile_error(ss.str(), ast->source_position);
+            m_error_reporter.compile_error(ss.str(), ast->source_position);
         }
 
         return {};
     }
 
     AnalysisUnit TypeCheckPass::analyse_program_ast(AnalysisCtx& ctx, AST* ast){
-        for (auto& elem : ast->as_program().get_body()) {
+        for (auto& elem : ast->as_program().body) {
             analyse(ctx, elem);
         }
         return {};
     }
     AnalysisUnit TypeCheckPass::analyse(AnalysisCtx& ctx, BlockAST& ast){
-        sym_table.enter();
-        for (auto& elem : ast.get_body()) {
+        m_symtable.enter();
+        for (auto& elem : ast.body) {
             analyse(ctx, elem);
         }
-        sym_table.exit();
+        m_symtable.exit();
         return {};
     }
 
     AnalysisUnit TypeCheckPass::analyse_bin(AnalysisCtx& ctx, AST* ast){
         auto bin = ast->as_bin();
-        auto lhs_type = analyse(ctx, bin.get_lhs());
-        auto rhs_type = analyse(ctx, bin.get_rhs());
+        auto lhs_type = analyse(ctx, bin.lhs);
+        auto rhs_type = analyse(ctx, bin.rhs);
         return lhs_type;
     }
 
     AnalysisUnit TypeCheckPass::analyse(AnalysisCtx& ctx, FnAST& ast){
-        analyse(ctx, ast.get_body());
-        return AnalysisUnit{&ast.get_type()};
+        analyse(ctx, ast.body);
+        return AnalysisUnit{&ast.type};
     }
 
     AnalysisUnit TypeCheckPass::analyse(AnalysisCtx&, NumAST& num){
@@ -145,11 +150,11 @@ namespace trove {
 
     AnalysisUnit TypeCheckPass::analyse_var(AnalysisCtx& ctx, AST* ast){
         auto var = ast->as_var();
-        auto type = sym_table.lookup(var.get_token()->get_value());
+        auto type = m_symtable.lookup(var.token->value);
         if (!type.has_value()) {
-            err_reporter.compile_error("unknown variable", ast->source_position);
+            m_error_reporter.compile_error("unknown variable", ast->source_position);
         }
-        spdlog::info("analysing var {}", type.value()->get_type());
+        spdlog::info("analysing var {}", type.value()->base_type);
         return AnalysisUnit{ type.value() };
     }
 
@@ -161,27 +166,20 @@ namespace trove {
     AnalysisUnit TypeCheckPass::analyse_struct_def(AnalysisCtx& ctx, AST* ast) {
 
         auto struct_def = ast->as_struct_def();
-        for (auto& member : struct_def.get_member_decls()) {
+        for (auto& member : struct_def.member_decls) {
             auto member_analysis = analyse(ctx, member);
-            spdlog::info("DOING MEMBER! {}", member_analysis.type->to_string());
-            struct_def.get_type().multiple.push_back(*member_analysis.type);
+            struct_def.type.contained_types.push_back(*member_analysis.type);
 
         }
 
-        return AnalysisUnit{ &ast->as_struct_def().get_type() };
+        return AnalysisUnit{ &ast->as_struct_def().type };
     }
 
     AnalysisUnit TypeCheckPass::analyse_struct_literal(AnalysisCtx& ctx, AST* ast) {
-
-
-
-        for (auto& member : ast->as_struct_literal().get_member_values()) {
+        for (auto& member : ast->as_struct_literal().member_values) {
             auto member_analysis = analyse(ctx, member);
-            spdlog::info("DOING MEMBER! {}", member_analysis.type->to_string());
-            ast->as_struct_literal().type.multiple.push_back(*member_analysis.type);
-
+            ast->as_struct_literal().type.contained_types.push_back(*member_analysis.type);
         }
-
         return AnalysisUnit{ &ast->as_struct_literal().type };
     }
 }

@@ -10,15 +10,13 @@
 namespace trove {
 	class Parser {
 	public:
-		Parser(ErrorReporter err_reporter, std::vector<Token> tokens) : err_reporter(err_reporter), tokens(tokens) {}
+		Parser(ErrorReporter error_reporter, std::vector<Token> tokens) : m_error_reporter(error_reporter), m_tokens(tokens) {}
 		AST* parse();
 		u1 expect(Token::Type);
 		std::optional<Token*> consume(Token::Type);
 		Token* next();
 		Token* peek(u32 ahead);
 	private:
-		ErrorReporter err_reporter;
-		u32 current = 0;
 		u1 is_type(Token::Type t);
 		Type parse_type();
 		AST* parse_stmt();
@@ -40,7 +38,9 @@ namespace trove {
 		AST* parse_fn();
 		AST* parse_struct_def();
 		AST* parse_struct_literal();
-		std::vector<Token> tokens;
+		std::vector<Token> m_tokens;
+		ErrorReporter m_error_reporter;
+		u32 m_current = 0;
 	};
 
 }
