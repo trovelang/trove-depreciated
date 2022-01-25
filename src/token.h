@@ -78,10 +78,10 @@ namespace trove {
 			PUB,
 			PRIV,
 			VAR,
-			CONST,
+			CONSTANT,
 
-			TRUE,
-			FALSE
+			TRUEY,
+			FALSY
 		};
 
 		std::string to_string();

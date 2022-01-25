@@ -1,0 +1,10 @@
+^C:\TROVELANG\TROVE\CMAKEFILES\D9BFCE1B2235B3DAE0E882EEE66E6B30\RUN_TESTS_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

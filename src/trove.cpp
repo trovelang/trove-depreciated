@@ -14,6 +14,9 @@
 int main(int argc, char** argv)
 {
 
+
+	spdlog::info("hello, world!");
+
 	using namespace trove;
 
 	std::string source = "x s32 = 1+2";
@@ -29,7 +32,7 @@ int main(int argc, char** argv)
 		std::getline(std::cin, source);
 	}*/
 
-	std::ifstream t("C:/trovelang/trove/tests/trove/test.trove");
+	std::ifstream t("C:/trovelang/trove/tests/trove/helloworld.trove");
 	std::stringstream buffer;
 	buffer << t.rdbuf();
 	source = buffer.str();

@@ -175,14 +175,14 @@ namespace trove {
 		switch (current) {
 		case 'c': {
 			found_keyword = check_keyword("omp", Token::Type::COMP);
-			if (!found_keyword) found_keyword = check_keyword("onst", Token::Type::CONST);
+			if (!found_keyword) found_keyword = check_keyword("onst", Token::Type::CONSTANT);
 			break;
 		}
 		case 'e': found_keyword = check_keyword("lse", Token::Type::ELSE); break;
 		case 'f': {
 			found_keyword = check_keyword("n", Token::Type::FN);
 			if (!found_keyword) found_keyword = check_keyword("or", Token::Type::FOR);
-			if (!found_keyword) found_keyword = check_keyword("alse", Token::Type::FALSE);
+			if (!found_keyword) found_keyword = check_keyword("alse", Token::Type::FALSY);
 			break;
 		}
 		case 'i': {
@@ -214,7 +214,7 @@ namespace trove {
 		}
 		case 't': {
 			found_keyword = check_keyword("ype", Token::Type::TYPE);
-			if (!found_keyword) found_keyword = check_keyword("rue", Token::Type::TRUE);
+			if (!found_keyword) found_keyword = check_keyword("rue", Token::Type::TRUEY);
 			break;
 		}
 		case 'u': {

@@ -38,7 +38,7 @@ namespace trove {
 
 	u1 Parser::is_type(Token::Type t) {
 		switch (t) {
-			case Token::Type::CONST:
+			case Token::Type::CONSTANT:
 			case Token::Type::VAR:
 			case Token::Type::U32:
 			case Token::Type::S32:
@@ -56,10 +56,10 @@ namespace trove {
 
 		auto token = peek();
 
-		auto mutability = Type::Mutability::CONST;
+		auto mutability = Type::Mutability::CONSTANT;
 
-		if (token->type == Token::Type::CONST) {
-			mutability = Type::Mutability::CONST;
+		if (token->type == Token::Type::CONSTANT) {
+			mutability = Type::Mutability::CONSTANT;
 			next();
 		}else if (token->type == Token::Type::VAR) {
 			mutability = Type::Mutability::MUT;
@@ -338,8 +338,8 @@ namespace trove {
 		case Token::Type::NUM: next(); return new AST(AST::Type::NUM, tok->source_position, NumAST(tok, TypeBuilder::builder().base_type(Type::BaseType::U32).build()));
 		case Token::Type::IDENTIFIER: next(); return new AST(AST::Type::VAR, tok->source_position, VarAST(tok));
 		case Token::Type::STRING: next(); return new AST(AST::Type::STRING, tok->source_position, StringAST(tok));
-		case Token::Type::TRUE: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(tok));
-		case Token::Type::FALSE: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(tok));
+		case Token::Type::TRUEY: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(tok));
+		case Token::Type::FALSY: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(tok));
 		case Token::Type::FN: return parse_fn();
 		// TODO WE WANT TO BE ABLE TO PARSE BLOCKS, OR STRUCT LITERALS without the prepending
 		case Token::Type::TYPE: return parse_struct_def();

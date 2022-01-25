@@ -129,7 +129,7 @@ namespace trove {
 		// we are doing a global fn
 		// todo check for global
 		if (ast.type.value().base_type == Type::BaseType::FN 
-			&& ast.type.value().mutability==Type::Mutability::CONST){
+			&& ast.type.value().mutability==Type::Mutability::CONSTANT){
 			gen(ctx, ast.value.value());
 		}else if (ast.type.value().base_type == Type::BaseType::FN
 			&& ast.type.value().mutability == Type::Mutability::MUT) {
@@ -153,7 +153,7 @@ namespace trove {
 		
 		
 		}else if (ast.type.value().base_type == Type::BaseType::TYPE
-			&& ast.type.value().mutability == Type::Mutability::CONST) {
+			&& ast.type.value().mutability == Type::Mutability::CONSTANT) {
 			gen(ctx, ast.value.value());
 		}
 		else if (ast.type.value().base_type == Type::BaseType::TYPE

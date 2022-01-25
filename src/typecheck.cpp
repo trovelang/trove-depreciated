@@ -55,7 +55,7 @@ namespace trove {
 
 
             // if we are dealing with a function we need to process it
-            if (decl.type->mutability==Type::Mutability::CONST
+            if (decl.type->mutability==Type::Mutability::CONSTANT
             && value_analysis_unit.type->base_type == Type::BaseType::FN) {
                 // set the global fn name
                 value_analysis_unit.type->associated_token = decl.token;
@@ -73,7 +73,7 @@ namespace trove {
             }
 
             // if we are dealing with a function we need to process it
-            if (decl.type->mutability == Type::Mutability::CONST
+            if (decl.type->mutability == Type::Mutability::CONSTANT
                 && value_analysis_unit.type->base_type == Type::BaseType::TYPE) {
                 // set the global fn name
                 value_analysis_unit.type->associated_token = decl.token;

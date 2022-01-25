@@ -21,7 +21,7 @@ namespace trove {
 
 		enum class Mutability : u8 {
 			MUT,
-			CONST
+			CONSTANT
 		};
 
 		struct FnType {
@@ -43,7 +43,7 @@ namespace trove {
 		Type* contained_type;
 		std::vector<Type> contained_types;
 		Token* associated_token;
-		Mutability mutability{ Mutability::CONST };
+		Mutability mutability{ Mutability::CONSTANT };
 	};
 
 	class TypeBuilder {
