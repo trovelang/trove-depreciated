@@ -6,8 +6,11 @@ set(CMAKE_CXX_STANDARD 20)
 
 project("trove")
 
+add_subdirectory("lib/Catch2")
 add_subdirectory("lib/spdlog")
 find_package(spdlog)
+find_package(Catch2 3 REQUIRED)
+
 
 include_directories("src")
 
@@ -15,5 +18,8 @@ include_directories("src")
 add_executable(trove "src/trove.cpp" "src/trove.h" "src/lexer.h" "src/lexer.cpp" "src/parser.h" "src/parser.cpp" "src/token.h" "src/token.cpp" "src/types.h" "src/log.h" "src/log.cpp" "src/ast.h" "src/ast.cpp" "src/type.h" "src/borrowchecker.h" "src/borrowchecker.cpp" "src/cli.h" "src/clr.h" "src/analyse.h" "src/analyse.cpp" "src/cgenerator.cpp"  "src/type.cpp" "src/symtable.h" "src/error.h" "src/typecheck.h" "src/typecheck.cpp" "src/error.cpp" "src/unit.h" )
 
 target_link_libraries(trove spdlog)
+
+enable_testing()
+add_subdirectory("tests")
 
 # TODO: Add tests and install targets if needed.

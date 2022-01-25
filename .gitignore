@@ -1,4 +1,7 @@
 CMakeFiles/
 .vs/
+.vscode/
 out/
 tmp/
+build/
+Testing/
