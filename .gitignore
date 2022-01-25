@@ -5,3 +5,7 @@ out/
 tmp/
 build/
 Testing/
+
+**/*.vcxproj
+**/*.vcxproj.filters
+**/*.cmake
