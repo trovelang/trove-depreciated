@@ -5,6 +5,8 @@ out/
 tmp/
 build/
 Testing/
+**/x64/
+**/x86/
 
 **/*.vcxproj
 **/*.vcxproj.filters
