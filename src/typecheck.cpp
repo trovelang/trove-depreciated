@@ -11,6 +11,9 @@ e.g. main const = {}
 Do we turn {} into fn {} during DeclAST analysis <-- FOR NOW WE ARE GOING WITH THIS
 Or turn {} into fn {} during FnAST analysis given the context
 
+TODO
+the context should perhaps be in a stack?
+
 */
 namespace trove {
 
@@ -19,30 +22,40 @@ namespace trove {
         analyse(ctx, m_ast);
     }
 
-    AnalysisUnit TypeCheckPass::analyse(AnalysisCtx& ctx, AST* ast) {
+    AnalysisUnit TypeCheckPass::analyse(AnalysisCtx ctx, AST* ast) {
+
+        m_analysis_context.push(ctx);
+
+        AnalysisUnit res{};
         switch (ast->get_type()) {
-        case AST::Type::PROGRAM: return analyse_program_ast(ctx, ast);
-        case AST::Type::BLOCK: return analyse_block(ctx, ast);
-        case AST::Type::STATEMENT: return analyse_statement(ctx, ast);
-        case AST::Type::DECL: return analyse_decl_ast(ctx, ast);
-        case AST::Type::ASSIGN: return analyse_assign_ast(ctx, ast);
-        case AST::Type::BIN: return analyse_bin(ctx, ast);
-        case AST::Type::NUM: return analyse(ctx, ast->as_num());
-        case AST::Type::VAR: return analyse_var(ctx, ast);
-        case AST::Type::LOOP: return analyse_loop(ctx, ast);
-        case AST::Type::FN: return analyse_fn(ctx, ast);
-        case AST::Type::STRUCT_DEF: return analyse_struct_def(ctx, ast);
-        case AST::Type::STRUCT_LITERAL: return analyse_struct_literal(ctx, ast);
+        case AST::Type::PROGRAM: res = analyse_program_ast(ast); break;
+        case AST::Type::BLOCK: res = analyse_block(ast); break;
+        case AST::Type::STATEMENT: res = analyse_statement(ast); break;
+        case AST::Type::DECL: res = analyse_decl_ast(ast); break;
+        case AST::Type::ASSIGN: res = analyse_assign_ast(ast); break;
+        case AST::Type::BIN: res = analyse_bin(ast); break;
+        case AST::Type::NUM: res = analyse(ast->as_num()); break;
+        case AST::Type::VAR: res = analyse_var(ast); break;
+        case AST::Type::LOOP: res = analyse_loop(ast); break;
+        case AST::Type::FN: res = analyse_fn(ast); break;
+        case AST::Type::STRUCT_DEF: res = analyse_struct_def(ast); break;
+        case AST::Type::STRUCT_LITERAL: res = analyse_struct_literal(ast); break;
+        default: UNREACHABLE("uhhh");
         }
+
+        m_analysis_context.pop();
+
+        return res;
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_statement(AST* ast) {
+        auto new_ctx = SAME_CTX();
+        CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+        analyse(new_ctx, ast->as_statement().body);
         return {};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_statement(AnalysisCtx& ctx, AST* ast) {
-        analyse(ctx, ast->as_statement().body);
-        return {};
-    }
-
-    AnalysisUnit TypeCheckPass::analyse_decl_ast(AnalysisCtx& ctx, AST* ast){
+    AnalysisUnit TypeCheckPass::analyse_decl_ast(AST* ast){
 
 
         DeclAST& decl = ast->as_decl();
@@ -51,16 +64,12 @@ namespace trove {
 
         IF_VALUE(decl.value){
             
-            CTX_REQUIRE_TYPE(ctx, &ast->as_decl().type.value());
+            auto new_ctx = m_analysis_context.top();
+            new_ctx.required_type = &ast->as_decl().type.value();
 
-
-            spdlog::info("about to analyse decl {}", decl.value.value()->to_string());
-            value_analysis_unit = analyse(ctx, decl.value.value());
-
-            spdlog::info("just analysed decl {}", decl.token->value);
+            value_analysis_unit = analyse(new_ctx, decl.value.value());
 
             decl.type.value().coerce(*value_analysis_unit.type);
-
             
             if (!decl.type.value().complete) {
                 decl.type.value() = *value_analysis_unit.type;
@@ -115,31 +124,45 @@ namespace trove {
         return AnalysisUnit{ &ast->as_decl().type.value() };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_block(AnalysisCtx& ctx, AST* ast) {
+    AnalysisUnit TypeCheckPass::analyse_block(AST* ast) {
 
         spdlog::info("analysing block!");
         // transform ourself into a fn!
-        if (ctx.required_type->base_type == Type::BaseType::FN) {
-            auto fn_body = new AST(*ast);
-            auto fn = AST(AST::Type::FN, ast->source_position, FnAST(fn_body, {}, 0, *ctx.required_type));
-            *ast = fn;
+        IF_VALUE(m_analysis_context.top().required_type) {
+            if (m_analysis_context.top().required_type.value()->base_type == Type::BaseType::FN) {
+                
+                for (auto& elem : ast->as_block().body) {
+                    auto new_ctx = m_analysis_context.top();
+                    new_ctx.scope = AnalysisCtx::Scope::LOCAL;
+                    analyse(new_ctx, elem);
+                }
 
-            spdlog::info("done analysing block! {}", ast->as_fn().type.to_string());
-            return AnalysisUnit{ &ast->as_fn().type };
+                auto fn_body = new AST(*ast);
+                auto fn = AST(AST::Type::FN, ast->source_position, FnAST(fn_body, {}, 0, *m_analysis_context.top().required_type.value()));
+                *ast = fn;
+
+                spdlog::info("done analysing block! {}", ast->as_fn().type.to_string());
+
+                return AnalysisUnit{ &ast->as_fn().type };
+            }
         }
 
         for (auto& elem : ast->as_block().body) {
-            analyse(ctx, elem);
+            auto new_ctx = SAME_CTX();
+            CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+            analyse(new_ctx, elem);
         }
         return {};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_assign_ast(AnalysisCtx& ctx, AST* ast){
+    AnalysisUnit TypeCheckPass::analyse_assign_ast(AST* ast){
 
         auto assign = ast->as_assign();
 
-        auto lhs = analyse(ctx, assign.assignee);
-        auto rhs = analyse(ctx, assign.value);
+        auto new_ctx = SAME_CTX();
+        CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+        auto lhs = analyse(new_ctx, assign.assignee);
+        auto rhs = analyse(new_ctx, assign.value);
 
         if (!lhs.type->equals(*rhs.type)) {
             std::stringstream ss;
@@ -150,29 +173,35 @@ namespace trove {
         return {};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_program_ast(AnalysisCtx& ctx, AST* ast){
+    AnalysisUnit TypeCheckPass::analyse_program_ast(AST* ast){
         for (auto& elem : ast->as_program().body) {
-            analyse(ctx, elem);
+            auto new_ctx = SAME_CTX();
+            CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+            analyse(new_ctx, elem);
         }
         return {};
     }
-    AnalysisUnit TypeCheckPass::analyse(AnalysisCtx& ctx, BlockAST& ast){
+    AnalysisUnit TypeCheckPass::analyse(BlockAST& ast){
         m_symtable.enter();
         for (auto& elem : ast.body) {
-            analyse(ctx, elem);
+            auto new_ctx = SAME_CTX();
+            CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+            analyse(new_ctx, elem);
         }
         m_symtable.exit();
         return {};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_bin(AnalysisCtx& ctx, AST* ast){
+    AnalysisUnit TypeCheckPass::analyse_bin(AST* ast){
         auto bin = ast->as_bin();
-        auto lhs_type = analyse(ctx, bin.lhs);
-        auto rhs_type = analyse(ctx, bin.rhs);
+        auto new_ctx = SAME_CTX();
+        CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+        auto lhs_type = analyse(new_ctx, bin.lhs);
+        auto rhs_type = analyse(new_ctx, bin.rhs);
         return lhs_type;
     }
 
-    AnalysisUnit TypeCheckPass::analyse_fn(AnalysisCtx& ctx, AST* ast) {
+    AnalysisUnit TypeCheckPass::analyse_fn(AST* ast) {
         // todo check if we are a lambda here
         // if we are an r_value
         /*if (ctx.r_value && ctx.parent_type->mutability == Type::Mutability::MUT) {
@@ -186,15 +215,17 @@ namespace trove {
             ast->as_fn().type.fn_type.is_lambda = false;
         }*/
 
-        analyse(ctx, ast->as_fn().body);
+        auto new_ctx = SAME_CTX();
+        CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+        analyse(new_ctx, ast->as_fn().body);
         return AnalysisUnit{ &ast->as_fn().type };
     }
 
-    AnalysisUnit TypeCheckPass::analyse(AnalysisCtx&, NumAST& num){
+    AnalysisUnit TypeCheckPass::analyse(NumAST& num){
         return AnalysisUnit{&num.type};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_var(AnalysisCtx& ctx, AST* ast){
+    AnalysisUnit TypeCheckPass::analyse_var(AST* ast){
         auto var = ast->as_var();
         auto type = m_symtable.lookup(var.token->value);
         IF_NO_VALUE(type) {
@@ -203,16 +234,18 @@ namespace trove {
         return AnalysisUnit{ type.value() };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_loop(AnalysisCtx& ctx, AST* ast) {
+    AnalysisUnit TypeCheckPass::analyse_loop(AST* ast) {
        
         return AnalysisUnit{  };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_struct_def(AnalysisCtx& ctx, AST* ast) {
+    AnalysisUnit TypeCheckPass::analyse_struct_def(AST* ast) {
 
         auto struct_def = ast->as_struct_def();
         for (auto& member : struct_def.member_decls) {
-            auto member_analysis = analyse(ctx, member);
+            auto new_ctx = SAME_CTX();
+            CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+            auto member_analysis = analyse(new_ctx, member);
             struct_def.type.contained_types.push_back(*member_analysis.type);
 
         }
@@ -220,9 +253,11 @@ namespace trove {
         return AnalysisUnit{ &ast->as_struct_def().type };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_struct_literal(AnalysisCtx& ctx, AST* ast) {
+    AnalysisUnit TypeCheckPass::analyse_struct_literal(AST* ast) {
         for (auto& member : ast->as_struct_literal().member_values) {
-            auto member_analysis = analyse(ctx, member);
+            auto new_ctx = SAME_CTX();
+            CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+            auto member_analysis = analyse(new_ctx, member);
             ast->as_struct_literal().type.contained_types.push_back(*member_analysis.type);
         }
         return AnalysisUnit{ &ast->as_struct_literal().type };
