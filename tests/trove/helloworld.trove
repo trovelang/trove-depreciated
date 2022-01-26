@@ -1,5 +1,5 @@
 
 
-main const fn = fn {
+main const fn = {
 	printf("main!")
 }
