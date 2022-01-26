@@ -87,6 +87,7 @@ namespace trove {
 		std::string to_string();
 
 		Type type;
+		// FIXME this should be std::optional<std::string>
 		std::string value {};
 		SourcePosition source_position {};
 	};

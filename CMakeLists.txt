@@ -39,9 +39,24 @@ include(Dart)
 add_executable(test_example "tests/test_example.cpp")
 add_test(test_example test_example)
 target_link_libraries(test_example PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2WithMain)
-#catch_discover_tests(test_example)
 
-add_executable(test_types "tests/test_types.cpp")
+add_executable(test_types "tests/test_type.cpp")
 add_test(test_types test_types)
 target_link_libraries(test_types PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2WithMain)
-#catch_discover_tests(test_example)
+
+add_executable(test_token "tests/test_token.cpp")
+add_test(test_token test_token)
+target_link_libraries(test_token PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2WithMain)
+
+add_executable(test_lexer "tests/test_lexer.cpp")
+add_test(test_lexer test_lexer)
+target_link_libraries(test_lexer PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2WithMain)
+
+add_executable(test_parser "tests/test_parser.cpp")
+add_test(test_parser test_parser)
+target_link_libraries(test_parser PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2WithMain)
+
+# TODO for some reason #include <symtable.h> breaks...
+#add_executable(test_sym_table "tests/test_sym_table.cpp")
+#add_test(test_sym_table test_sym_table)
+#target_link_libraries(test_sym_table PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2WithMain)

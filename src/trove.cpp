@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	auto compilation_unit = CompilationUnit(source);
 	auto err_reporter = ErrorReporter(compilation_unit);
 
-	auto lexer = Lexer(source);
+	auto lexer = Lexer(err_reporter, source);
 	auto tokens = lexer.lex();
 	for (auto token : tokens) {
 		spdlog::info("token {}", token.to_string());

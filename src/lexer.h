@@ -3,13 +3,13 @@
 #include <vector>
 #include <string_view>
 #include <token.h>
+#include <error.h>
 
 namespace trove {
 	
 	class Lexer {
 	public:
-		Lexer() {}
-		Lexer(std::string_view source) : m_source(source) {}
+		Lexer(ErrorReporter err_reporter, std::string_view source) : m_err_reporter(err_reporter), m_source(source) {}
 		std::vector<Token> lex();
 	private:
 		u1 end();
@@ -37,6 +37,7 @@ namespace trove {
 		u32 m_index_save_point = 0;
 		u32 m_line = 0;
 		u32 m_line_save_point = 0;
+		ErrorReporter m_err_reporter;
 		std::string_view m_source;
 		std::vector<Token> m_tokens;
 	};

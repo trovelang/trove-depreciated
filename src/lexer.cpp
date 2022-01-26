@@ -57,6 +57,7 @@ namespace trove {
 			}
 		}
 
+		// FIXME this should be a proper position
 		m_tokens.push_back(Token(Token::Type::END, { 0,0,0,0 }));
 		return m_tokens;
 	}
