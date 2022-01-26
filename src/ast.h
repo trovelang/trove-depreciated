@@ -396,6 +396,7 @@ namespace trove {
 		SourcePosition source_position;
 		Type type;
 		ASTValue value;
+		AST* parent = nullptr;
 	};
 
 	extern const char* ast_type_debug[];

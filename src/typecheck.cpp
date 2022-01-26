@@ -1,6 +1,17 @@
 #include <typecheck.h>
 #include <trove.h>
 
+/*
+
+We need to make an important descision here, do we check for scnearios BEFORE or AFTER
+dealing with an ast
+
+e.g. main const = {}
+
+Do we turn {} into fn {} during DeclAST analysis <-- FOR NOW WE ARE GOING WITH THIS
+Or turn {} into fn {} during FnAST analysis given the context
+
+*/
 namespace trove {
 
     void TypeCheckPass::analyse() {
@@ -11,7 +22,7 @@ namespace trove {
     AnalysisUnit TypeCheckPass::analyse(AnalysisCtx& ctx, AST* ast) {
         switch (ast->get_type()) {
         case AST::Type::PROGRAM: return analyse_program_ast(ctx, ast);
-        case AST::Type::BLOCK: return analyse_block_ast(ctx, ast);
+        case AST::Type::BLOCK: return analyse_block(ctx, ast);
         case AST::Type::STATEMENT: return analyse_statement(ctx, ast);
         case AST::Type::DECL: return analyse_decl_ast(ctx, ast);
         case AST::Type::ASSIGN: return analyse_assign_ast(ctx, ast);
@@ -19,7 +30,7 @@ namespace trove {
         case AST::Type::NUM: return analyse(ctx, ast->as_num());
         case AST::Type::VAR: return analyse_var(ctx, ast);
         case AST::Type::LOOP: return analyse_loop(ctx, ast);
-        case AST::Type::FN: return analyse(ctx, ast->as_fn());
+        case AST::Type::FN: return analyse_fn(ctx, ast);
         case AST::Type::STRUCT_DEF: return analyse_struct_def(ctx, ast);
         case AST::Type::STRUCT_LITERAL: return analyse_struct_literal(ctx, ast);
         }
@@ -39,15 +50,18 @@ namespace trove {
         AnalysisUnit value_analysis_unit;
 
         IF_VALUE(decl.value){
-            value_analysis_unit = analyse(ctx, decl.value.value());
             
-            // check if the types need to be 'coerced'
-            // e.g. if we have x var = fn {}
-            // a fn {} is a const type, therefore we need to co-erce it to a var
-            // WE CO-ERCE LEFT TO RIGHT
+            CTX_REQUIRE_TYPE(ctx, &ast->as_decl().type.value());
+
+
+            spdlog::info("about to analyse decl {}", decl.value.value()->to_string());
+            value_analysis_unit = analyse(ctx, decl.value.value());
+
+            spdlog::info("just analysed decl {}", decl.token->value);
 
             decl.type.value().coerce(*value_analysis_unit.type);
 
+            
             if (!decl.type.value().complete) {
                 decl.type.value() = *value_analysis_unit.type;
                 spdlog::info("infering type! {}", decl.type.value().to_string());
@@ -91,7 +105,6 @@ namespace trove {
             }
         }
 
-
         IF_NO_VALUE(decl.type){
             type = value_analysis_unit.type;
         }else {
@@ -102,7 +115,19 @@ namespace trove {
         return AnalysisUnit{ &ast->as_decl().type.value() };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_block_ast(AnalysisCtx& ctx, AST* ast) {
+    AnalysisUnit TypeCheckPass::analyse_block(AnalysisCtx& ctx, AST* ast) {
+
+        spdlog::info("analysing block!");
+        // transform ourself into a fn!
+        if (ctx.required_type->base_type == Type::BaseType::FN) {
+            auto fn_body = new AST(*ast);
+            auto fn = AST(AST::Type::FN, ast->source_position, FnAST(fn_body, {}, 0, *ctx.required_type));
+            *ast = fn;
+
+            spdlog::info("done analysing block! {}", ast->as_fn().type.to_string());
+            return AnalysisUnit{ &ast->as_fn().type };
+        }
+
         for (auto& elem : ast->as_block().body) {
             analyse(ctx, elem);
         }
@@ -147,9 +172,22 @@ namespace trove {
         return lhs_type;
     }
 
-    AnalysisUnit TypeCheckPass::analyse(AnalysisCtx& ctx, FnAST& ast){
-        analyse(ctx, ast.body);
-        return AnalysisUnit{&ast.type};
+    AnalysisUnit TypeCheckPass::analyse_fn(AnalysisCtx& ctx, AST* ast) {
+        // todo check if we are a lambda here
+        // if we are an r_value
+        /*if (ctx.r_value && ctx.parent_type->mutability == Type::Mutability::MUT) {
+            ast->as_fn().type.associated_token->value = "lambda_";
+            ast->as_fn().type.fn_type.is_lambda = true;
+        }
+        else if (ctx.r_value && ctx.parent_type->mutability == Type::Mutability::CONSTANT) {
+            // get the parents variable name
+            auto name = ast->parent->as_decl().token;
+            ast->as_fn().type.associated_token->value = "lambda_";
+            ast->as_fn().type.fn_type.is_lambda = false;
+        }*/
+
+        analyse(ctx, ast->as_fn().body);
+        return AnalysisUnit{ &ast->as_fn().type };
     }
 
     AnalysisUnit TypeCheckPass::analyse(AnalysisCtx&, NumAST& num){
@@ -162,7 +200,6 @@ namespace trove {
         IF_NO_VALUE(type) {
             m_error_reporter.compile_error("unknown variable", ast->source_position);
         }
-        spdlog::info("analysing var {}", type.value()->base_type);
         return AnalysisUnit{ type.value() };
     }
 

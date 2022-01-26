@@ -12,7 +12,7 @@ namespace trove {
 		auto block_body = std::vector<AST*>();
 
 		while (m_tokens[m_current].type != Token::Type::END) {
-			block_body.push_back(parse_stmt());
+			block_body.push_back(parse_stmt_expr());
 		}
 
 		return new AST(AST::Type::PROGRAM, {}, ProgramAST(block_body));
@@ -106,7 +106,13 @@ namespace trove {
 			.build();
 	}
 
-	AST* Parser::parse_stmt() {
+
+	AST* Parser::parse_stmt_expr() {
+		auto child = parse_expr();
+		return new AST(AST::Type::STATEMENT, child->get_position(), StatementAST(child));
+	}
+
+	AST* Parser::parse_expr() {
 		AST* child = nullptr;
 		auto peeking = peek();
 		switch (peek()->type) {
@@ -123,10 +129,10 @@ namespace trove {
 			child = parse_return();
 			break;
 		default:
-			child = parse_decl_or_assign();
+			child = parse_comp();
 			break;
 		}
-		return new AST(AST::Type::STATEMENT, child->get_position(), StatementAST(child));
+		return child;
 	}
 
 	// todo a comp time thing should be done ahead of expressions aswel
@@ -139,7 +145,7 @@ namespace trove {
 
 		IF_VALUE(consume(Token::Type::PIPE)) {
 			consume(Token::Type::PIPE);
-			auto body = parse_stmt();
+			auto body = parse_expr();
 			return new AST(AST::Type::WATCHMAN, higher_precedence->get_position().merge(body->get_position()), WatchmanAST(higher_precedence, body));
 		}
 
@@ -151,7 +157,7 @@ namespace trove {
 		auto stmts = std::vector<AST*>();
 		auto lcurly = consume(Token::Type::LCURLY);
 		while (!expect(Token::Type::RCURLY)) {
-			stmts.push_back(parse_stmt());
+			stmts.push_back(parse_stmt_expr());
 		}
 		auto rcurly = consume(Token::Type::RCURLY);
 		return new AST(AST::Type::BLOCK, lcurly.value()->source_position.merge(rcurly.value()->source_position), BlockAST(stmts));
@@ -161,10 +167,10 @@ namespace trove {
 	AST* Parser::parse_if() {
 		auto if_token = consume(Token::Type::IF);
 		auto cond = parse_expr();
-		auto body = parse_stmt();
+		auto body = parse_stmt_expr();
 		auto else_token = consume(Token::Type::ELSE);
 		IF_VALUE(else_token) {
-			auto else_body = parse_stmt();
+			auto else_body = parse_stmt_expr();
 			return new AST(AST::Type::IF, if_token.value()->source_position.merge(else_body->get_position()), IfAST(cond, body, else_body));
 		}
 		return new AST(AST::Type::IF, if_token.value()->source_position.merge(body->get_position()), IfAST(cond, body));
@@ -176,7 +182,7 @@ namespace trove {
 		spdlog::info("parsing loop {}!", peek()->value);
 
 		auto cond = parse_expr();
-		auto body = parse_stmt();
+		auto body = parse_stmt_expr();
 		return new AST(AST::Type::LOOP, loop_token.value()->source_position.merge(body->get_position()), LoopAST(LoopAST::LoopType::BASIC, cond, body));
 	}
 
@@ -184,10 +190,6 @@ namespace trove {
 		auto return_token = consume(Token::Type::RET);
 		auto value = parse_expr();
 		return new AST(AST::Type::RET, return_token.value()->source_position.merge(value->get_position()), RetAST(value));
-	}
-
-	AST* Parser::parse_expr() {
-		return parse_comp();
 	}
 
 	AST* Parser::parse_decl_or_assign() {
@@ -215,7 +217,7 @@ namespace trove {
 			return new AST(
 				AST::Type::DECL,
 				higher_precedence->get_position().merge(value->get_position()),
-				DeclAST(higher_precedence->as_var().get_token(), type, value, requires_infering));
+				DeclAST(higher_precedence->as_var().get_token(), type, value, requires_infering));;
 		}
 		else {
 			// check if we have x var or x const (i.e. we haven't fully quantified the type)
@@ -366,7 +368,7 @@ namespace trove {
 			consume(Token::Type::RPAREN);
 		}
 
-		auto body = parse_stmt();
+		auto body = parse_stmt_expr();
 
 		auto type = TypeBuilder::builder()
 			.base_type(Type::BaseType::FN)
