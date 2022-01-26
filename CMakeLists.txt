@@ -29,13 +29,19 @@ target_include_directories(trove PUBLIC "src")
 
 enable_testing()
 find_package(Catch2 3 REQUIRED)
+list(APPEND CMAKE_MODULE_PATH"lib/Catch2/extras")
 include(CTest)
 include(Dart)
+
 # add_subdirectory("tests")
+
+# tests go here
 add_executable(test_example "tests/test_example.cpp")
 add_test(test_example test_example)
-target_link_libraries(test_example PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2)
+target_link_libraries(test_example PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2WithMain)
+#catch_discover_tests(test_example)
 
 add_executable(test_types "tests/test_types.cpp")
 add_test(test_types test_types)
-target_link_libraries(test_types PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2)
+target_link_libraries(test_types PUBLIC my_cpp_lib PUBLIC spdlog::spdlog PRIVATE Catch2::Catch2WithMain)
+#catch_discover_tests(test_example)
