@@ -132,6 +132,20 @@ namespace trove {
 		std::vector<AST*> args;
 	};
 
+	struct UnAST {
+
+		enum class Type : u8 {
+			LOGICAL_NOT,
+			TAKE_REFERENCE
+		};
+
+		UnAST() {}
+		UnAST(Token* op, AST* value)
+			: op(op), value(value) {}
+		std::string to_string();
+		Token* op;
+		AST* value;
+	};
 	struct BinAST {
 
 		static const char* type_lookup[4];
@@ -247,6 +261,7 @@ namespace trove {
 			VAR,
 			STRING,
 			CALL,
+			UN,
 			BIN,
 			DECL,
 			ASSIGN,
@@ -267,6 +282,7 @@ namespace trove {
 			BoolAST,
 			VarAST,
 			StringAST,
+			UnAST,
 			BinAST,
 			DeclAST,
 			AssignAST,
@@ -338,6 +354,10 @@ namespace trove {
 
 		CallAST& as_call() {
 			return std::get<CallAST>(value);
+		}
+
+		UnAST& as_un() {
+			return std::get<UnAST>(value);
 		}
 
 		BinAST& as_bin() {

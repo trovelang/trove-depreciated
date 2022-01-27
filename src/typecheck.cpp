@@ -33,6 +33,7 @@ namespace trove {
         case AST::Type::STATEMENT: res = analyse_statement(ast); break;
         case AST::Type::DECL: res = analyse_decl_ast(ast); break;
         case AST::Type::ASSIGN: res = analyse_assign_ast(ast); break;
+        case AST::Type::UN: res = analyse_un(ast); break;
         case AST::Type::BIN: res = analyse_bin(ast); break;
         case AST::Type::NUM: res = analyse(ast->as_num()); break;
         case AST::Type::VAR: res = analyse_var(ast); break;
@@ -73,9 +74,7 @@ namespace trove {
             
             if (!decl.type.value().complete) {
                 decl.type.value() = *value_analysis_unit.type;
-                spdlog::info("infering type! {}", decl.type.value().to_string());
             }
-
 
             // if we are dealing with a function we need to process it
             if (decl.type->mutability==Type::Mutability::CONSTANT
@@ -125,8 +124,6 @@ namespace trove {
     }
 
     AnalysisUnit TypeCheckPass::analyse_block(AST* ast) {
-
-        spdlog::info("analysing block!");
         // transform ourself into a fn!
         IF_VALUE(m_analysis_context.top().required_type) {
             if (m_analysis_context.top().required_type.value()->base_type == Type::BaseType::FN) {
@@ -140,8 +137,6 @@ namespace trove {
                 auto fn_body = new AST(*ast);
                 auto fn = AST(AST::Type::FN, ast->source_position, FnAST(fn_body, {}, 0, *m_analysis_context.top().required_type.value()));
                 *ast = fn;
-
-                spdlog::info("done analysing block! {}", ast->as_fn().type.to_string());
 
                 return AnalysisUnit{ &ast->as_fn().type };
             }
@@ -164,13 +159,16 @@ namespace trove {
         auto lhs = analyse(new_ctx, assign.assignee);
         auto rhs = analyse(new_ctx, assign.value);
 
+        // see if we can coerce the rhs into the lhs
+        lhs.type->coerce(*rhs.type);
+
         if (!lhs.type->equals(*rhs.type)) {
             std::stringstream ss;
             ss << "types do not equal, expected " << lhs.type->to_string() << " but got " << rhs.type->to_string();
             m_error_reporter.compile_error(ss.str(), ast->source_position);
         }
 
-        return {};
+        return AnalysisUnit{};
     }
 
     AnalysisUnit TypeCheckPass::analyse_program_ast(AST* ast){
@@ -190,6 +188,14 @@ namespace trove {
         }
         m_symtable.exit();
         return {};
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_un(AST* ast) {
+        auto un = ast->as_un();
+        auto new_ctx = SAME_CTX();
+        CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+        auto value_type = analyse(new_ctx, un.value);
+        return value_type;
     }
 
     AnalysisUnit TypeCheckPass::analyse_bin(AST* ast){

@@ -43,6 +43,7 @@ namespace trove {
         AnalysisUnit analyse_var(AST*);
         AnalysisUnit analyse_fn(AST*);
         AnalysisUnit analyse(BlockAST&);
+        AnalysisUnit analyse_un(AST*);
         AnalysisUnit analyse_bin(AST*);
         AnalysisUnit analyse_loop(AST*);
         AnalysisUnit analyse_struct_def(AST*);

@@ -32,6 +32,7 @@ namespace trove {
 		AST* parse_assign();
 		AST* parse_plus_minus();
 		AST* parse_mul_div();
+		AST* parse_unary();
 		AST* parse_struct_access();
 		AST* parse_call();
 		AST* parse_single();

@@ -20,6 +20,7 @@ namespace trove {
 		"AST_VAR",
 		"AST_STRING",
 		"AST_CALL",
+		"AST_UN",
 		"AST_BIN",
 		"AST_DECL",
 		"AST_ASSIGN",
@@ -92,6 +93,12 @@ namespace trove {
 	std::string BinAST::to_string() {
 		std::stringstream ss;
 		ss << "BinAST " << lhs->to_string() << " " << type_lookup[(int)type] << " " << rhs->to_string() << "\n";
+		return ss.str();
+	}
+
+	std::string UnAST::to_string() {
+		std::stringstream ss;
+		ss << "UnAST "<< op->to_string() << value->to_string() << "\n";
 		return ss.str();
 	}
 

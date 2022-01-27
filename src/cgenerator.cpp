@@ -85,7 +85,8 @@ namespace trove {
 		case AST::Type::STATEMENT: gen_statement(ctx, ast); break;
 		case AST::Type::DECL: gen(ctx, ast->as_decl()); break;
 		case AST::Type::ASSIGN: gen(ctx, ast->as_assign()); break;
-		case AST::Type::BIN: gen(ctx, ast->as_bin()); break;
+		case AST::Type::UN: gen_un(ctx, ast); break;
+		case AST::Type::BIN: gen_bin(ctx, ast); break;
 		case AST::Type::NUM: gen(ctx, ast->as_num()); break;
 		case AST::Type::STRING: gen_string(ctx, ast); break;
 		case AST::Type::VAR: gen(ctx, ast->as_var()); break;
@@ -197,12 +198,19 @@ namespace trove {
 		gen(ctx, ast.value);
 	}
 
-	void CGenerator::gen(CGeneratorContext& ctx, BinAST& ast) {
-		gen(ctx, ast.lhs);
+	void CGenerator::gen_un(CGeneratorContext& ctx, AST* ast) {
+		if (ast->as_un().op->type == Token::Type::BANG) {
+			emit_raw("!");
+		}
+		gen(ctx, ast->as_un().value);
+	}
+
+	void CGenerator::gen_bin(CGeneratorContext& ctx, AST* ast) {
+		gen(ctx, ast->as_bin().lhs);
 		emit_raw(" ");
-		emit_raw(BinAST::type_lookup[(int)ast.type]);
+		emit_raw(BinAST::type_lookup[(int)ast->as_bin().type]);
 		emit_raw(" ");
-		gen(ctx, ast.rhs);
+		gen(ctx, ast->as_bin().rhs);
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, FnAST& fn_ast) {

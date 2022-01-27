@@ -5,10 +5,6 @@
 namespace trove {
 	AST* Parser::parse() {
 
-		for (auto token : m_tokens) {
-			spdlog::info("token {}", token.to_string());
-		}
-
 		auto block_body = std::vector<AST*>();
 
 		while (m_tokens[m_current].type != Token::Type::END) {
@@ -167,10 +163,10 @@ namespace trove {
 	AST* Parser::parse_if() {
 		auto if_token = consume(Token::Type::IF);
 		auto cond = parse_expr();
-		auto body = parse_stmt_expr();
+		auto body = parse_expr();
 		auto else_token = consume(Token::Type::ELSE);
 		IF_VALUE(else_token) {
-			auto else_body = parse_stmt_expr();
+			auto else_body = parse_expr();
 			return new AST(AST::Type::IF, if_token.value()->source_position.merge(else_body->get_position()), IfAST(cond, body, else_body));
 		}
 		return new AST(AST::Type::IF, if_token.value()->source_position.merge(body->get_position()), IfAST(cond, body));
@@ -178,9 +174,6 @@ namespace trove {
 
 	AST* Parser::parse_loop() {
 		auto loop_token = consume(Token::Type::LOOP);
-
-		spdlog::info("parsing loop {}!", peek()->value);
-
 		auto cond = parse_expr();
 		auto body = parse_stmt_expr();
 		return new AST(AST::Type::LOOP, loop_token.value()->source_position.merge(body->get_position()), LoopAST(LoopAST::LoopType::BASIC, cond, body));
@@ -195,13 +188,10 @@ namespace trove {
 	AST* Parser::parse_decl_or_assign() {
 		auto first = peek();
 		auto second = peek(1);
-		spdlog::info("parse_decl_or_assign first: {} second: {}", first->value, second->value);
 		// FIXME: This is probably bad...
 		if (first->type==Token::Type::IDENTIFIER && is_type(second->type)) {
-			spdlog::info("doing decl!");
 			return parse_decl();
 		}
-		spdlog::info("doing assign...");
 		return parse_assign();
 	}
 
@@ -235,22 +225,10 @@ namespace trove {
 	}
 
 	AST* Parser::parse_assign() {
-		spdlog::info("parsing_assign");
 		auto higher_precedence = parse_plus_minus();
 		if (expect(Token::Type::ASSIGN)) {
 			auto assign_token = consume(Token::Type::ASSIGN);
 			auto value = parse_expr();
-			spdlog::info("assign lhs pos {} {} {} {}",
-				higher_precedence->get_position().index_start,
-				higher_precedence->get_position().index_end,
-				higher_precedence->get_position().line_start,
-				higher_precedence->get_position().line_end);
-
-			spdlog::info("assign rhs pos {} {} {} {}",
-				value->get_position().index_start,
-				value->get_position().index_end,
-				value->get_position().line_start,
-				value->get_position().line_end);
 			return new AST(AST::Type::ASSIGN, higher_precedence->get_position().merge(value->get_position()), 
 				AssignAST(higher_precedence, value));
 		}
@@ -260,10 +238,8 @@ namespace trove {
 	AST* Parser::parse_plus_minus() {
 		auto higher_precedence = parse_mul_div();
 		if (expect(Token::Type::PLUS) || expect(Token::Type::MINUS)) {
-			spdlog::info("parse_plus_minus");
 			auto op = next();
 			auto rhs = parse_plus_minus();
-
 			BinAST::Type type;
 			switch (op->type) {
 			case Token::Type::PLUS: type = BinAST::Type::ADD; break;
@@ -279,7 +255,7 @@ namespace trove {
 	}
 
 	AST* Parser::parse_mul_div() {
-		auto higher_precedence = parse_struct_access();
+		auto higher_precedence = parse_unary();
 		if (expect(Token::Type::STAR) || expect(Token::Type::DIV)) {
 			auto op = next();
 			auto rhs = parse_mul_div();
@@ -298,6 +274,17 @@ namespace trove {
 		return higher_precedence;
 	}
 
+
+	AST* Parser::parse_unary() {
+		if (expect(Token::Type::BANG) || expect(Token::Type::BAND)) {
+			auto op = next();
+			auto value = parse_unary();
+			auto ast = new AST(AST::Type::UN, op->source_position.merge(value->source_position), UnAST(op, value));
+			return ast;
+
+		}
+		return parse_struct_access();
+	}
 
 	AST* Parser::parse_struct_access() {
 		auto higher_precedence = parse_call();
@@ -351,8 +338,6 @@ namespace trove {
 	}
 
 	AST* Parser::parse_fn() {
-
-		spdlog::info("parse_fn");
 
 		auto fn = next();
 

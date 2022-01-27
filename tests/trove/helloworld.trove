@@ -1,5 +1,12 @@
-
-
 main const fn = {
-	printf("main!")
+
+	
+	x u32 = 123
+
+
+	if !x {
+		printf("true!!!")
+	}else{
+		printf("false :p")
+	}
 }

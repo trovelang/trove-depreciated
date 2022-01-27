@@ -11,6 +11,7 @@ namespace trove {
 		enum class BaseType : u8 {
 			INCOMPLETE,
 			NONE,
+			BOOL,
 			U32,
 			S32,
 			STRING,
