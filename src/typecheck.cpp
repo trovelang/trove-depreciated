@@ -161,6 +161,14 @@ namespace trove {
         auto lhs = analyse(new_ctx, assign.assignee);
         auto rhs = analyse(new_ctx, assign.value);
 
+
+        if (lhs.type->mutability == Type::Mutability::CONSTANT) {
+            std::stringstream ss;
+            ss << "Attempted to assign to constant " << lhs.type->to_string();
+            m_error_reporter.compile_error(ss.str(), ast->source_position);
+            return {};
+        }
+
         // see if we can coerce the rhs into the lhs
         lhs.type->coerce(*rhs.type);
 
