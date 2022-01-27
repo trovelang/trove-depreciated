@@ -41,6 +41,7 @@ namespace trove {
         AnalysisUnit analyse_assign_ast(AST*);
         AnalysisUnit analyse_program_ast(AST*);
         AnalysisUnit analyse_var(AST*);
+        AnalysisUnit analyse_bool(AST*);
         AnalysisUnit analyse_fn(AST*);
         AnalysisUnit analyse(BlockAST&);
         AnalysisUnit analyse_un(AST*);
@@ -50,6 +51,7 @@ namespace trove {
         AnalysisUnit analyse_struct_literal(AST*);
         AnalysisUnit analyse(FnAST&);
         AnalysisUnit analyse(NumAST&);
+        AnalysisUnit analyse_initialiser_list(AST*);
 
     private:
         ErrorReporter& m_error_reporter;

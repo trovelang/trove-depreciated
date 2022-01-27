@@ -61,6 +61,7 @@ namespace trove {
 			"ELSE",
 			"RET",
 
+			"BOOL",
 			"U32",
 			"S32",
 			"TYPE",

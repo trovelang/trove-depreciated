@@ -36,6 +36,7 @@ namespace trove {
 		switch (t) {
 			case Token::Type::CONSTANT:
 			case Token::Type::VAR:
+			case Token::Type::BOOL:
 			case Token::Type::U32:
 			case Token::Type::S32:
 			case Token::Type::TYPE:
@@ -65,6 +66,7 @@ namespace trove {
 		token = peek();
 
 		switch (token->type) {
+			case Token::Type::BOOL: next();  return TypeBuilder::builder().base_type(Type::BaseType::BOOL).associated_token(token).mutability(mutability).build();
 			case Token::Type::U32: next();  return TypeBuilder::builder().base_type(Type::BaseType::U32).associated_token(token).mutability(mutability).build();
 			case Token::Type::S32: next();  return TypeBuilder::builder().base_type(Type::BaseType::S32).associated_token(token).mutability(mutability).build();
 			case Token::Type::TYPE: next();  return TypeBuilder::builder().base_type(Type::BaseType::TYPE).associated_token(token).mutability(mutability).build();
@@ -112,9 +114,9 @@ namespace trove {
 		AST* child = nullptr;
 		auto peeking = peek();
 		switch (peek()->type) {
-		case Token::Type::LCURLY:
+		/*case Token::Type::LCURLY:
 			child = parse_block();
-			break;
+			break;*/
 		case Token::Type::IF:
 			child = parse_if();
 			break;
@@ -136,7 +138,7 @@ namespace trove {
 		return parse_decl_or_assign();
 	}
 
-	AST* Parser::parse_watchman() {
+	/*AST* Parser::parse_watchman() {
 		auto higher_precedence = parse_block();
 
 		IF_VALUE(consume(Token::Type::PIPE)) {
@@ -146,19 +148,7 @@ namespace trove {
 		}
 
 		return higher_precedence;
-	}
-
-	AST* Parser::parse_block() {
-
-		auto stmts = std::vector<AST*>();
-		auto lcurly = consume(Token::Type::LCURLY);
-		while (!expect(Token::Type::RCURLY)) {
-			stmts.push_back(parse_stmt_expr());
-		}
-		auto rcurly = consume(Token::Type::RCURLY);
-		return new AST(AST::Type::BLOCK, lcurly.value()->source_position.merge(rcurly.value()->source_position), BlockAST(stmts));
-
-	}
+	}*/
 
 	AST* Parser::parse_if() {
 		auto if_token = consume(Token::Type::IF);
@@ -327,12 +317,13 @@ namespace trove {
 		case Token::Type::NUM: next(); return new AST(AST::Type::NUM, tok->source_position, NumAST(tok, TypeBuilder::builder().base_type(Type::BaseType::U32).build()));
 		case Token::Type::IDENTIFIER: next(); return new AST(AST::Type::VAR, tok->source_position, VarAST(tok));
 		case Token::Type::STRING: next(); return new AST(AST::Type::STRING, tok->source_position, StringAST(tok));
-		case Token::Type::TRUEY: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(tok));
-		case Token::Type::FALSY: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(tok));
+		case Token::Type::TRUEY: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(BoolAST::Type::TRUEY, TypeBuilder::builder().base_type(Type::BaseType::BOOL).build()));
+		case Token::Type::FALSY: next(); return new AST(AST::Type::BOOL, tok->source_position, BoolAST(BoolAST::Type::FALSY, TypeBuilder::builder().base_type(Type::BaseType::BOOL).build()));
 		case Token::Type::FN: return parse_fn();
 		// TODO WE WANT TO BE ABLE TO PARSE BLOCKS, OR STRUCT LITERALS without the prepending
 		case Token::Type::TYPE: return parse_struct_def();
 		case Token::Type::STRUCT: return parse_struct_literal();
+		case Token::Type::LCURLY: return parse_l_curly_thing();
 		}
 		return 0;
 	}
@@ -360,6 +351,25 @@ namespace trove {
 			.build();
 		return new AST(AST::Type::FN, fn->source_position.merge(body->get_position()), FnAST(body, params, 0, type));
 
+	}
+
+	AST* Parser::parse_l_curly_thing() {
+
+		auto l_curly = consume(Token::Type::LCURLY);
+
+		auto first_expression = parse_expr();
+
+		// we are doing an initialiser list
+		if (expect(Token::Type::COMMA)) {
+			return parse_initialiser_list(l_curly.value(), first_expression);
+		}
+
+		// we are doing a struct def?
+		if (first_expression->type == AST::Type::DECL) {
+
+		}
+
+		return parse_block(l_curly.value(), first_expression);
 	}
 
 	AST* Parser::parse_struct_def() {
@@ -391,4 +401,41 @@ namespace trove {
 		return new AST(AST::Type::STRUCT_LITERAL, s.value()->source_position.merge(right_curly.value()->source_position), StructLiteralAST(member_values));
 	}
 
+
+	
+	AST* Parser::parse_block(Token* l_curly, AST* first_item) {
+		auto stmts = std::vector<AST*>();
+		stmts.push_back(new AST(AST::Type::STATEMENT, first_item->source_position, StatementAST(first_item)));
+		while (!expect(Token::Type::RCURLY)) {
+			stmts.push_back(parse_stmt_expr());
+		}
+		auto r_curly = consume(Token::Type::RCURLY);
+		return new AST(AST::Type::BLOCK, l_curly->source_position.merge(r_curly.value()->source_position), BlockAST(stmts));
+	}
+
+	/*
+	
+		
+	e.g. x MyType = {1, "2", 3.0}
+	
+	*/
+	AST* Parser::parse_initialiser_list(Token* l_curly, AST* first_item) {
+
+		auto list_items = std::vector<AST*>();
+		list_items.push_back(first_item);
+
+		while (!expect(Token::Type::RCURLY)) {
+			consume(Token::Type::COMMA);
+			auto next_value = parse_expr();
+			list_items.push_back(next_value);
+		}
+
+		auto r_curly = consume(Token::Type::RCURLY);
+
+		return new AST(
+			AST::Type::INITIALISER_LIST,
+			l_curly->source_position.merge(r_curly.value()->source_position),
+			InitialiserListAST(list_items)
+		);
+	}
 }

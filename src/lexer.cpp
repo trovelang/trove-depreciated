@@ -174,6 +174,10 @@ namespace trove {
 
 
 		switch (current) {
+		case 'b': {
+			found_keyword = check_keyword("ool", Token::Type::BOOL);
+			break;
+		}
 		case 'c': {
 			found_keyword = check_keyword("omp", Token::Type::COMP);
 			if (!found_keyword) found_keyword = check_keyword("onst", Token::Type::CONSTANT);

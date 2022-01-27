@@ -1,12 +1,14 @@
+
+
 main const fn = {
 
-	
-	x u32 = 123
+	z bool = false
 
-
-	if !x {
+	if z {
 		printf("true!!!")
 	}else{
 		printf("false :p")
 	}
+
+	list var = { 1, false, 3}
 }

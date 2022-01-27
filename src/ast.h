@@ -82,11 +82,18 @@ namespace trove {
 	};
 
 	struct BoolAST {
+
+		enum class Type {
+			FALSY,
+			TRUEY
+		};
+
 		BoolAST() {}
-		BoolAST(Token* token) : token(token) {
+		BoolAST(Type t, trove::Type type) : t(t), type(type) {
 		}
 		std::string to_string();
-		Token* token;
+		Type t;
+		trove::Type type;
 	};
 
 	struct VarAST {
@@ -244,6 +251,13 @@ namespace trove {
 		LoopType loop_type;
 	};
 
+	struct InitialiserListAST {
+		InitialiserListAST() {}
+		InitialiserListAST(std::vector<AST*> values) : values(values){}
+		std::string to_string();
+		std::vector<AST*> values;
+	};
+
 
 	struct AST {
 
@@ -268,7 +282,8 @@ namespace trove {
 			IF,
 			RET,
 			COMP,
-			LOOP
+			LOOP,
+			INITIALISER_LIST
 		};
 
 		using ASTValue = std::variant<
@@ -292,6 +307,7 @@ namespace trove {
 			StructDefAST,
 			StructLiteralAST,
 			StructAccessAST,
+			InitialiserListAST,
 			LoopAST
 		>;
 
@@ -386,6 +402,10 @@ namespace trove {
 
 		LoopAST& as_loop() {
 			return std::get<LoopAST>(value);
+		}
+
+		InitialiserListAST& as_initialiser_list() {
+			return std::get<InitialiserListAST>(value);
 		}
 
 		SourcePosition& get_position() {

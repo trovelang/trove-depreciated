@@ -40,6 +40,7 @@ namespace trove {
 	std::string CGenerator::type_to_str(Type type){
 		switch (type.base_type) {
 		case Type::BaseType::INCOMPLETE: return "INCOMPLETE"; // todo assert unreachable
+		case Type::BaseType::BOOL: return "unsigned int";
 		case Type::BaseType::U32: return "unsigned int";
 		case Type::BaseType::S32: return "int";
 		case Type::BaseType::FN: return "fn";
@@ -97,6 +98,7 @@ namespace trove {
 		case AST::Type::BOOL: gen_bool(ctx, ast); break;
 		case AST::Type::STRUCT_DEF: gen_struct_def(ctx, ast); break;
 		case AST::Type::STRUCT_LITERAL: gen_struct_literal(ctx, ast); break;
+		case AST::Type::INITIALISER_LIST: gen_initialiser_list(ctx, ast); break;
 		}
 	}
 
@@ -256,7 +258,11 @@ namespace trove {
 	}
 
 	void CGenerator::gen_bool(CGeneratorContext& ctx, AST* ast) {
-		emit_raw(ast->as_bool().token->value);
+		const char* bool_lookup[] = {
+			"0",
+			"1"
+		};
+		emit_raw(bool_lookup[(u32)ast->as_bool().t]);
 	}
 
 	void CGenerator::gen_loop(CGeneratorContext& ctx, AST* ast) {
@@ -301,5 +307,16 @@ namespace trove {
 		}
 		emit_raw("}");
 
+	}
+
+	void CGenerator::gen_initialiser_list(CGeneratorContext& ctx, AST* ast) {
+		emit_raw("{");
+		for (u32 i = 0; i < ast->as_initialiser_list().values.size(); i++) {
+			gen(ctx, ast->as_initialiser_list().values[i]);
+			if (i < ast->as_initialiser_list().values.size() - 1) {
+				emit_raw(", ");
+			}
+		}
+		emit_raw("}");
 	}
 }

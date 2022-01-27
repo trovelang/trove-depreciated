@@ -35,12 +35,14 @@ namespace trove {
         case AST::Type::ASSIGN: res = analyse_assign_ast(ast); break;
         case AST::Type::UN: res = analyse_un(ast); break;
         case AST::Type::BIN: res = analyse_bin(ast); break;
+        case AST::Type::BOOL: res = analyse_bool(ast); break;
         case AST::Type::NUM: res = analyse(ast->as_num()); break;
         case AST::Type::VAR: res = analyse_var(ast); break;
         case AST::Type::LOOP: res = analyse_loop(ast); break;
         case AST::Type::FN: res = analyse_fn(ast); break;
         case AST::Type::STRUCT_DEF: res = analyse_struct_def(ast); break;
         case AST::Type::STRUCT_LITERAL: res = analyse_struct_literal(ast); break;
+        case AST::Type::INITIALISER_LIST: res = analyse_initialiser_list(ast); break;
         default: UNREACHABLE("uhhh");
         }
 
@@ -231,6 +233,10 @@ namespace trove {
         return AnalysisUnit{&num.type};
     }
 
+    AnalysisUnit TypeCheckPass::analyse_bool(AST* ast) {
+        return AnalysisUnit{ &ast->as_bool().type };
+    }
+
     AnalysisUnit TypeCheckPass::analyse_var(AST* ast){
         auto var = ast->as_var();
         auto type = m_symtable.lookup(var.token->value);
@@ -267,5 +273,17 @@ namespace trove {
             ast->as_struct_literal().type.contained_types.push_back(*member_analysis.type);
         }
         return AnalysisUnit{ &ast->as_struct_literal().type };
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_initialiser_list(AST* ast) {
+        auto type = new Type(TypeBuilder::builder().base_type(Type::BaseType::STRUCT).build());
+        type->struct_type.is_anonymous = true;
+        for (auto& elem : ast->as_initialiser_list().values) {
+            auto new_ctx = SAME_CTX();
+            CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+            auto elem_type = analyse(new_ctx, elem);
+            type->contained_types.push_back(*elem_type.type);
+        }
+        return AnalysisUnit{ type };
     }
 }

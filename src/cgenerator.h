@@ -38,6 +38,7 @@ namespace trove {
         void gen_bool(CGeneratorContext&, AST*);
         void gen_struct_def(CGeneratorContext&, AST*);
         void gen_struct_literal(CGeneratorContext&, AST*);
+        void gen_initialiser_list(CGeneratorContext&, AST*);
     private:
         AST* m_ast;
         std::stringstream m_output_stream;

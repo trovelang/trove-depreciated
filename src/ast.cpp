@@ -26,7 +26,8 @@ namespace trove {
 		"AST_ASSIGN",
 		"AST_IF",
 		"AST_RET",
-		"AST_LOOP"
+		"AST_LOOP",
+		"AST_INITIALISER_LIST"
 	};
 
 	std::string ProgramAST::to_string() {
@@ -108,6 +109,12 @@ namespace trove {
 		return ss.str();
 	}
 
+	std::string InitialiserListAST::to_string() {
+		std::stringstream ss;
+		ss << "InitialiserListAST " << "\n";
+		return ss.str();
+	}
+
 	std::string VarAST::to_string() {
 		std::stringstream ss;
 		ss << "VarAST " << token->value;
@@ -115,8 +122,12 @@ namespace trove {
 	}
 
 	std::string BoolAST::to_string() {
+		const char* bool_lookup[] = {
+			"true",
+			"false"
+		};
 		std::stringstream ss;
-		ss << "BoolAST " << token->value;
+		ss << "BoolAST " << bool_lookup[(u32)t] << " " << type.to_string();
 		return ss.str();
 	}
 
