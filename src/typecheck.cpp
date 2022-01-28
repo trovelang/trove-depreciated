@@ -40,6 +40,7 @@ namespace trove {
         case AST::Type::VAR: res = analyse_var(ast); break;
         case AST::Type::LOOP: res = analyse_loop(ast); break;
         case AST::Type::FN: res = analyse_fn(ast); break;
+        case AST::Type::STRING: res = analyse_string(ast); break;
         case AST::Type::STRUCT_DEF: res = analyse_struct_def(ast); break;
         case AST::Type::STRUCT_LITERAL: res = analyse_struct_literal(ast); break;
         case AST::Type::INITIALISER_LIST: res = analyse_initialiser_list(ast); break;
@@ -257,6 +258,11 @@ namespace trove {
     AnalysisUnit TypeCheckPass::analyse_loop(AST* ast) {
        
         return AnalysisUnit{  };
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_string(AST* ast) {
+
+        return AnalysisUnit{ new Type(TypeBuilder::builder().base_type(Type::BaseType::STRING).build()) };
     }
 
     AnalysisUnit TypeCheckPass::analyse_struct_def(AST* ast) {

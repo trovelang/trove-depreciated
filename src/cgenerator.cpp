@@ -40,6 +40,7 @@ namespace trove {
 	std::string CGenerator::type_to_str(Type type){
 		switch (type.base_type) {
 		case Type::BaseType::INCOMPLETE: return "INCOMPLETE"; // todo assert unreachable
+		case Type::BaseType::STRING: return "const char*";
 		case Type::BaseType::BOOL: return "unsigned int";
 		case Type::BaseType::U32: return "unsigned int";
 		case Type::BaseType::S32: return "int";

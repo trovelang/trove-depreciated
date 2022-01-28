@@ -1,6 +1,18 @@
 
 
-main const fn = {
+
+
+
+
+format_string const = fn  {
+
+	
+}
+
+
+
+
+main const = fn {
 
 	z var bool = false
 	z = true
@@ -11,6 +23,17 @@ main const fn = {
 		printf("false :p")
 	}
 
-	list const = { 1, false, 3}
+	list var = { 123, 456 }
+
+
+
+	printf("my list %d", list)
+
+
+	s string = "hello world"
+
+
+	printf(s)
+
 	
 }

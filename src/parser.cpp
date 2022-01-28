@@ -359,6 +359,12 @@ namespace trove {
 
 		auto first_expression = parse_expr();
 
+
+		if (first_expression == nullptr) {
+			auto r_curly = consume(Token::Type::RCURLY);
+			return new AST(AST::Type::BLOCK, l_curly.value()->source_position.merge(r_curly.value()->source_position), BlockAST());
+		}
+
 		// we are doing an initialiser list
 		if (expect(Token::Type::COMMA)) {
 			return parse_initialiser_list(l_curly.value(), first_expression);
