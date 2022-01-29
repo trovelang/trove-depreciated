@@ -17,7 +17,19 @@ the context should perhaps be in a stack?
 */
 namespace trove {
 
+    void TypeCheckPass::register_builtins(){
+        m_symtable.place("printf", new Type(
+            TypeBuilder::builder()
+            .base_type(Type::BaseType::FN)
+            .contained_types({
+                TypeBuilder::builder().base_type(Type::BaseType::STRING).build(),
+                TypeBuilder::builder().base_type(Type::BaseType::NONE).build(),
+                })
+            .build()));
+    }
+
     void TypeCheckPass::analyse() {
+        register_builtins();
         auto ctx = AnalysisCtx{ AnalysisCtx::Scope::GLOBAL };
         analyse(ctx, m_ast);
     }
@@ -36,9 +48,11 @@ namespace trove {
         case AST::Type::UN: res = analyse_un(ast); break;
         case AST::Type::BIN: res = analyse_bin(ast); break;
         case AST::Type::BOOL: res = analyse_bool(ast); break;
+        case AST::Type::RET: res = analyse_ret(ast); break;
         case AST::Type::NUM: res = analyse(ast->as_num()); break;
         case AST::Type::VAR: res = analyse_var(ast); break;
         case AST::Type::LOOP: res = analyse_loop(ast); break;
+        case AST::Type::CALL: res = analyse_call(ast); break;
         case AST::Type::FN: res = analyse_fn(ast); break;
         case AST::Type::STRING: res = analyse_string(ast); break;
         case AST::Type::STRUCT_DEF: res = analyse_struct_def(ast); break;
@@ -91,7 +105,7 @@ namespace trove {
                 // set the global fn name
                 auto token = new Token(TokenBuilder::builder()
                     .type(Token::Type::IDENTIFIER)
-                    .value("lambda")
+                    .value(std::string("lambda_").append(std::to_string(lambda_count++)))
                     .build());
                 value_analysis_unit.type->associated_token = token;
                 decl.type.value().associated_token = token;
@@ -137,8 +151,10 @@ namespace trove {
                     analyse(new_ctx, elem);
                 }
 
+                auto return_type = TypeBuilder::builder().base_type(Type::BaseType::NONE).build();
+                auto fn_type = TypeBuilder::builder().base_type(Type::BaseType::FN).contained_types({ return_type }).build();
                 auto fn_body = new AST(*ast);
-                auto fn = AST(AST::Type::FN, ast->source_position, FnAST(fn_body, {}, 0, *m_analysis_context.top().required_type.value()));
+                auto fn = AST(AST::Type::FN, ast->source_position, FnAST(fn_body, {}, return_type, 0, *m_analysis_context.top().required_type.value()));
                 *ast = fn;
 
                 return AnalysisUnit{ &ast->as_fn().type };
@@ -232,6 +248,16 @@ namespace trove {
             ast->as_fn().type.fn_type.is_lambda = false;
         }*/
 
+        for (const auto& param : ast->as_fn().params) {
+            auto new_ctx = SAME_CTX();
+            CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+            auto param_type = analyse(new_ctx, param);
+
+            ast->as_fn().type.contained_types.push_back(*param_type.type);
+        }
+
+        ast->as_fn().type.contained_types.push_back(ast->as_fn().return_type);
+
         auto new_ctx = SAME_CTX();
         CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
         analyse(new_ctx, ast->as_fn().body);
@@ -240,6 +266,12 @@ namespace trove {
 
     AnalysisUnit TypeCheckPass::analyse(NumAST& num){
         return AnalysisUnit{&num.type};
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_ret(AST* ast) {
+        auto new_ctx = SAME_CTX();
+        CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+        return analyse(new_ctx, ast->as_ret().value);
     }
 
     AnalysisUnit TypeCheckPass::analyse_bool(AST* ast) {
@@ -258,6 +290,19 @@ namespace trove {
     AnalysisUnit TypeCheckPass::analyse_loop(AST* ast) {
        
         return AnalysisUnit{  };
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_call(AST* ast) {
+        auto new_ctx = SAME_CTX();
+        CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+        auto callee_type = analyse(new_ctx, ast->as_call().callee);
+
+        if (callee_type.type->base_type != Type::BaseType::FN) {
+            m_error_reporter.compile_error("callee must be function", ast->source_position);
+            return {};
+        }
+
+        return AnalysisUnit{ &callee_type.type->contained_types.at(callee_type.type->contained_types.size()-1) };
     }
 
     AnalysisUnit TypeCheckPass::analyse_string(AST* ast) {

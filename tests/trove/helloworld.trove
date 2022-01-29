@@ -1,39 +1,17 @@
 
 
+format_string var = fn (formatter string) u32 {
 
+	printf("formatting string %s", formatter)
 
-
-
-format_string const = fn  {
-
-	
+	ret 123
 }
 
-
-
-
-main const = fn {
-
-	z var bool = false
-	z = true
-
-	if z {
-		printf("true!!!")
-	}else{
-		printf("false :p")
-	}
-
-	list var = { 123, 456 }
-
-
-
-	printf("my list %d", list)
-
-
-	s string = "hello world"
-
-
-	printf(s)
-
+main const fn = {
 	
+	s var = "hello, world"
+
+	x var = format_string(s)
+
+	printf("x is %d", x)
 }

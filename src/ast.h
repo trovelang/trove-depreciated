@@ -53,11 +53,13 @@ namespace trove {
 
 	struct FnAST {
 		FnAST() {}
-		FnAST(AST* body, std::vector<AST*> params, u32 local_count, Type type) : body(body), params(params), local_count(local_count), type(type) {}
+		FnAST(AST* body, std::vector<AST*> params, Type return_type, u32 local_count, Type type) 
+			: body(body), params(params), return_type(return_type), local_count(local_count), type(type) {}
 		std::string to_string();
 		AST* body;
 		std::vector<AST*> params;
 		u32 local_count = 0;
+		Type return_type;
 		Type type;
 	};
 

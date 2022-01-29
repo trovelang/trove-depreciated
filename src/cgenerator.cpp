@@ -40,6 +40,7 @@ namespace trove {
 	std::string CGenerator::type_to_str(Type type){
 		switch (type.base_type) {
 		case Type::BaseType::INCOMPLETE: return "INCOMPLETE"; // todo assert unreachable
+		case Type::BaseType::NONE: return "void";
 		case Type::BaseType::STRING: return "const char*";
 		case Type::BaseType::BOOL: return "unsigned int";
 		case Type::BaseType::U32: return "unsigned int";
@@ -90,6 +91,7 @@ namespace trove {
 		case AST::Type::UN: gen_un(ctx, ast); break;
 		case AST::Type::BIN: gen_bin(ctx, ast); break;
 		case AST::Type::NUM: gen(ctx, ast->as_num()); break;
+		case AST::Type::RET: gen_ret(ctx, ast); break;
 		case AST::Type::STRING: gen_string(ctx, ast); break;
 		case AST::Type::VAR: gen(ctx, ast->as_var()); break;
 		case AST::Type::FN: gen(ctx, ast->as_fn()); break;
@@ -139,15 +141,20 @@ namespace trove {
 			&& ast.type.value().mutability == Type::Mutability::MUT) {
 
 			gen(ctx, ast.value.value());
-			emit_raw("void (*");
+
+			auto return_type = ast.type.value().contained_types.at(ast.type.value().contained_types.size() - 1);
+
+			emit_raw(type_to_str(return_type));
+			emit_raw(" (*");
 			emit_raw(ast.token->value);
 			emit_raw(")(");
 
 			auto params = ast.type.value().contained_types;
 			// do the type params
-			for (u32 i = 0; i < params.size(); i++) {
+			// we have to do -1 because the last is the return type
+			for (u32 i = 0; i < params.size()-1; i++) {
 				emit_raw(type_to_str(params[i]));
-				if (i < params.size() - 1) {
+				if (i < params.size() - 2) {
 					emit_raw(", ");
 				}
 			}
@@ -216,8 +223,14 @@ namespace trove {
 		gen(ctx, ast->as_bin().rhs);
 	}
 
+	void CGenerator::gen_ret(CGeneratorContext& ctx, AST* ast) {
+		emit_raw("return ");
+		gen(ctx, ast->as_ret().value);
+	}
+
 	void CGenerator::gen(CGeneratorContext& ctx, FnAST& fn_ast) {
-		emit_raw("void ");
+		emit_raw(type_to_str(fn_ast.type.contained_types.at(fn_ast.type.contained_types.size() - 1)));
+		emit_raw(" ");
 		emit_raw(fn_ast.type.associated_token->value);
 		//emit("(){\n");
 		emit_raw("(");

@@ -28,6 +28,7 @@ namespace trove {
         void gen(CGeneratorContext&, BlockAST&);
         void gen_un(CGeneratorContext&, AST*);
         void gen_bin(CGeneratorContext&, AST*);
+        void gen_ret(CGeneratorContext&, AST*);
         void gen(CGeneratorContext&, FnAST&);
         void gen(CGeneratorContext&, NumAST&);
         void gen(CGeneratorContext&, VarAST&);

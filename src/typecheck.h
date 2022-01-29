@@ -33,6 +33,7 @@ namespace trove {
     class TypeCheckPass {
     public:
         TypeCheckPass(ErrorReporter& err_reporter, AST* ast) : m_error_reporter(err_reporter), m_ast(ast) {}
+        void register_builtins();
         void analyse();
         AnalysisUnit analyse(AnalysisCtx, AST*);
         AnalysisUnit analyse_statement(AST*);
@@ -41,7 +42,9 @@ namespace trove {
         AnalysisUnit analyse_assign_ast(AST*);
         AnalysisUnit analyse_program_ast(AST*);
         AnalysisUnit analyse_var(AST*);
+        AnalysisUnit analyse_ret(AST*);
         AnalysisUnit analyse_bool(AST*);
+        AnalysisUnit analyse_call(AST*);
         AnalysisUnit analyse_fn(AST*);
         AnalysisUnit analyse(BlockAST&);
         AnalysisUnit analyse_un(AST*);
@@ -59,6 +62,7 @@ namespace trove {
         AST* m_ast;
         SymTable<Type*> m_symtable;
         std::stack<AnalysisCtx> m_analysis_context;
+        u32 lambda_count{ 0 };
     };
 
 }

@@ -90,6 +90,13 @@ namespace trove {
 					consume(Token::Type::RPAREN);
 				}
 
+				if (is_type(peek()->type)) {
+					params.push_back(parse_type());
+				}
+				else {
+					params.push_back(TypeBuilder::builder().base_type(Type::BaseType::NONE).build());
+				}
+
 				return TypeBuilder::builder()
 					.base_type(Type::BaseType::FN)
 					.associated_token(token)
@@ -344,12 +351,17 @@ namespace trove {
 			consume(Token::Type::RPAREN);
 		}
 
+		Type return_type = TypeBuilder::builder().base_type(Type::BaseType::NONE).build();
+		if (is_type(peek()->type)) {
+			return_type = parse_type();
+		}
+
 		auto body = parse_stmt_expr();
 
 		auto type = TypeBuilder::builder()
 			.base_type(Type::BaseType::FN)
 			.build();
-		return new AST(AST::Type::FN, fn->source_position.merge(body->get_position()), FnAST(body, params, 0, type));
+		return new AST(AST::Type::FN, fn->source_position.merge(body->get_position()), FnAST(body, params, return_type, 0, type));
 
 	}
 
