@@ -207,7 +207,7 @@ namespace trove {
 		}
 		std::string to_string();
 		std::vector<AST*> member_decls;
-		Type type; // either struct or type (defaults to struct)
+		Type type;
 	};
 
 	struct StructLiteralAST {
@@ -260,6 +260,18 @@ namespace trove {
 		std::vector<AST*> values;
 	};
 
+	struct ModuleAST {
+		ModuleAST() {}
+		ModuleAST(std::vector<AST*> body) : body(body) {
+			type = TypeBuilder::builder()
+				.base_type(Type::BaseType::MODULE)
+				.build();
+		}
+		std::string to_string();
+		std::vector<AST*> body;
+		Type type;
+	};
+
 
 	struct AST {
 
@@ -285,7 +297,8 @@ namespace trove {
 			RET,
 			COMP,
 			LOOP,
-			INITIALISER_LIST
+			INITIALISER_LIST,
+			MODULE
 		};
 
 		using ASTValue = std::variant<
@@ -310,7 +323,8 @@ namespace trove {
 			StructLiteralAST,
 			StructAccessAST,
 			InitialiserListAST,
-			LoopAST
+			LoopAST,
+			ModuleAST
 		>;
 
 		AST() {}
@@ -410,6 +424,10 @@ namespace trove {
 			return std::get<InitialiserListAST>(value);
 		}
 
+		ModuleAST& as_module() {
+			return std::get<ModuleAST>(value);
+		}
+		
 		SourcePosition& get_position() {
 			return source_position;
 		}

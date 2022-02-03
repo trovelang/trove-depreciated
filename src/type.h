@@ -17,7 +17,8 @@ namespace trove {
 			STRING,
 			STRUCT,
 			TYPE,
-			FN
+			FN,
+			MODULE
 		};
 
 		enum class Mutability : u8 {

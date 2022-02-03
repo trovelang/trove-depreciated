@@ -387,6 +387,7 @@ namespace trove {
 		// TODO WE WANT TO BE ABLE TO PARSE BLOCKS, OR STRUCT LITERALS without the prepending
 		case Token::Type::TYPE: return parse_struct_def();
 		case Token::Type::STRUCT: return parse_struct_literal();
+		case Token::Type::MOD: return parse_module();
 		case Token::Type::LCURLY: return parse_l_curly_thing();
 		}
 		return 0;
@@ -474,6 +475,20 @@ namespace trove {
 		auto right_curly = consume(Token::Type::RCURLY);
 
 		return new AST(AST::Type::STRUCT_LITERAL, s.value()->source_position.merge(right_curly.value()->source_position), StructLiteralAST(member_values));
+	}
+
+
+	AST* Parser::parse_module() {
+		auto m = consume(Token::Type::MOD);
+		auto left_curly = consume(Token::Type::LCURLY);
+		std::vector<AST*> body;
+		while (!expect(Token::Type::RCURLY)) {
+			body.push_back(parse_expr());
+		}
+		auto right_curly = consume(Token::Type::RCURLY); 
+		return new AST(AST::Type::MODULE, 
+			m.value()->source_position.merge(right_curly.value()->source_position), 
+			ModuleAST(body));
 	}
 
 

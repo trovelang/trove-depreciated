@@ -216,6 +216,10 @@ namespace trove {
 			found_keyword = check_keyword("oop", Token::Type::LOOP);
 			break;
 		}
+		case 'm': {
+			found_keyword = check_keyword("od", Token::Type::MOD);
+			break;
+		}
 		case 'p': {
 			found_keyword = check_keyword("ub", Token::Type::PUB);
 			if (!found_keyword) found_keyword = check_keyword("riv", Token::Type::PRIV);

@@ -1,20 +1,25 @@
 
 
-a_generic_data : type {
+
+
+
+
+
+Vector :: type {
+
+
+
+    
+
+
 
 }
 
 
-a_generic_fn : fn (comp t : type){
-    comp if t.name == "string" {
-        panic("type must not be a string!")
-    }
+
+
+
+main :: {
+
+    v := Vector{"hello", 123}
 }
-
-
-a_generic_fn(1.23) 
-a_generic_fn("hello, world")
-
-
-a_generic_data(u32)
-a_generic_data(string)

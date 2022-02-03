@@ -51,6 +51,7 @@ namespace trove {
         AnalysisUnit analyse_bin(AST*);
         AnalysisUnit analyse_loop(AST*);
         AnalysisUnit analyse_struct_def(AST*);
+        AnalysisUnit analyse_mod_def(AST*);
         AnalysisUnit analyse_struct_literal(AST*);
         AnalysisUnit analyse_string(AST*);
         AnalysisUnit analyse(FnAST&);

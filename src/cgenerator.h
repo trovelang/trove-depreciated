@@ -4,11 +4,18 @@
 #include <type.h>
 #include <string>
 #include <sstream>
+#include <vector>
 
 namespace trove {
 
-    struct CGeneratorContext {
 
+    struct ModuleCtx {
+        std::vector<std::string*> module_names;
+    };
+
+    struct CGeneratorContext {
+        u1 in_global;
+        ModuleCtx module_ctx;
     };
 
     class CGenerator {

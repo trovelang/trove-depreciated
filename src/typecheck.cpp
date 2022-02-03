@@ -56,6 +56,7 @@ namespace trove {
         case AST::Type::FN: res = analyse_fn(ast); break;
         case AST::Type::STRING: res = analyse_string(ast); break;
         case AST::Type::STRUCT_DEF: res = analyse_struct_def(ast); break;
+        case AST::Type::MODULE: res = analyse_mod_def(ast); break;
         case AST::Type::STRUCT_LITERAL: res = analyse_struct_literal(ast); break;
         case AST::Type::INITIALISER_LIST: res = analyse_initialiser_list(ast); break;
         default: UNREACHABLE("uhhh");
@@ -129,13 +130,13 @@ namespace trove {
                 decl.type.value().associated_token = token;
             }
 
-            // if we are dealing with a function we need to process it
+            // if we are dealing with a type we need to process it
             if (decl.type->mutability == Type::Mutability::CONSTANT
                 && value_analysis_unit.type->base_type == Type::BaseType::TYPE) {
                 // set the global fn name
                 value_analysis_unit.type->associated_token = decl.token;
             }
-            // if we are dealing with a lambda we need to process it
+            // if we are dealing with a lambda type we need to process it
             else if (decl.type->mutability == Type::Mutability::MUT
                 && value_analysis_unit.type->base_type == Type::BaseType::TYPE) {
                 // set the global fn name
@@ -146,6 +147,14 @@ namespace trove {
                 value_analysis_unit.type->associated_token = token;
                 decl.type.value().associated_token = token;
             }
+
+            // if we are dealing with a module we need to process it
+            else if (decl.type->mutability == Type::Mutability::CONSTANT
+                && value_analysis_unit.type->base_type == Type::BaseType::MODULE) {
+                // set the global mod name
+                value_analysis_unit.type->associated_token = decl.token;
+            }
+            
         }
 
         IF_NO_VALUE(decl.type){
@@ -345,6 +354,18 @@ namespace trove {
         }
 
         return AnalysisUnit{ &ast->as_struct_def().type };
+    }
+
+    AnalysisUnit TypeCheckPass::analyse_mod_def(AST* ast) {
+
+        auto module = ast->as_module();
+        for (auto& member : module.body) {
+            auto new_ctx = SAME_CTX();
+            CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
+            analyse(new_ctx, member);
+        }
+
+        return AnalysisUnit{ &ast->as_module().type };
     }
 
     AnalysisUnit TypeCheckPass::analyse_struct_literal(AST* ast) {

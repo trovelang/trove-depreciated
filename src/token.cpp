@@ -67,6 +67,7 @@ namespace trove {
 			"S32",
 			"TYPE",
 			"STRUCT",
+			"MOD",
 
 			"COMP",
 

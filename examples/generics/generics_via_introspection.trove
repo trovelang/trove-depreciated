@@ -1,0 +1,33 @@
+
+
+
+
+comp used_types : type[]
+
+generic_fn :: fn (compiler : Compiler, stream : TokenStream){
+		
+	generic_type := stream.next().as_expr().type()
+	
+	if used_types.contains(generic_type) return
+
+	fn_code := """
+		the_fn :: fn (p : {}){
+			println(\"hello \{\}\", p)
+		}
+	""".format(generic_type.to_string())
+
+
+	compiler.emit(fn_code)
+}
+
+
+
+
+main :: fn {
+
+	
+	@generic_fn(123)
+	@generic_fn("hello, world!")
+
+
+}

@@ -71,6 +71,7 @@ namespace trove {
 
 	void CGenerator::gen() {
 		CGeneratorContext ctx;
+		ctx.in_global = true;
 		gen(ctx, m_ast);
 		auto code = m_output_stream.str();
 		std::ofstream myfile;
@@ -188,10 +189,33 @@ namespace trove {
 				
 
 		}
+		else if (ast.type.value().base_type == Type::BaseType::MODULE
+			&& ast.type.value().mutability == Type::Mutability::CONSTANT) {
+			emit_raw("// module start\n");
+
+			
+			auto new_ctx = ctx;
+			new_ctx.in_global = false;
+			new_ctx.module_ctx.module_names.push_back(&ast.token->value);
+
+			for (auto& expr : ast.value.value()->as_module().body) {
+				gen(new_ctx, expr);
+			}
+
+			emit_raw("// module end\n");
+		}
 		else {
 			emit_raw(type_to_str(ast.type.value()));
 			emit_raw(" ");
-			emit_raw(ast.token->value);
+			if (ctx.in_global) {
+				emit_raw(ast.token->value);
+			}
+			else {
+				std::stringstream ss;
+				for (auto& mod : ctx.module_ctx.module_names)
+					ss << *mod << "_";
+				emit_raw(ss.str().append(ast.token->value));
+			}
 			IF_VALUE(ast.value) {
 				emit_raw(" = ");
 				gen(ctx, ast.value.value());

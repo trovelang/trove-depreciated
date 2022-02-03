@@ -13,7 +13,8 @@ namespace trove {
 		"STRING",
 		"STRUCT",
 		"TYPE",
-		"FN"
+		"FN",
+		"MODULE"
 	};
 
 

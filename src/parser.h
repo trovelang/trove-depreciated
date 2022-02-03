@@ -39,6 +39,7 @@ namespace trove {
 		AST* parse_l_curly_thing();
 		AST* parse_struct_def();
 		AST* parse_struct_literal();
+		AST* parse_module();
 		AST* parse_block(Token* l_curly, AST* first_item);
 		AST* parse_initialiser_list(Token* l_curly, AST* first_item);
 		std::vector<Token> m_tokens;

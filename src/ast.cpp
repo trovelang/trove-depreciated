@@ -27,7 +27,8 @@ namespace trove {
 		"AST_IF",
 		"AST_RET",
 		"AST_LOOP",
-		"AST_INITIALISER_LIST"
+		"AST_INITIALISER_LIST",
+		"AST_MODULE"
 	};
 
 	std::string ProgramAST::to_string() {
@@ -114,6 +115,18 @@ namespace trove {
 		ss << "InitialiserListAST " << "\n";
 		return ss.str();
 	}
+
+	std::string ModuleAST::to_string() {
+		std::stringstream ss;
+		ss << "ModuleAST \n";
+		ss << "{\n";
+		for (auto& item : body) {
+			ss << item->to_string() << ",\n";
+		}
+		ss << "\n}";
+		return ss.str();
+	}
+
 
 	std::string VarAST::to_string() {
 		std::stringstream ss;
