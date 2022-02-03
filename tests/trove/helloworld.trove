@@ -1,5 +1,11 @@
 
 
+Vector :: type {
+
+	x : u32
+
+}
+
 main :: fn {
 	
 	
@@ -9,5 +15,12 @@ main :: fn {
 
 	t = 5
 
+
+
+	y : u32 = 123
+	y = 3
+
+	zzz : u32 : 88
+	zzz = 1
 
 }

@@ -220,10 +220,37 @@ namespace trove {
 				higher_precedence->get_position().merge(value->get_position()),
 				DeclAST(higher_precedence->as_var().get_token(), type, value, true));
 		}
-		/*
 		else if (consume(Token::Type::COLON)) {
+			auto type = parse_type();
+			auto requires_infering = !type.complete;
 
+
+			if (consume(Token::Type::ASSIGN)) {
+				auto value = parse_expr();
+				type.mutability = Type::Mutability::MUT;
+				return new AST(
+					AST::Type::DECL,
+					higher_precedence->get_position().merge(value->get_position()),
+					DeclAST(higher_precedence->as_var().get_token(), type, value, false));
+			}
+			else if (consume(Token::Type::COLON)) {
+				auto value = parse_expr();
+				type.mutability = Type::Mutability::CONSTANT;
+				return new AST(
+					AST::Type::DECL,
+					higher_precedence->get_position().merge(value->get_position()),
+					DeclAST(higher_precedence->as_var().get_token(), type, value, false));
+			}
+			else {
+				type.mutability = Type::Mutability::MUT;
+				return new AST(
+					AST::Type::DECL,
+					higher_precedence->get_position(),
+					DeclAST(higher_precedence->as_var().get_token(), type));
+			}
 		}
+
+		/*
 
 		auto type = parse_type();
 		auto requires_infering = !type.complete;
