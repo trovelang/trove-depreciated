@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <symtable.h>
 
 namespace trove {
 
@@ -46,9 +47,11 @@ namespace trove {
         void gen_bool(CGeneratorContext&, AST*);
         void gen_struct_def(CGeneratorContext&, AST*);
         void gen_struct_literal(CGeneratorContext&, AST*);
+        void gen_struct_access(CGeneratorContext&, AST*);
         void gen_initialiser_list(CGeneratorContext&, AST*);
     private:
         AST* m_ast;
+        SymTable<std::string> m_symtable;
         std::stringstream m_output_stream;
     };
 

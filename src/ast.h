@@ -226,10 +226,10 @@ namespace trove {
 
 	struct StructAccessAST {
 		StructAccessAST() {}
-		StructAccessAST(AST* obj, Token* member) : obj(obj), member(member) {}
+		StructAccessAST(AST* obj, AST* member) : obj(obj), member(member) {}
 		StructAccessAST(AST* obj, u32 index) : obj(obj), index(index) {}
 		AST* obj;
-		Token* member;
+		AST* member;
 		u32 index = 0;
 	};
 

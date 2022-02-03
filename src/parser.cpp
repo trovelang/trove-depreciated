@@ -343,7 +343,7 @@ namespace trove {
 	AST* Parser::parse_struct_access() {
 		auto higher_precedence = parse_call();
 		if (consume(Token::Type::DOT)) {
-			auto member = next();
+			auto member = parse_struct_access();
 			return new AST(AST::Type::STRUCT_ACCESS, higher_precedence->get_position().merge(member->source_position), StructAccessAST(higher_precedence, member));
 		}
 		return higher_precedence;
@@ -483,7 +483,7 @@ namespace trove {
 		auto left_curly = consume(Token::Type::LCURLY);
 		std::vector<AST*> body;
 		while (!expect(Token::Type::RCURLY)) {
-			body.push_back(parse_expr());
+			body.push_back(parse_stmt_expr());
 		}
 		auto right_curly = consume(Token::Type::RCURLY); 
 		return new AST(AST::Type::MODULE, 

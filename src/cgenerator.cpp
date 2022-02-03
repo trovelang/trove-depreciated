@@ -102,6 +102,7 @@ namespace trove {
 		case AST::Type::BOOL: gen_bool(ctx, ast); break;
 		case AST::Type::STRUCT_DEF: gen_struct_def(ctx, ast); break;
 		case AST::Type::STRUCT_LITERAL: gen_struct_literal(ctx, ast); break;
+		case AST::Type::STRUCT_ACCESS: gen_struct_access(ctx, ast); break;
 		case AST::Type::INITIALISER_LIST: gen_initialiser_list(ctx, ast); break;
 		}
 	}
@@ -147,7 +148,11 @@ namespace trove {
 
 			emit_raw(type_to_str(return_type));
 			emit_raw(" (*");
-			emit_raw(ast.token->value);
+			std::stringstream ss;
+			for (auto& mod : ctx.module_ctx.module_names)
+				ss << *mod << "_";
+			auto variable_name = ss.str().append(ast.token->value);
+			emit_raw(variable_name);
 			emit_raw(")(");
 
 			auto params = ast.type.value().contained_types;
@@ -214,7 +219,9 @@ namespace trove {
 				std::stringstream ss;
 				for (auto& mod : ctx.module_ctx.module_names)
 					ss << *mod << "_";
-				emit_raw(ss.str().append(ast.token->value));
+				auto variable_name = ss.str().append(ast.token->value);
+				// put the variable name in the symtable
+				emit_raw(variable_name);
 			}
 			IF_VALUE(ast.value) {
 				emit_raw(" = ");
@@ -255,7 +262,11 @@ namespace trove {
 	void CGenerator::gen(CGeneratorContext& ctx, FnAST& fn_ast) {
 		emit_raw(type_to_str(fn_ast.type.contained_types.at(fn_ast.type.contained_types.size() - 1)));
 		emit_raw(" ");
-		emit_raw(fn_ast.type.associated_token->value);
+		std::stringstream ss;
+		for (auto& mod : ctx.module_ctx.module_names)
+			ss << *mod << "_";
+		auto variable_name = ss.str().append(fn_ast.type.associated_token->value);
+		emit_raw(variable_name);
 		//emit("(){\n");
 		emit_raw("(");
 		for (u32 i = 0; i < fn_ast.params.size(); i++) {
@@ -345,6 +356,20 @@ namespace trove {
 		}
 		emit_raw("}");
 
+	}
+
+	void CGenerator::gen_struct_access(CGeneratorContext& ctx, AST* ast) {
+
+
+		// first look up the 
+		if (true) {
+
+			// then create the name
+			std::stringstream ss;
+			ss << ast->as_struct_access().obj->as_var().token->value << "_";
+			emit_raw(ss.str());
+			gen(ctx, ast->as_struct_access().member);
+		}
 	}
 
 	void CGenerator::gen_initialiser_list(CGeneratorContext& ctx, AST* ast) {
