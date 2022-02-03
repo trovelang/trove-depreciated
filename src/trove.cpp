@@ -49,8 +49,6 @@ s32 main(int argc, char** argv)
 	auto lexer = trove::Lexer(err_reporter, source);
 	auto tokens = lexer.lex();
 
-	for (auto& token : tokens) spdlog::info("{}", token.to_string());
-
 	auto parser = trove::Parser(err_reporter, tokens);
 	auto ast = parser.parse();
 

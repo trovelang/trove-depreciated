@@ -1,35 +1,17 @@
 
 
 
-Stuff :: mod {
-	
-	Another :: mod {
-	
-		x :: 123
-
-
-
-
-	}
-
-
-
-	x :: 321
-
-	my_f :: fn {
-		
-		printf("this is being called from a module!")
-	
-	}
-
-}
 
 
 main :: fn {
 
-	printf("%d", Stuff.Another.x)
-	printf("%d", Stuff.x)
+	Uhhh :: mod {
+	
+		hello :: fn  {
+			printf("hello, world!")
+		}
+	
+	}
 
-
-	Stuff.my_f()
+	Uhhh.hello()
 }
