@@ -33,8 +33,22 @@ namespace trove {
 			case '|': decide(Token::Type::PIPE, Token::Type::LOR); break;
 			case '!': decide(Token::Type::BANG, Token::Type::NEQ); break;
 			case '=': decide(Token::Type::ASSIGN, Token::Type::EQUALS); break;
-			case ':': decide(Token::Type::COLON, Token::Type::QUICK_ASSIGN); break;
-
+			case ':': {
+				//decide(Token::Type::COLON, Token::Type::QUICK_ASSIGN);
+				//break;
+				auto peeked = peek(0);
+				if (peeked == ':') {
+					next();
+					token(Token::Type::CONSTANT_DECL);
+				}else if(peeked == '=') {
+					next();
+					token(Token::Type::QUICK_ASSIGN);
+				}
+				else {
+					token(Token::Type::COLON);
+				}
+				break;
+			}
 			case '.': decide(Token::Type::DOT, Token::Type::DOUBLE_DOT, Token::Type::TRIPLE_DOT); break;
 			case '>': decide(Token::Type::GREATER, Token::Type::GREATER_EQ, Token::Type::RSHIFT); break;
 			case '<': decide(Token::Type::LESS, Token::Type::LESS_EQ, Token::Type::LSHIFT); break;

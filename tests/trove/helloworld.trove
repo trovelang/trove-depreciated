@@ -1,17 +1,13 @@
 
 
-format_string var = fn (formatter string) u32 {
-
-	printf("formatting string %s", formatter)
-
-	ret 123
-}
-
-main const fn = {
+main :: fn {
 	
-	s var = "hello, world"
+	
+	x :: 123
 
-	x var = format_string(s)
+	t := 2
 
-	printf("x is %d", x)
+	t = 5
+
+
 }

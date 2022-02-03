@@ -185,15 +185,45 @@ namespace trove {
 	AST* Parser::parse_decl_or_assign() {
 		auto first = peek();
 		auto second = peek(1);
-		// FIXME: This is probably bad...
-		if (first->type==Token::Type::IDENTIFIER && is_type(second->type)) {
+
+
+		if (first->type == Token::Type::IDENTIFIER
+			&& (second->type == Token::Type::COLON
+				|| second->type == Token::Type::CONSTANT_DECL
+				|| second->type == Token::Type::QUICK_ASSIGN)) {
+
 			return parse_decl();
 		}
+
+		//if (first->type==Token::Type::IDENTIFIER && is_type(second->type)) {
+		//	return parse_decl();
+		//}
 		return parse_assign();
 	}
 
 	AST* Parser::parse_decl() {
 		auto higher_precedence = parse_plus_minus();
+
+		if (consume(Token::Type::CONSTANT_DECL)) {
+			auto value = parse_expr();
+			auto type = TypeBuilder::builder().complete(false).mutability(Type::Mutability::CONSTANT).build();
+			return new AST(
+				AST::Type::DECL,
+				higher_precedence->get_position().merge(value->get_position()),
+				DeclAST(higher_precedence->as_var().get_token(), type, value, true));
+		}
+		else if (consume(Token::Type::QUICK_ASSIGN)) {
+			auto value = parse_expr();
+			auto type = TypeBuilder::builder().complete(false).mutability(Type::Mutability::MUT).build();
+			return new AST(
+				AST::Type::DECL,
+				higher_precedence->get_position().merge(value->get_position()),
+				DeclAST(higher_precedence->as_var().get_token(), type, value, true));
+		}
+		/*
+		else if (consume(Token::Type::COLON)) {
+
+		}
 
 		auto type = parse_type();
 		auto requires_infering = !type.complete;
@@ -204,7 +234,7 @@ namespace trove {
 			return new AST(
 				AST::Type::DECL,
 				higher_precedence->get_position().merge(value->get_position()),
-				DeclAST(higher_precedence->as_var().get_token(), type, value, requires_infering));;
+				DeclAST(higher_precedence->as_var().get_token(), type, value, requires_infering));
 		}
 		else {
 			// check if we have x var or x const (i.e. we haven't fully quantified the type)
@@ -217,7 +247,7 @@ namespace trove {
 				DeclAST(higher_precedence->as_var().get_token(), type));
 		}
 
-	
+		*/
 		return higher_precedence;
 	}
 

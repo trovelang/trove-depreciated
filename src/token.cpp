@@ -40,6 +40,7 @@ namespace trove {
 
 			"COLON",
 			"QUICK_ASSIGN",
+			"CONSTANT_DECL",
 
 			"DOT",
 			"DOUBLE_DOT",

@@ -93,6 +93,24 @@ namespace trove {
                 decl.type.value() = *value_analysis_unit.type;
             }
 
+
+            // FIXME if we have x Vector
+            // at this point the Vector type isn't resolved, its only a placeholder
+            // we need to look up into the symtable to find out the actual value
+            if (decl.type.value().base_type == Type::BaseType::STRUCT) {
+
+                auto struct_type = m_symtable.lookup(decl.type.value().associated_token->value);
+                ast->as_decl().type.value() = *struct_type.value();
+                ast->as_decl().type.value().base_type = Type::BaseType::STRUCT;
+            }
+
+
+            if (!decl.type->equals(*value_analysis_unit.type)) {
+                std::stringstream ss;
+                ss << "types do not equal, expected " << decl.type->to_string() << " but got " << value_analysis_unit.type->to_string();
+                m_error_reporter.compile_error(ss.str(), ast->source_position);
+            }
+
             // if we are dealing with a function we need to process it
             if (decl.type->mutability==Type::Mutability::CONSTANT
             && value_analysis_unit.type->base_type == Type::BaseType::FN) {
@@ -158,6 +176,11 @@ namespace trove {
                 *ast = fn;
 
                 return AnalysisUnit{ &ast->as_fn().type };
+            }
+            else {
+                if (m_analysis_context.top().required_type.value()->base_type == Type::BaseType::TYPE) {
+
+                }
             }
         }
 
@@ -317,7 +340,7 @@ namespace trove {
             auto new_ctx = SAME_CTX();
             CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
             auto member_analysis = analyse(new_ctx, member);
-            struct_def.type.contained_types.push_back(*member_analysis.type);
+            ast->as_struct_def().type.contained_types.push_back(*member_analysis.type);
 
         }
 

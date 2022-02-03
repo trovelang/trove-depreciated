@@ -1,0 +1,33 @@
+
+
+
+
+// constant int
+x :: 123
+
+// constant string
+x :: "hello, world"
+
+// constant u32
+x : u32 : 234
+
+
+
+// variable string
+x := "hello, world"
+
+// variable u32
+x : u32 = 123
+
+
+main u32 :: fn {
+
+
+    // i really dont like this operator
+    my_lambda := fn {
+
+    }
+
+}
+
+
