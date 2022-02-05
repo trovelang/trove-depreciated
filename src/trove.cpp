@@ -67,9 +67,6 @@ s32 output_tokens(std::string source){
 	auto compilation_unit = trove::CompilationUnit(source);
 	auto err_reporter = trove::ErrorReporter(compilation_unit);
 
-
-	auto start_parse = std::chrono::high_resolution_clock::now();
-
 	auto lexer = trove::Lexer(err_reporter, source);
 	auto tokens = lexer.lex();
 
@@ -84,9 +81,6 @@ s32 output_ast(std::string source){
 
 	auto compilation_unit = trove::CompilationUnit(source);
 	auto err_reporter = trove::ErrorReporter(compilation_unit);
-
-
-	auto start_parse = std::chrono::high_resolution_clock::now();
 
 	auto lexer = trove::Lexer(err_reporter, source);
 	auto tokens = lexer.lex();
@@ -120,6 +114,7 @@ s32 args_parser(int argc, char** argv){
 		}else if(std::string(argv[1])=="-i"){
 			spdlog::warn("NOT IMPLEMENTED");
 		}else if(std::string(argv[1])=="-t"){
+			spdlog::info("outputing tokens");
 			output_tokens(load_file(argv[2]));
 		}else if(std::string(argv[1])=="-a"){
 			output_ast(load_file(argv[2]));
