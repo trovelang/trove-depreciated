@@ -8,6 +8,15 @@ SET(CMAKE_CXX_FLAGS "-std=c++20")
 
 project("trove")
 
+option(CODEGEN_CLANG "Specify C compiler for codegen" OFF)
+if (CODEGEN_CLANG)
+  add_definitions(-DCODEGEN_CLANG)
+endif()
+option(CODEGEN_GCC "Specify C compiler for codegen" ON)
+if (CODEGEN_GCC)
+  add_definitions(-DCODEGEN_GCC)
+endif()
+
 add_subdirectory("lib/Catch2")
 add_subdirectory("lib/spdlog")
 # find_package(spdlog REQUIRED)

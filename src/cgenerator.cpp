@@ -78,8 +78,18 @@ namespace trove {
 		myfile.open("c:/trovelang/trove/tmp/tmp.c");
 		myfile << code;
 		myfile.close();
-		system("gcc c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
-		execute("c:/trovelang/trove/tmp/tmp.exe");
+
+		system("clang c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
+		// #ifdef CODEGEN_CLANG
+		// spdlog::info("building with clang");
+		// system("clang c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
+		// #endif
+		// #ifdef CODEGEN_GCC
+		// spdlog::info("building with gcc");
+		// system("gcc c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
+		// #endif 
+		
+		// execute("c:/trovelang/trove/tmp/tmp.exe");
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, AST* ast) {

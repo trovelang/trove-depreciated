@@ -4,6 +4,6 @@
 
 main :: fn {
 	
-
+    printf("hello from trove!")
 	
 }

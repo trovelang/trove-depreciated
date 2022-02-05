@@ -11,6 +11,13 @@
 #include <borrowchecker.h>
 #include <unit.h>
 
+std::string load_file(const char* file){
+	std::ifstream t(file);
+	std::stringstream buffer;
+	buffer << t.rdbuf();
+	return buffer.str();
+}
+
 u32 num_lines(std::string& source) {
 	u32 line_counter = 1;
 	for (auto& c : source)
@@ -54,6 +61,44 @@ s32 compile(std::string source){
 	return 0;
 }
 
+s32 output_tokens(std::string source){
+	auto n_lines = num_lines(source);
+
+	auto compilation_unit = trove::CompilationUnit(source);
+	auto err_reporter = trove::ErrorReporter(compilation_unit);
+
+
+	auto start_parse = std::chrono::high_resolution_clock::now();
+
+	auto lexer = trove::Lexer(err_reporter, source);
+	auto tokens = lexer.lex();
+
+	for(auto& token : tokens)
+		spdlog::info("{}", token.to_string());
+
+	return 0;
+}
+
+s32 output_ast(std::string source){
+	auto n_lines = num_lines(source);
+
+	auto compilation_unit = trove::CompilationUnit(source);
+	auto err_reporter = trove::ErrorReporter(compilation_unit);
+
+
+	auto start_parse = std::chrono::high_resolution_clock::now();
+
+	auto lexer = trove::Lexer(err_reporter, source);
+	auto tokens = lexer.lex();
+
+	auto parser = trove::Parser(err_reporter, tokens);
+	auto ast = parser.parse();
+
+	spdlog::info("{}", ast->to_string());
+
+	return 0;
+}
+
 s32 args_parser(int argc, char** argv){
 
 	if(argc==1){
@@ -61,24 +106,23 @@ s32 args_parser(int argc, char** argv){
 		spdlog::info("-c Compile File");
 		spdlog::info("-r Compile & Run");
 		spdlog::info("-i Interactive REPL");
+		spdlog::info("-t Output Tokens");
+		spdlog::info("-a Output AST");
 	}else{
 		if(std::string(argv[1])=="-c"){
 			spdlog::info("compiling {}", argv[2]);
-			std::ifstream t(argv[2]);
-			std::stringstream buffer;
-			buffer << t.rdbuf();
-			std::string source = buffer.str();
-			compile(source);
+			compile(load_file(argv[2]));
 		}else if(std::string(argv[1])=="-r"){
 			spdlog::info("compiling & running {}", argv[2]);
-			std::ifstream t(argv[2]);
-			std::stringstream buffer;
-			buffer << t.rdbuf();
-			std::string source = buffer.str();
-			compile(source);
+			compile(load_file(argv[2]));
+			spdlog::info("running {}", argv[2]);
 			system("c:/trovelang/trove/tmp/tmp.exe");
 		}else if(std::string(argv[1])=="-i"){
 			spdlog::warn("NOT IMPLEMENTED");
+		}else if(std::string(argv[1])=="-t"){
+			output_tokens(load_file(argv[2]));
+		}else if(std::string(argv[1])=="-a"){
+			output_ast(load_file(argv[2]));
 		}
 	}
 	return 0;

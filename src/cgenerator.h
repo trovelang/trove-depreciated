@@ -7,6 +7,8 @@
 #include <vector>
 #include <symtable.h>
 
+#define UHHH
+
 namespace trove {
 
 
