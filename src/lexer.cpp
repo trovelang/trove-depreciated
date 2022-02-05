@@ -70,9 +70,8 @@ namespace trove {
 
 			}
 		}
-
 		// FIXME this should be a proper position
-		m_tokens.push_back(Token(Token::Type::END, { 0,0,0,0 }));
+		m_tokens.push_back(TokenBuilder::builder().type(Token::Type::END).position({0,0,0,0}).build());
 		return m_tokens;
 	}
 

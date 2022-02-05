@@ -2,16 +2,8 @@
 
 
 
-
 main :: fn {
-
-	Uhhh :: mod {
 	
-		hello :: fn  {
-			printf("hello, world!")
-		}
-	
-	}
 
-	Uhhh.hello()
+	
 }
