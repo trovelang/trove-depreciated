@@ -7,10 +7,12 @@
 
 namespace trove {
 	
+	class CompilationUnit;
+
 	class Lexer {
 	public:
-		Lexer(ErrorReporter err_reporter, std::string_view source) : m_err_reporter(err_reporter), m_source(source) {}
-		std::vector<Token> lex();
+		Lexer(CompilationUnit* compilation_unit, std::string_view source) : m_compilation_unit(compilation_unit), m_source(source) {}
+		std::vector<Token>* lex();
 	private:
 		u1 end();
 		char advance(u32 amount);
@@ -37,9 +39,9 @@ namespace trove {
 		u32 m_index_save_point = 0;
 		u32 m_line = 0;
 		u32 m_line_save_point = 0;
-		ErrorReporter m_err_reporter;
 		std::string_view m_source;
-		std::vector<Token> m_tokens;
+		std::vector<Token>* m_tokens;
+		CompilationUnit* m_compilation_unit;
 	};
 
 }

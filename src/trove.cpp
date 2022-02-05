@@ -43,21 +43,27 @@ s32 compile(std::string source){
 	auto n_lines = num_lines(source);
 
 	auto compilation_unit = trove::CompilationUnit(source);
-	auto err_reporter = trove::ErrorReporter(compilation_unit);
 
+	auto start_parse = std::chrono::high_resolution_clock::now();
+	compilation_unit.up_to_compile(); 
+	auto end_gen = std::chrono::high_resolution_clock::now();
+
+	spdlog::info("Compiled {} lines in {}", n_lines, time_to_str(std::chrono::duration_cast<std::chrono::microseconds>(end_gen - start_parse).count()));
+
+	return 0;
+
+	/*
 
 	auto start_parse = std::chrono::high_resolution_clock::now();
 
-	auto lexer = trove::Lexer(err_reporter, source);
+	auto lexer = trove::Lexer(&compilation_unit, source);
 	auto tokens = lexer.lex();
 
-	auto parser = trove::Parser(err_reporter, tokens);
+	auto parser = trove::Parser(&compilation_unit, tokens);
 	auto ast = parser.parse();
 
-	auto type_checker = trove::Pass1(err_reporter, ast);
+	auto type_checker = trove::Pass1(&compilation_unit, ast);
 	type_checker.analyse();
-
-	auto borrow_checker = trove::BorrowCheckPass(err_reporter, ast);
 
 	auto end_parse = std::chrono::high_resolution_clock::now();
 
@@ -72,37 +78,27 @@ s32 compile(std::string source){
 	spdlog::info("Compiled {} lines in {}", n_lines, time_to_str(std::chrono::duration_cast<std::chrono::microseconds>(end_gen - start_parse).count()));	
 
 	return 0;
+
+	*/
 }
 
 s32 output_tokens(std::string source){
 	auto n_lines = num_lines(source);
 
 	auto compilation_unit = trove::CompilationUnit(source);
-	auto err_reporter = trove::ErrorReporter(compilation_unit);
+	auto tokens = compilation_unit.lex();
 
-	auto lexer = trove::Lexer(err_reporter, source);
-	auto tokens = lexer.lex();
-
-	for(auto& token : tokens)
-		spdlog::info("{}", token.to_string());
+	for(auto& token : *tokens)
+		logger.info() << token.to_string() << "\n";
 
 	return 0;
 }
 
 s32 output_ast(std::string source){
 	auto n_lines = num_lines(source);
-
 	auto compilation_unit = trove::CompilationUnit(source);
-	auto err_reporter = trove::ErrorReporter(compilation_unit);
-
-	auto lexer = trove::Lexer(err_reporter, source);
-	auto tokens = lexer.lex();
-
-	auto parser = trove::Parser(err_reporter, tokens);
-	auto ast = parser.parse();
-
-	spdlog::info("{}", ast->to_string());
-
+	auto ast = compilation_unit.up_to_parse();
+	logger.info() << ast->to_string() << "\n";
 	return 0;
 }
 
@@ -117,7 +113,8 @@ void help(){
 }
 
 s32 args_parser(int argc, char** argv){
-
+	//compile(load_file("c:/trovelang/trove/tests/trove/helloworld.trove"));
+	//return 0;
 	if(argc==1){
 		help();
 	}else{

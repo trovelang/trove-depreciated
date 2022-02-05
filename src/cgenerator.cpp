@@ -72,6 +72,7 @@ namespace trove {
 	void CGenerator::gen() {
 		CGeneratorContext ctx;
 		ctx.in_global = true;
+		gen_runtime();
 		gen(ctx, m_ast);
 		auto code = m_output_stream.str();
 		std::ofstream myfile;
@@ -111,6 +112,7 @@ namespace trove {
 		case AST::Type::STRUCT_LITERAL: gen_struct_literal(ctx, ast); break;
 		case AST::Type::STRUCT_ACCESS: gen_struct_access(ctx, ast); break;
 		case AST::Type::INITIALISER_LIST: gen_initialiser_list(ctx, ast); break;
+		case AST::Type::MODULE: gen_module(ctx, ast); break;
 		}
 	}
 
@@ -120,7 +122,6 @@ namespace trove {
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, ProgramAST& ast) {
-		gen_runtime();
 		for (auto& expr : ast.body) {
 			gen(ctx, expr);
 		}
@@ -388,5 +389,21 @@ namespace trove {
 			}
 		}
 		emit_raw("}");
+	}
+
+	void CGenerator::gen_module(CGeneratorContext& ctx, AST* ast){
+		emit_raw("// anonymous module start\n");
+		
+		auto new_ctx = ctx;
+		// new_ctx.in_global = false;
+
+		// if we are an anonymous module then dont do a name
+		// new_ctx.module_ctx.module_names.push_back(&ast.token->value);
+
+		for (auto& expr : ast->as_module().body) {
+			gen(new_ctx, expr);
+		}
+
+		emit_raw("// anonymous module end\n");
 	}
 }

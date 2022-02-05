@@ -51,6 +51,7 @@ namespace trove {
         void gen_struct_literal(CGeneratorContext&, AST*);
         void gen_struct_access(CGeneratorContext&, AST*);
         void gen_initialiser_list(CGeneratorContext&, AST*);
+        void gen_module(CGeneratorContext&, AST*);
     private:
         AST* m_ast;
         SymTable<std::string> m_symtable;

@@ -8,9 +8,12 @@
 #include <error.h>
 
 namespace trove {
+	
+	class CompilationUnit;
+
 	class Parser {
 	public:
-		Parser(ErrorReporter error_reporter, std::vector<Token> tokens) : m_error_reporter(error_reporter), m_tokens(tokens) {}
+		Parser(CompilationUnit* compilation_unit, std::vector<Token>* tokens) : m_compilation_unit(compilation_unit), m_tokens(tokens) {}
 		AST* parse();
 		u1 expect(Token::Type);
 		std::optional<Token*> consume(Token::Type);
@@ -42,8 +45,8 @@ namespace trove {
 		AST* parse_module();
 		AST* parse_block(Token* l_curly, AST* first_item);
 		AST* parse_initialiser_list(Token* l_curly, AST* first_item);
-		std::vector<Token> m_tokens;
-		ErrorReporter m_error_reporter;
+		std::vector<Token>* m_tokens;
+		CompilationUnit* m_compilation_unit;
 		u32 m_current = 0;
 	};
 

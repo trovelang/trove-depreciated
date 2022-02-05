@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <spdlog/spdlog.h>
+#include <unit.h>
 
 namespace trove {
 
@@ -21,7 +22,7 @@ namespace trove {
 
 		std::stringstream ss;
 
-		auto lines = split_string_by_newline(m_compilation_unit.source);
+		auto lines = split_string_by_newline(m_compilation_unit->source());
 
 		for (u32 line = position.line_start; line <= position.line_end; line++) {
 			for (u32 i = position.index_start; i < position.index_end; i++) {

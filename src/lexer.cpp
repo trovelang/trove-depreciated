@@ -3,8 +3,9 @@
 #include <spdlog/spdlog.h>
 
 namespace trove {
-	std::vector<Token> Lexer::lex() {
+	std::vector<Token>* Lexer::lex() {
 
+		m_tokens = new std::vector<Token>();
 
 		while (!end()) {
 			skip_whitespace();
@@ -77,7 +78,7 @@ namespace trove {
 			}
 		}
 		// FIXME this should be a proper position
-		m_tokens.push_back(TokenBuilder::builder().type(Token::Type::END).position({0,0,0,0}).build());
+		m_tokens->push_back(TokenBuilder::builder().type(Token::Type::END).position({0,0,0,0}).build());
 		return m_tokens;
 	}
 
@@ -121,7 +122,7 @@ namespace trove {
 			.type(type)
 			.position(SourcePosition{ m_index_save_point, m_index, m_line_save_point, m_line })
 			.build();
-		m_tokens.push_back(token);
+		m_tokens->push_back(token);
 	}
 
 	void Lexer::token(Token::Type type, std::string value) {
@@ -130,7 +131,7 @@ namespace trove {
 			.value(value)
 			.position(SourcePosition{ m_index_save_point, m_index, m_line_save_point, m_line })
 			.build();
-		m_tokens.push_back(token);
+		m_tokens->push_back(token);
 	}
 
 	void Lexer::decide(Token::Type type1, Token::Type type2) {

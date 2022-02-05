@@ -1,5 +1,6 @@
 #include <pass1.h>
 #include <trove.h>
+#include <unit.h>
 
 /*
 
@@ -28,10 +29,11 @@ namespace trove {
             .build()));
     }
 
-    void Pass1::analyse() {
+    AST* Pass1::analyse() {
         register_builtins();
         auto ctx = AnalysisCtx{ AnalysisCtx::Scope::GLOBAL };
         analyse(ctx, m_ast);
+        return m_ast;
     }
 
     AnalysisUnit Pass1::analyse(AnalysisCtx ctx, AST* ast) {
@@ -109,7 +111,7 @@ namespace trove {
             if (!decl.type->equals(*value_analysis_unit.type)) {
                 std::stringstream ss;
                 ss << "types do not equal, expected " << decl.type->to_string() << " but got " << value_analysis_unit.type->to_string();
-                m_error_reporter.compile_error(ss.str(), ast->source_position);
+                m_compilation_unit->err_reporter().compile_error(ss.str(), ast->source_position);
             }
 
             // if we are dealing with a function we need to process it
@@ -214,7 +216,7 @@ namespace trove {
         if (lhs.type->mutability == Type::Mutability::CONSTANT) {
             std::stringstream ss;
             ss << "Attempted to assign to constant " << lhs.type->to_string();
-            m_error_reporter.compile_error(ss.str(), ast->source_position);
+            m_compilation_unit->err_reporter().compile_error(ss.str(), ast->source_position);
             return {};
         }
 
@@ -224,7 +226,7 @@ namespace trove {
         if (!lhs.type->equals(*rhs.type)) {
             std::stringstream ss;
             ss << "types do not equal, expected " << lhs.type->to_string() << " but got " << rhs.type->to_string();
-            m_error_reporter.compile_error(ss.str(), ast->source_position);
+            m_compilation_unit->err_reporter().compile_error(ss.str(), ast->source_position);
         }
 
         return AnalysisUnit{};
@@ -314,7 +316,7 @@ namespace trove {
         auto var = ast->as_var();
         auto type = m_symtable.lookup(var.token->value);
         IF_NO_VALUE(type) {
-            m_error_reporter.compile_error("unknown variable", ast->source_position);
+            m_compilation_unit->err_reporter().compile_error("unknown variable", ast->source_position);
         }
         return AnalysisUnit{ type.value() };
     }
@@ -325,12 +327,32 @@ namespace trove {
     }
 
     AnalysisUnit Pass1::analyse_call(AST* ast) {
+
+
+        // check for builtins
+        if(ast->as_call().callee->type==AST::Type::VAR){
+            auto var_value = ast->as_call().callee->as_var().token->value;
+            
+            if(var_value=="include"){
+                // TODO assert if there are no args
+                auto module = new Type(TypeBuilder::builder().base_type(Type::BaseType::MODULE).build());
+                auto include_file = ast->as_call().args[0]->as_str().token->value;
+                auto module_src = load_file(include_file.c_str());
+                auto compilation_unit = CompilationUnit(module_src);
+                auto module_ast = compilation_unit.up_to_pass1();
+                auto new_ast = new AST(AST::Type::MODULE, ast->source_position, ModuleAST({module_ast}));
+                *ast = *new_ast;
+
+                return AnalysisUnit{module};
+            }
+        }
+
         auto new_ctx = SAME_CTX();
         CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
         auto callee_type = analyse(new_ctx, ast->as_call().callee);
 
         if (callee_type.type->base_type != Type::BaseType::FN) {
-            m_error_reporter.compile_error("callee must be function", ast->source_position);
+            m_compilation_unit->err_reporter().compile_error("callee must be function", ast->source_position);
             return {};
         }
 

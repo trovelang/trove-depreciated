@@ -7,7 +7,7 @@ namespace trove {
 
 		auto block_body = std::vector<AST*>();
 
-		while (m_tokens[m_current].type != Token::Type::END) {
+		while (m_tokens->at(m_current).type != Token::Type::END) {
 			block_body.push_back(parse_stmt_expr());
 		}
 
@@ -21,15 +21,15 @@ namespace trove {
 		return std::optional<Token*>();
 	}
 	u1 Parser::expect(Token::Type type) {
-		return m_tokens[m_current].type == type;
+		return m_tokens->at(m_current).type == type;
 	}
 
 	Token* Parser::next() {
-		return &m_tokens[m_current++];
+		return &m_tokens->at(m_current++);
 	}
 
 	Token* Parser::peek(u32 ahead = 0) {
-		return &m_tokens[m_current + ahead];
+		return &m_tokens->at(m_current + ahead);
 	}
 
 	u1 Parser::is_type(Token::Type t) {

@@ -30,11 +30,13 @@ namespace trove {
         Type* type;
     };
 
+    class CompilationUnit;
+
     class Pass1 {
     public:
-        Pass1(ErrorReporter& err_reporter, AST* ast) : m_error_reporter(err_reporter), m_ast(ast) {}
+        Pass1(CompilationUnit* compilation_unit, AST*& ast) : m_compilation_unit(compilation_unit), m_ast(ast) {}
         void register_builtins();
-        void analyse();
+        AST* analyse();
         AnalysisUnit analyse(AnalysisCtx, AST*);
         AnalysisUnit analyse_statement(AST*);
         AnalysisUnit analyse_decl_ast(AST*);
@@ -59,8 +61,8 @@ namespace trove {
         AnalysisUnit analyse_initialiser_list(AST*);
 
     private:
-        ErrorReporter& m_error_reporter;
-        AST* m_ast;
+        CompilationUnit* m_compilation_unit;
+        AST*& m_ast;
         SymTable<Type*> m_symtable;
         std::stack<AnalysisCtx> m_analysis_context;
         u32 lambda_count{ 0 };

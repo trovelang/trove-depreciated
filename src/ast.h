@@ -450,6 +450,7 @@ namespace trove {
 			case Type::LOOP: return as_loop().to_string();
 			case Type::IF: return as_if().to_string();
 			case Type::BOOL: return as_bool().to_string();
+			case Type::MODULE: return as_module().to_string();
 			default: return "Unknown";
 			}
 		}
