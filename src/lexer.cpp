@@ -54,7 +54,13 @@ namespace trove {
 			case '<': decide(Token::Type::LESS, Token::Type::LESS_EQ, Token::Type::LSHIFT); break;
 
 
-			case '/': do_comment(); break;
+			case '/': {
+				if(peek(0)=='/'){
+					do_comment();
+				}else{
+					token(Token::Type::DIV);
+				}
+			}
 
 			default: {
 				if (is_letter(current) || current == '_') {
@@ -325,6 +331,10 @@ namespace trove {
 	}
 
 	void Lexer::do_comment() {
+		next();
+		while(peek()!='\n'){
+			next();
+		}
 	}
 
 	void Lexer::do_number(char current) {

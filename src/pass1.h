@@ -30,9 +30,9 @@ namespace trove {
         Type* type;
     };
 
-    class TypeCheckPass {
+    class Pass1 {
     public:
-        TypeCheckPass(ErrorReporter& err_reporter, AST* ast) : m_error_reporter(err_reporter), m_ast(ast) {}
+        Pass1(ErrorReporter& err_reporter, AST* ast) : m_error_reporter(err_reporter), m_ast(ast) {}
         void register_builtins();
         void analyse();
         AnalysisUnit analyse(AnalysisCtx, AST*);

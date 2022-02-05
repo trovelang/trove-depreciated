@@ -1,4 +1,4 @@
-#include <typecheck.h>
+#include <pass1.h>
 #include <trove.h>
 
 /*
@@ -17,7 +17,7 @@ the context should perhaps be in a stack?
 */
 namespace trove {
 
-    void TypeCheckPass::register_builtins(){
+    void Pass1::register_builtins(){
         m_symtable.place("printf", new Type(
             TypeBuilder::builder()
             .base_type(Type::BaseType::FN)
@@ -28,13 +28,13 @@ namespace trove {
             .build()));
     }
 
-    void TypeCheckPass::analyse() {
+    void Pass1::analyse() {
         register_builtins();
         auto ctx = AnalysisCtx{ AnalysisCtx::Scope::GLOBAL };
         analyse(ctx, m_ast);
     }
 
-    AnalysisUnit TypeCheckPass::analyse(AnalysisCtx ctx, AST* ast) {
+    AnalysisUnit Pass1::analyse(AnalysisCtx ctx, AST* ast) {
 
         m_analysis_context.push(ctx);
 
@@ -67,14 +67,14 @@ namespace trove {
         return res;
     }
 
-    AnalysisUnit TypeCheckPass::analyse_statement(AST* ast) {
+    AnalysisUnit Pass1::analyse_statement(AST* ast) {
         auto new_ctx = SAME_CTX();
         CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
         analyse(new_ctx, ast->as_statement().body);
         return {};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_decl_ast(AST* ast){
+    AnalysisUnit Pass1::analyse_decl_ast(AST* ast){
 
 
         DeclAST& decl = ast->as_decl();
@@ -167,7 +167,7 @@ namespace trove {
         return AnalysisUnit{ &ast->as_decl().type.value() };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_block(AST* ast) {
+    AnalysisUnit Pass1::analyse_block(AST* ast) {
         // transform ourself into a fn!
         IF_VALUE(m_analysis_context.top().required_type) {
             if (m_analysis_context.top().required_type.value()->base_type == Type::BaseType::FN) {
@@ -201,7 +201,7 @@ namespace trove {
         return {};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_assign_ast(AST* ast){
+    AnalysisUnit Pass1::analyse_assign_ast(AST* ast){
 
         auto assign = ast->as_assign();
 
@@ -230,7 +230,7 @@ namespace trove {
         return AnalysisUnit{};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_program_ast(AST* ast){
+    AnalysisUnit Pass1::analyse_program_ast(AST* ast){
         for (auto& elem : ast->as_program().body) {
             auto new_ctx = SAME_CTX();
             CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
@@ -238,7 +238,7 @@ namespace trove {
         }
         return {};
     }
-    AnalysisUnit TypeCheckPass::analyse(BlockAST& ast){
+    AnalysisUnit Pass1::analyse(BlockAST& ast){
         m_symtable.enter();
         for (auto& elem : ast.body) {
             auto new_ctx = SAME_CTX();
@@ -249,7 +249,7 @@ namespace trove {
         return {};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_un(AST* ast) {
+    AnalysisUnit Pass1::analyse_un(AST* ast) {
         auto un = ast->as_un();
         auto new_ctx = SAME_CTX();
         CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
@@ -257,7 +257,7 @@ namespace trove {
         return value_type;
     }
 
-    AnalysisUnit TypeCheckPass::analyse_bin(AST* ast){
+    AnalysisUnit Pass1::analyse_bin(AST* ast){
         auto bin = ast->as_bin();
         auto new_ctx = SAME_CTX();
         CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
@@ -266,7 +266,7 @@ namespace trove {
         return lhs_type;
     }
 
-    AnalysisUnit TypeCheckPass::analyse_fn(AST* ast) {
+    AnalysisUnit Pass1::analyse_fn(AST* ast) {
         // todo check if we are a lambda here
         // if we are an r_value
         /*if (ctx.r_value && ctx.parent_type->mutability == Type::Mutability::MUT) {
@@ -296,21 +296,21 @@ namespace trove {
         return AnalysisUnit{ &ast->as_fn().type };
     }
 
-    AnalysisUnit TypeCheckPass::analyse(NumAST& num){
+    AnalysisUnit Pass1::analyse(NumAST& num){
         return AnalysisUnit{&num.type};
     }
 
-    AnalysisUnit TypeCheckPass::analyse_ret(AST* ast) {
+    AnalysisUnit Pass1::analyse_ret(AST* ast) {
         auto new_ctx = SAME_CTX();
         CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
         return analyse(new_ctx, ast->as_ret().value);
     }
 
-    AnalysisUnit TypeCheckPass::analyse_bool(AST* ast) {
+    AnalysisUnit Pass1::analyse_bool(AST* ast) {
         return AnalysisUnit{ &ast->as_bool().type };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_var(AST* ast){
+    AnalysisUnit Pass1::analyse_var(AST* ast){
         auto var = ast->as_var();
         auto type = m_symtable.lookup(var.token->value);
         IF_NO_VALUE(type) {
@@ -319,12 +319,12 @@ namespace trove {
         return AnalysisUnit{ type.value() };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_loop(AST* ast) {
+    AnalysisUnit Pass1::analyse_loop(AST* ast) {
        
         return AnalysisUnit{  };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_call(AST* ast) {
+    AnalysisUnit Pass1::analyse_call(AST* ast) {
         auto new_ctx = SAME_CTX();
         CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
         auto callee_type = analyse(new_ctx, ast->as_call().callee);
@@ -337,12 +337,12 @@ namespace trove {
         return AnalysisUnit{ &callee_type.type->contained_types.at(callee_type.type->contained_types.size()-1) };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_string(AST* ast) {
+    AnalysisUnit Pass1::analyse_string(AST* ast) {
 
         return AnalysisUnit{ new Type(TypeBuilder::builder().base_type(Type::BaseType::STRING).build()) };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_struct_def(AST* ast) {
+    AnalysisUnit Pass1::analyse_struct_def(AST* ast) {
 
         auto struct_def = ast->as_struct_def();
         for (auto& member : struct_def.member_decls) {
@@ -356,7 +356,7 @@ namespace trove {
         return AnalysisUnit{ &ast->as_struct_def().type };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_mod_def(AST* ast) {
+    AnalysisUnit Pass1::analyse_mod_def(AST* ast) {
 
         auto module = ast->as_module();
         for (auto& member : module.body) {
@@ -368,7 +368,7 @@ namespace trove {
         return AnalysisUnit{ &ast->as_module().type };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_struct_literal(AST* ast) {
+    AnalysisUnit Pass1::analyse_struct_literal(AST* ast) {
         for (auto& member : ast->as_struct_literal().member_values) {
             auto new_ctx = SAME_CTX();
             CTX_REQUIRED_TYPE(new_ctx, std::optional<Type*>());
@@ -378,7 +378,7 @@ namespace trove {
         return AnalysisUnit{ &ast->as_struct_literal().type };
     }
 
-    AnalysisUnit TypeCheckPass::analyse_initialiser_list(AST* ast) {
+    AnalysisUnit Pass1::analyse_initialiser_list(AST* ast) {
         auto type = new Type(TypeBuilder::builder().base_type(Type::BaseType::STRUCT).build());
         type->struct_type.is_anonymous = true;
         for (auto& elem : ast->as_initialiser_list().values) {

@@ -29,8 +29,8 @@ add_subdirectory("lib/spdlog")
 include_directories("src")
 include_directories("lib/spdlog/include/")
 
-set(SAUCE "src/lexer.cpp" "src/parser.cpp" "src/token.cpp" "src/log.cpp" "src/ast.cpp" "src/borrowchecker.cpp" "src/analyse.cpp" "src/cgenerator.cpp"  "src/type.cpp" "src/typecheck.cpp" "src/error.cpp" )
-set(HEADERS "src/trove.h" "src/lexer.h"  "src/parser.h" "src/token.h" "src/types.h" "src/log.h" "src/ast.h" "src/type.h" "src/borrowchecker.h" "src/cli.h" "src/clr.h" "src/analyse.h" "src/symtable.h" "src/error.h" "src/typecheck.h" "src/unit.h" )
+set(SAUCE "src/lexer.cpp" "src/parser.cpp" "src/token.cpp" "src/log.cpp" "src/ast.cpp" "src/borrowchecker.cpp" "src/analyse.cpp" "src/cgenerator.cpp"  "src/type.cpp" "src/pass1.cpp" "src/error.cpp" )
+set(HEADERS "src/trove.h" "src/lexer.h"  "src/parser.h" "src/token.h" "src/types.h" "src/log.h" "src/ast.h" "src/type.h" "src/borrowchecker.h" "src/cli.h" "src/clr.h" "src/analyse.h" "src/symtable.h" "src/error.h" "src/pass1.h" "src/unit.h" )
 
 add_library(my_cpp_lib STATIC ${SAUCE})
 

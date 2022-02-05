@@ -7,7 +7,7 @@
 #include <parser.h>
 #include <analyse.h>
 #include <cgenerator.h>
-#include <typecheck.h>
+#include <pass1.h>
 #include <borrowchecker.h>
 #include <unit.h>
 #include <log.h>
@@ -54,7 +54,7 @@ s32 compile(std::string source){
 	auto parser = trove::Parser(err_reporter, tokens);
 	auto ast = parser.parse();
 
-	auto type_checker = trove::TypeCheckPass(err_reporter, ast);
+	auto type_checker = trove::Pass1(err_reporter, ast);
 	type_checker.analyse();
 
 	auto borrow_checker = trove::BorrowCheckPass(err_reporter, ast);

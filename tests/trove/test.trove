@@ -1,24 +1,3 @@
 
 
-
-blob var = fn(a u32, b u32){
-	printf("hello! %d", a)
-}
-
-// todo 
-// when we are typechecking function ast's we should check if it is a lambda and do the stuff there
-blob = fn () {
-}
-
-main const fn = fn {
-	x var = struct { 123 }
-
-	blob(1,2)
-
-	if 0 {
-		printf("true!")
-	}
-
-
-	{1,2,3}
-}
+x :: 123
