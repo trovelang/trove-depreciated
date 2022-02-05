@@ -12,6 +12,18 @@
 #include <unit.h>
 #include <log.h>
 
+std::string time_to_str(long long microseconds){
+	std::stringstream ss;
+	if(microseconds>1000000){
+		ss << ((float)microseconds / (float)1000000.0) << " seconds";
+	}else if(microseconds>1000){
+		ss << ((float)microseconds / (float)1000.0) << " milliseconds";
+	}else{
+		ss << microseconds << " microseconds";
+	}
+	return ss.str();
+}
+
 std::string load_file(const char* file){
 	std::ifstream t(file);
 	std::stringstream buffer;
@@ -49,15 +61,15 @@ s32 compile(std::string source){
 
 	auto end_parse = std::chrono::high_resolution_clock::now();
 
-	spdlog::info("Parsed {} lines in {} microseconds...", n_lines, std::chrono::duration_cast<std::chrono::microseconds>(end_parse - start_parse).count());
+	spdlog::info("Parsed {} lines in {}...", n_lines, time_to_str(std::chrono::duration_cast<std::chrono::microseconds>(end_parse - start_parse).count()));
 
 	auto start_gen = std::chrono::high_resolution_clock::now();
 	auto cgenerator = trove::CGenerator(ast);
 	cgenerator.gen();
 	auto end_gen = std::chrono::high_resolution_clock::now();
 
-	spdlog::info("Generated {} lines in {} milliseconds...", n_lines, std::chrono::duration_cast<std::chrono::milliseconds>(end_gen - start_gen).count());
-	spdlog::info("Compiled {} lines in {} ms", n_lines, std::chrono::duration_cast<std::chrono::milliseconds>(end_gen - start_parse).count());	
+	spdlog::info("Generated {} lines in {}...", n_lines, time_to_str(std::chrono::duration_cast<std::chrono::microseconds>(end_gen - start_gen).count()));
+	spdlog::info("Compiled {} lines in {}", n_lines, time_to_str(std::chrono::duration_cast<std::chrono::microseconds>(end_gen - start_parse).count()));	
 
 	return 0;
 }
@@ -94,23 +106,31 @@ s32 output_ast(std::string source){
 	return 0;
 }
 
+void help(){
+	logger.info() << "usage: TODO\n";
+	logger.info() << "-h Help\n";
+	logger.info() << "-c Compile File\n";
+	logger.info() << "-r Compile & Run\n";
+	logger.info() << "-i Interactive REPL\n";
+	logger.info() << "-t Output Tokens\n";
+	logger.info() << "-a Output AST\n";
+}
+
 s32 args_parser(int argc, char** argv){
 
 	if(argc==1){
-		logger.info() << "usage: TODO\n";
-		logger.info() << "-c Compile File\n";
-		logger.info() << "-r Compile & Run\n";
-		logger.info() << "-i Interactive REPL\n";
-		logger.info() << "-t Output Tokens\n";
-		logger.info() << "-a Output AST\n";
+		help();
 	}else{
-		if(std::string(argv[1])=="-c"){
-			spdlog::info("compiling {}", argv[2]);
+		if(std::string(argv[1])=="-h"){
+			help();
+		}
+		else if(std::string(argv[1])=="-c"){
 			compile(load_file(argv[2]));
 		}else if(std::string(argv[1])=="-r"){
 			compile(load_file(argv[2]));
 			system("c:/trovelang/trove/tmp/tmp.exe");
 		}else if(std::string(argv[1])=="-i"){
+			logger.warn() << "This feature is not implemented yet\n";
 		}else if(std::string(argv[1])=="-t"){
 			output_tokens(load_file(argv[2]));
 		}else if(std::string(argv[1])=="-a"){

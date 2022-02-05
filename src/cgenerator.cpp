@@ -80,10 +80,10 @@ namespace trove {
 		myfile.close();
 
 		#ifdef CODEGEN_CLANG
-		system("clang c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
+		system("clang -w c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
 		#endif
 		#ifdef CODEGEN_GCC
-		system("gcc c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
+		system("gcc -w c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
 		#endif 
 		
 		// execute("c:/trovelang/trove/tmp/tmp.exe");
