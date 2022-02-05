@@ -12,6 +12,15 @@
 #include <borrowchecker.h>
 #include <unit.h>
 
+u32 args_parser(int argc, char** argv){
+
+	if(argc==1){
+		spdlog::info("usage: TODO");
+	}else{
+
+	}
+	return 0;
+}
 
 u32 num_lines(std::string& source) {
 	u32 line_counter = 1;
@@ -33,6 +42,8 @@ s32 main(int argc, char** argv)
 		std::cout << ">";
 		std::getline(std::cin, source);
 	}*/
+
+	args_parser(argc, argv);
 
 	std::ifstream t("C:/trovelang/trove/tests/trove/helloworld.trove");
 	std::stringstream buffer;
