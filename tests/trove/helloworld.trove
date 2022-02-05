@@ -1,9 +1,15 @@
 
 
-
+lam := fn {
+    printf("from an inner fn!")
+}
 
 main :: fn {
 	
-    printf("hello from trove!")
+    x :: 3
+
+
+
+    lam()
 	
 }

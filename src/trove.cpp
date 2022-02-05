@@ -10,6 +10,7 @@
 #include <typecheck.h>
 #include <borrowchecker.h>
 #include <unit.h>
+#include <log.h>
 
 std::string load_file(const char* file){
 	std::ifstream t(file);
@@ -96,25 +97,21 @@ s32 output_ast(std::string source){
 s32 args_parser(int argc, char** argv){
 
 	if(argc==1){
-		spdlog::info("usage: TODO");
-		spdlog::info("-c Compile File");
-		spdlog::info("-r Compile & Run");
-		spdlog::info("-i Interactive REPL");
-		spdlog::info("-t Output Tokens");
-		spdlog::info("-a Output AST");
+		logger.info() << "usage: TODO\n";
+		logger.info() << "-c Compile File\n";
+		logger.info() << "-r Compile & Run\n";
+		logger.info() << "-i Interactive REPL\n";
+		logger.info() << "-t Output Tokens\n";
+		logger.info() << "-a Output AST\n";
 	}else{
 		if(std::string(argv[1])=="-c"){
 			spdlog::info("compiling {}", argv[2]);
 			compile(load_file(argv[2]));
 		}else if(std::string(argv[1])=="-r"){
-			spdlog::info("compiling & running {}", argv[2]);
 			compile(load_file(argv[2]));
-			spdlog::info("running {}", argv[2]);
 			system("c:/trovelang/trove/tmp/tmp.exe");
 		}else if(std::string(argv[1])=="-i"){
-			spdlog::warn("NOT IMPLEMENTED");
 		}else if(std::string(argv[1])=="-t"){
-			spdlog::info("outputing tokens");
 			output_tokens(load_file(argv[2]));
 		}else if(std::string(argv[1])=="-a"){
 			output_ast(load_file(argv[2]));
@@ -124,6 +121,11 @@ s32 args_parser(int argc, char** argv){
 }
 
 s32 main(int argc, char** argv){
+	#ifdef DEBUG
+		logger.info() << "running in debug mode!\n";
+		logger.warn() << "running in debug mode!\n";
+		logger.errr() << "running in debug mode!\n";
+	#endif
 	args_parser(argc, argv);
 	return 0;
 }

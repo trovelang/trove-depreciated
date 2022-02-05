@@ -1,8 +1,6 @@
 
-cmake . -B bin/debug -G Ninja -D CMAKE_BUILD_TYPE=Debug -DCODEGEN_CLANG=ON
-@REM cmake -G Ninja --build out --config Debug --target trove
-ninja -C bin/debug -j 20 trove
+set config=%1
 
-cmake . -B bin/release -G Ninja -D CMAKE_BUILD_TYPE=Release -DCODEGEN_CLANG=ON
+cmake . -B bin/%config% -G Ninja -D CMAKE_BUILD_TYPE=%config% -DCODEGEN_GCC=ON
 @REM cmake -G Ninja --build out --config Debug --target trove
-ninja -C bin/release -j 20 trove
+ninja -C bin/%config% -j 20 trove

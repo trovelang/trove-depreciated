@@ -79,15 +79,12 @@ namespace trove {
 		myfile << code;
 		myfile.close();
 
+		#ifdef CODEGEN_CLANG
 		system("clang c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
-		// #ifdef CODEGEN_CLANG
-		// spdlog::info("building with clang");
-		// system("clang c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
-		// #endif
-		// #ifdef CODEGEN_GCC
-		// spdlog::info("building with gcc");
-		// system("gcc c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
-		// #endif 
+		#endif
+		#ifdef CODEGEN_GCC
+		system("gcc c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
+		#endif 
 		
 		// execute("c:/trovelang/trove/tmp/tmp.exe");
 	}

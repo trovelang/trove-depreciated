@@ -5,6 +5,10 @@ cmake_minimum_required(VERSION 3.8)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_FLAGS "-std=c++20")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+
+# disable warnings
+add_definitions(-w)
 
 project("trove")
 
