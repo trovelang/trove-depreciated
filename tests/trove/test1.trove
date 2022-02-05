@@ -1,0 +1,4 @@
+
+file2 :: include("c:/trovelang/trove/tests/trove/test2.trove")
+
+x :: 123

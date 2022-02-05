@@ -1,11 +1,5 @@
-
-// 1. we need to load up test.trove and compile past typechecking
-// 2. we need to create a module and then set the body to the ast returned from step 1
-
-include("c:/trovelang/trove/tests/trove/test.trove")
+file1 :: include("c:/trovelang/trove/tests/trove/test1.trove")
 
 main :: fn {
-
-    
-    printf("hello, world! %s", x)
+    printf("hello, world! %d %d", file1.x, file1.file2.y)
 }
