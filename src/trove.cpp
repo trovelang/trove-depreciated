@@ -3,7 +3,6 @@
 #include <sstream>
 #include <spdlog/spdlog.h>
 #include <chrono>
-
 #include <lexer.h>
 #include <parser.h>
 #include <analyse.h>
@@ -11,16 +10,6 @@
 #include <typecheck.h>
 #include <borrowchecker.h>
 #include <unit.h>
-
-u32 args_parser(int argc, char** argv){
-
-	if(argc==1){
-		spdlog::info("usage: TODO");
-	}else{
-
-	}
-	return 0;
-}
 
 u32 num_lines(std::string& source) {
 	u32 line_counter = 1;
@@ -30,25 +19,7 @@ u32 num_lines(std::string& source) {
 	return line_counter;
 }
 
-s32 main(int argc, char** argv)
-{
-	/*if (argc > 1) {
-		std::ifstream t(argv[1]);
-		std::stringstream buffer;
-		buffer << t.rdbuf();
-		source = buffer.str();
-	}
-	else {
-		std::cout << ">";
-		std::getline(std::cin, source);
-	}*/
-
-	args_parser(argc, argv);
-
-	std::ifstream t("C:/trovelang/trove/tests/trove/helloworld.trove");
-	std::stringstream buffer;
-	buffer << t.rdbuf();
-	std::string source = buffer.str();
+s32 compile(std::string source){
 	auto n_lines = num_lines(source);
 
 	auto compilation_unit = trove::CompilationUnit(source);
@@ -78,7 +49,42 @@ s32 main(int argc, char** argv)
 	auto end_gen = std::chrono::high_resolution_clock::now();
 
 	spdlog::info("Generated {} lines in {} milliseconds...", n_lines, std::chrono::duration_cast<std::chrono::milliseconds>(end_gen - start_gen).count());
-	spdlog::info("Compiled {} lines in {} ms", n_lines, std::chrono::duration_cast<std::chrono::milliseconds>(end_gen - start_parse).count());
+	spdlog::info("Compiled {} lines in {} ms", n_lines, std::chrono::duration_cast<std::chrono::milliseconds>(end_gen - start_parse).count());	
 
+	return 0;
+}
+
+s32 args_parser(int argc, char** argv){
+
+	if(argc==1){
+		spdlog::info("usage: TODO");
+		spdlog::info("-c Compile File");
+		spdlog::info("-r Compile & Run");
+		spdlog::info("-i Interactive REPL");
+	}else{
+		if(std::string(argv[1])=="-c"){
+			spdlog::info("compiling {}", argv[2]);
+			std::ifstream t(argv[2]);
+			std::stringstream buffer;
+			buffer << t.rdbuf();
+			std::string source = buffer.str();
+			compile(source);
+		}else if(std::string(argv[1])=="-r"){
+			spdlog::info("compiling & running {}", argv[2]);
+			std::ifstream t(argv[2]);
+			std::stringstream buffer;
+			buffer << t.rdbuf();
+			std::string source = buffer.str();
+			compile(source);
+			system("c:/trovelang/trove/tmp/tmp.exe");
+		}else if(std::string(argv[1])=="-i"){
+			spdlog::warn("NOT IMPLEMENTED");
+		}
+	}
+	return 0;
+}
+
+s32 main(int argc, char** argv){
+	args_parser(argc, argv);
 	return 0;
 }
