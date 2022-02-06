@@ -1,6 +1,7 @@
 #include <unit.h>
 #include <pass1.h>
 #include <cgenerator.h>
+#include <type.h>
 
 namespace trove{
 
@@ -11,32 +12,32 @@ std::vector<Token>* CompilationUnit::lex(){
     return m_tokens;
 }
 
-AST* CompilationUnit::parse(){
+ParseResult CompilationUnit::parse(){
     auto parser = Parser(this, m_tokens);
-	m_ast = parser.parse();
-    return m_ast;
+	m_parse_result = {parser.parse()};
+    return m_parse_result;
 }
 
-AST* CompilationUnit::pass1(){
-    auto pass1 = Pass1(this, m_ast);
-	m_ast = pass1.analyse();
-    return m_ast;
+Pass1Result CompilationUnit::pass1(){
+    auto pass1 = Pass1(this, m_parse_result.ast);
+	m_pass1_result = pass1.analyse();
+    return m_pass1_result;
 }
 
-AST* CompilationUnit::up_to_parse(){
+ParseResult CompilationUnit::up_to_parse(){
     m_tokens = lex();
-    m_ast = parse();
-    return m_ast;
+    m_parse_result = parse();
+    return m_parse_result;
 }
 
-AST* CompilationUnit::up_to_pass1(){
+Pass1Result CompilationUnit::up_to_pass1(){
     up_to_parse();
-    m_ast = pass1();
-    return m_ast;
+    m_pass1_result = pass1();
+    return m_pass1_result;
 }
 
 void CompilationUnit::compile(){
-    auto cgenerator = CGenerator(m_ast);
+    auto cgenerator = CGenerator(m_pass1_result.ast);
     cgenerator.gen();
 }
 

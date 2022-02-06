@@ -1,5 +1,5 @@
-io :: include("io.trove")
+include("io.trove")
 
 main :: fn {
-    io.println()
+    println()
 }

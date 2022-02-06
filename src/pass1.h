@@ -32,11 +32,17 @@ namespace trove {
 
     class CompilationUnit;
 
+    // FIXME we should heap allocate the symbol table otherwise we are doing copies
+    struct Pass1Result {
+		AST* ast;
+		SymTable<Type*> sym_table;
+	};
+
     class Pass1 {
     public:
         Pass1(CompilationUnit* compilation_unit, AST*& ast) : m_compilation_unit(compilation_unit), m_ast(ast) {}
         void register_builtins();
-        AST* analyse();
+        Pass1Result analyse();
         AnalysisUnit analyse(AnalysisCtx, AST*);
         AnalysisUnit analyse_statement(AST*);
         AnalysisUnit analyse_decl_ast(AST*);

@@ -29,11 +29,11 @@ namespace trove {
             .build()));
     }
 
-    AST* Pass1::analyse() {
+    Pass1Result Pass1::analyse() {
         register_builtins();
         auto ctx = AnalysisCtx{ AnalysisCtx::Scope::GLOBAL };
         analyse(ctx, m_ast);
-        return m_ast;
+        return Pass1Result{m_ast, m_symtable};
     }
 
     AnalysisUnit Pass1::analyse(AnalysisCtx ctx, AST* ast) {
@@ -344,9 +344,14 @@ namespace trove {
                 auto include_file = ast->as_call().args[0]->as_str().token->value;
                 auto working_dir = m_compilation_unit->working_dir();
                 auto module_src = load_file_with_working_dir(working_dir, include_file);
+
                 auto compilation_unit = CompilationUnit(module_src, m_compilation_unit->working_dir());
-                auto module_ast = compilation_unit.up_to_pass1();
-                auto new_ast = new AST(AST::Type::MODULE, ast->source_position, ModuleAST({module_ast}));
+                auto pass1_result = compilation_unit.up_to_pass1();
+
+                // merge our sym tables together
+                m_symtable.merge(pass1_result.sym_table);
+
+                auto new_ast = new AST(AST::Type::MODULE, ast->source_position, ModuleAST({pass1_result.ast}));
                 *ast = *new_ast;
 
                 return AnalysisUnit{module};

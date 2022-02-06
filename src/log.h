@@ -15,7 +15,13 @@ public:
     const char* RED = "\033[1;31m";
     const char* GREEN = "\033[1;32m";  
     const char* YELLOW = "\033[1;33m"; 
+    const char* MAGENTA = "\033[1;35m"; 
     const char* END = "\033[0m";
+
+    inline Logger& debug(){
+        std::cout << MAGENTA << "[DBUG] " << END;
+        return *this;
+    }
 
     inline Logger& info(){
         std::cout << GREEN << "[INFO] " << END;

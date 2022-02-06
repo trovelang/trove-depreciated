@@ -4,6 +4,8 @@
 #include <lexer.h>
 #include <parser.h>
 #include <error.h>
+#include <symtable.h>
+#include <pass1.h>
 
 /*
 s32 compile(std::string source){
@@ -44,6 +46,18 @@ s32 compile(std::string source){
 
 namespace trove {
 
+	struct Type;
+
+
+	enum class StageResult{
+		OK,
+		FAIL
+	};
+
+	struct ParseResult{
+		AST* ast;
+		StageResult result{StageResult::OK};
+	};
 
 	class CompilationUnit {
 	public:
@@ -51,11 +65,11 @@ namespace trove {
 			m_err_reporter = ErrorReporter(this);
 		}
 		std::vector<Token>* lex();
-		AST* parse();
-		AST* pass1();
+		ParseResult parse();
+		Pass1Result pass1();
 		void compile();
-		AST* up_to_parse();
-		AST* up_to_pass1();
+		ParseResult up_to_parse();
+		Pass1Result up_to_pass1();
 		void up_to_compile();
 		std::string& source(){
 			return m_source;
@@ -71,7 +85,8 @@ namespace trove {
 		std::string m_working_dir;
 		ErrorReporter m_err_reporter;
 		std::vector<Token>* m_tokens;
-		AST* m_ast;
+		ParseResult m_parse_result;
+		Pass1Result m_pass1_result;
 	};
 
 }

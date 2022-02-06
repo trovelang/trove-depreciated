@@ -118,8 +118,8 @@ s32 output_ast(std::string source){
 	auto n_lines = num_lines(source);
 	auto working_dir = "c:/trovelang/trove/tests/trove/";
 	auto compilation_unit = trove::CompilationUnit(source, working_dir);
-	auto ast = compilation_unit.up_to_parse();
-	logger.info() << ast->to_string() << "\n";
+	auto parse_result = compilation_unit.up_to_parse();
+	logger.info() << parse_result.ast->to_string() << "\n";
 	return 0;
 }
 
@@ -134,8 +134,9 @@ void help(){
 }
 
 s32 args_parser(int argc, char** argv){
-	//compile(load_file("c:/trovelang/trove/tests/trove/helloworld.trove"));
-	//return 0;
+	// auto f = std::string("c:/trovelang/trove/tests/trove/helloworld.trove");
+	// compile(load_file(f));
+	// return 0;
 
 	if(argc==1){
 		help();

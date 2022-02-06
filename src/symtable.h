@@ -14,6 +14,22 @@ public:
 		enter();
 		m_index = 0;
 	}
+
+	SymTable& merge(SymTable& other){
+		// loop over the other values for each index and put them in ours
+		for(u32 i=0;i<other.m_values.size();i++){
+			if(!(m_values.size()>i)){
+				m_values.push_back({});
+			}
+			m_values[i].insert(other.m_values[i].begin(), other.m_values[i].end());
+		}
+		return *this;
+	}
+
+	// merge 2 symbol tables
+	SymTable& merge(SymTable& other, u32 scope){
+
+	}
 	
 	void enter() {
 		m_index++;
