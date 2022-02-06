@@ -61,6 +61,7 @@ namespace trove {
         case AST::Type::MODULE: res = analyse_mod_def(ast); break;
         case AST::Type::STRUCT_LITERAL: res = analyse_struct_literal(ast); break;
         case AST::Type::INITIALISER_LIST: res = analyse_initialiser_list(ast); break;
+        case AST::Type::STRUCT_ACCESS: res = analyse_struct_access(ast); break;
         default: UNREACHABLE("uhhh");
         }
 
@@ -346,8 +347,9 @@ namespace trove {
 
     AnalysisUnit Pass1::analyse_call(AST* ast) {
 
-        // check for builtins
-        if(ast->as_call().callee->type==AST::Type::VAR){
+        auto call = ast->as_call();
+
+        if(call.callee->get_type()==AST::Type::VAR){
             auto var_value = ast->as_call().callee->as_var().token->value;
             
             if(var_value=="include"){
@@ -381,14 +383,24 @@ namespace trove {
             param_types.push_back(*(analyse(new_ctx, arg).type));
         }
 
-        if(ast->as_call().callee->get_type()==AST::Type::VAR){
-            // check for intrinsics
-            if(ast->as_call().callee->as_var().token->value!="printf"){
-                auto mangled_name = Type::mangle_identifier_with_types(
-                    ast->as_call().callee->as_var().token->value.append("_FN"), 
+        //logger.debug() << "analysing call " << ast->as_call().callee->as_var().token->value << "\n";
+
+        // TODO if its a struct access we need to mangle it
+
+        if (ast->as_call().callee->get_type() == AST::Type::VAR) {
+            if (ast->as_call().callee->as_var().token->value != "printf") {
+               auto mangled_name = Type::mangle_identifier_with_types(
+                    ast->as_call().callee->as_var().token->value.append("_FN"),
                     param_types);
-                ast->as_call().callee->as_var().token->value = mangled_name;
+               ast->as_call().callee->as_var().token->value = mangled_name;
             }
+        }else if(ast->as_call().callee->get_type()==AST::Type::STRUCT_ACCESS){
+            // FIXME this will crash if the member is not a string
+            auto member = ast->as_call().callee->as_struct_access().member->as_var().token->value;
+            auto mangled_name = Type::mangle_identifier_with_types(
+                member.append("_FN"), 
+                param_types);
+            ast->as_call().callee->as_struct_access().member->as_var().token->value = mangled_name;
         }
 
         auto new_ctx = SAME_CTX();
@@ -399,7 +411,6 @@ namespace trove {
             m_compilation_unit->err_reporter().compile_error("callee must be function", ast->source_position);
             return {};
         }
-
         return AnalysisUnit{ &callee_type.type->contained_types.at(callee_type.type->contained_types.size()-1) };
     }
 
@@ -454,5 +465,30 @@ namespace trove {
             type->contained_types.push_back(*elem_type.type);
         }
         return AnalysisUnit{ type };
+    }
+
+    AnalysisUnit Pass1::analyse_struct_access(AST* ast) {
+        // TODO we need to do mangling stuff
+        /*
+        logger.errr() << "analysing struct access \n obj: " 
+            << ast->as_struct_access().obj->to_string() 
+            << "\nmember: "<<ast->as_struct_access().member->to_string()<<"\n";
+
+        auto new_ctx = SAME_CTX();
+        auto t = analyse(new_ctx, ast->as_struct_access().obj);
+        */
+
+        auto new_ctx = SAME_CTX();
+        auto obj_type = analyse(new_ctx, ast->as_struct_access().obj);
+
+        // if its a namepsace then lookup the value in the namespace
+        if (obj_type.type->base_type == Type::BaseType::MODULE) {
+
+
+            return analyse(new_ctx, ast->as_struct_access().member);
+
+        }
+
+        return AnalysisUnit{ 0 };
     }
 }

@@ -228,6 +228,7 @@ namespace trove {
 		StructAccessAST() {}
 		StructAccessAST(AST* obj, AST* member) : obj(obj), member(member) {}
 		StructAccessAST(AST* obj, u32 index) : obj(obj), index(index) {}
+		std::string to_string();
 		AST* obj;
 		AST* member;
 		u32 index = 0;
@@ -451,6 +452,7 @@ namespace trove {
 			case Type::IF: return as_if().to_string();
 			case Type::BOOL: return as_bool().to_string();
 			case Type::MODULE: return as_module().to_string();
+			case Type::STRUCT_ACCESS: return as_struct_access().to_string();
 			default: return "Unknown";
 			}
 		}

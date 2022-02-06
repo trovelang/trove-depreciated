@@ -28,7 +28,8 @@ namespace trove {
 		"AST_RET",
 		"AST_LOOP",
 		"AST_INITIALISER_LIST",
-		"AST_MODULE"
+		"AST_MODULE",
+		"AST_STRUCT_ACCESS"
 	};
 
 	std::string ProgramAST::to_string() {
@@ -152,7 +153,7 @@ namespace trove {
 
 	std::string CallAST::to_string() {
 		std::stringstream ss;
-		ss << "CallAST " << callee->to_string() << "( ";
+		ss << "CallAST callee: " << callee->to_string() << " params: ( ";
 		for(auto& arg : args){
 			ss << arg->to_string() << ", ";
 		}
@@ -191,6 +192,13 @@ namespace trove {
 			ss << member->to_string() << ",\n";
 		}
 		ss << "}\n";
+		return ss.str();
+	}
+
+	std::string StructAccessAST::to_string() {
+		std::stringstream ss;
+		//ss << "StructAccessAST "<< obj->to_string() << " " << member->to_string() << "\n";
+		ss << "StructAccessAST";
 		return ss.str();
 	}
 

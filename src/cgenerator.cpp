@@ -156,10 +156,16 @@ namespace trove {
 
 			emit_raw(type_to_str(return_type));
 			emit_raw(" (*");
-			std::stringstream ss;
-			for (auto& mod : ctx.module_ctx.module_names)
-				ss << *mod << "_";
-			auto variable_name = ss.str().append(ast.token->value);
+
+			auto variable_name = ast.token->value;
+			// TODO if we are in a function then dont do this?
+
+			if(ctx.in_global){
+				std::stringstream ss;
+				for (auto& mod : ctx.module_ctx.module_names)
+					ss << *mod << "_";
+				variable_name = ss.str().append(ast.token->value);
+			}
 			emit_raw(variable_name);
 			emit_raw(")(");
 
@@ -208,7 +214,7 @@ namespace trove {
 
 			
 			auto new_ctx = ctx;
-			new_ctx.in_global = false;
+			// new_ctx.in_global = false;
 			new_ctx.module_ctx.module_names.push_back(&ast.token->value);
 
 			for (auto& expr : ast.value.value()->as_module().body) {
@@ -220,16 +226,31 @@ namespace trove {
 		else {
 			emit_raw(type_to_str(ast.type.value()));
 			emit_raw(" ");
+
+			// TODO isn't this the wrong way round?
+
+			// if (ctx.in_global) {
+			// 	emit_raw(ast.token->value);
+			// }
+			// else {
+			// 	std::stringstream ss;
+			// 	for (auto& mod : ctx.module_ctx.module_names)
+			// 		ss << *mod << "_";
+			// 	auto variable_name = ss.str().append(ast.token->value);
+			// 	// put the variable name in the symtable
+			// 	emit_raw(variable_name);
+			// }
+			// TODO this is wrong anyway, because say what if we wanted to call a module function from within the module?
 			if (ctx.in_global) {
-				emit_raw(ast.token->value);
-			}
-			else {
 				std::stringstream ss;
 				for (auto& mod : ctx.module_ctx.module_names)
 					ss << *mod << "_";
 				auto variable_name = ss.str().append(ast.token->value);
 				// put the variable name in the symtable
 				emit_raw(variable_name);
+			}
+			else {
+				emit_raw(ast.token->value);
 			}
 			IF_VALUE(ast.value) {
 				emit_raw(" = ");
@@ -278,7 +299,9 @@ namespace trove {
 		//emit("(){\n");
 		emit_raw("(");
 		for (u32 i = 0; i < fn_ast.params.size(); i++) {
-			gen(ctx, fn_ast.params[i]);
+			auto new_ctx = ctx;
+			new_ctx.in_global = false;
+			gen(new_ctx, fn_ast.params[i]);
 			if (i < fn_ast.params.size() - 1) {
 				emit_raw(",");
 			}
@@ -297,19 +320,6 @@ namespace trove {
 	}
 
 	void CGenerator::gen_call(CGeneratorContext& ctx, AST* ast) {
-		
-		// TODO mangle the identifier
-		if(ast->as_call().callee->get_type()==AST::Type::VAR){
-
-			// how do we get the type???
-
-			
-			// ast->as_call().callee->as_var().token->value = 
-			// Type::mangle_identifier(
-			// 	ast->as_call().callee->as_var().token->value,
-			// 	m_co); 
-		}
-
 		gen(ctx, ast->as_call().callee);
 		emit_raw("(");
 		for (u32 i = 0; i < ast->as_call().args.size(); i++) {
@@ -380,7 +390,6 @@ namespace trove {
 	}
 
 	void CGenerator::gen_struct_access(CGeneratorContext& ctx, AST* ast) {
-
 
 		// first look up the 
 		if (true) {

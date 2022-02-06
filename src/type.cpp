@@ -23,7 +23,9 @@ namespace trove {
     }
 
 	std::string Type::mangle_identifier_with_types(std::string& identifier, std::vector<Type>& types){
-		return identifier.append("_").append(Type::mangle_types(types));
+		if(types.size()>0)
+			return identifier.append("_").append(Type::mangle_types(types));
+		return identifier;
 	}
 
 	std::string Type::mangle_types(std::vector<Type>& types){

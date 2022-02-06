@@ -337,20 +337,20 @@ namespace trove {
 			return ast;
 
 		}
-		return parse_struct_access();
+		return parse_call();
 	}
 
-	AST* Parser::parse_struct_access() {
-		auto higher_precedence = parse_call();
-		if (consume(Token::Type::DOT)) {
-			auto member = parse_struct_access();
-			return new AST(AST::Type::STRUCT_ACCESS, higher_precedence->get_position().merge(member->source_position), StructAccessAST(higher_precedence, member));
-		}
-		return higher_precedence;
-	}
+	// AST* Parser::parse_struct_access() {
+	// 	auto higher_precedence = parse_call();
+	// 	if (consume(Token::Type::DOT)) {
+	// 		auto member = parse_struct_access();
+	// 		return new AST(AST::Type::STRUCT_ACCESS, higher_precedence->get_position().merge(member->source_position), StructAccessAST(higher_precedence, member));
+	// 	}
+	// 	return higher_precedence;
+	// }
 
 	AST* Parser::parse_call() {
-		auto higher_precedence = parse_single();
+		auto higher_precedence = parse_struct_access();
 		if (consume(Token::Type::LPAREN)) {
 
 			auto args = std::vector<AST*>();
@@ -374,6 +374,14 @@ namespace trove {
 		return higher_precedence;
 	}
 
+	AST* Parser::parse_struct_access() {
+		auto higher_precedence = parse_single();
+		if (consume(Token::Type::DOT)) {
+			auto member = parse_struct_access();
+			return new AST(AST::Type::STRUCT_ACCESS, higher_precedence->get_position().merge(member->source_position), StructAccessAST(higher_precedence, member));
+		}
+		return higher_precedence;
+	}
 
 	AST* Parser::parse_single() {
 		auto tok = peek();

@@ -13,3 +13,19 @@ print :: fn (val : bool) {
 print :: fn (val : string) {
     printf("%s", val)
 }
+
+println :: fn (val : u32) {
+    printf("%d\n", val)
+}
+
+println :: fn (val : bool) {
+    if val {
+        printf("true\n")
+    }else {
+        printf("false\n")
+    }
+}
+
+println :: fn (val : string) {
+    printf("%s\n", val)
+}

@@ -1,5 +1,5 @@
-include("io.trove")
+umm :: include("test1.trove")
 
 main :: fn {
-    print(true)
+    umm.x()
 }

@@ -141,9 +141,10 @@ void help(){
 }
 
 s32 args_parser(int argc, char** argv){
-	// auto f = std::string("c:/trovelang/trove/tests/trove/helloworld.trove");
-	// compile(load_file(f));
-	// return 0;
+	//auto f = std::string("c:/trovelang/trove/tests/trove/main.trove");
+	//compile(f);
+	//output_ast(f);
+	//return 0;
 
 	if(argc==1){
 		help();
@@ -176,6 +177,7 @@ s32 args_parser(int argc, char** argv){
 
 s32 main(int argc, char** argv){
 	#ifdef DEBUG
+		logger.debug() << "running in debug mode!\n";
 		logger.info() << "running in debug mode!\n";
 		logger.warn() << "running in debug mode!\n";
 		logger.errr() << "running in debug mode!\n";

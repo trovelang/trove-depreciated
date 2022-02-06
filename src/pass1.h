@@ -13,6 +13,10 @@
 
 namespace trove {
 
+    struct Pass1ModuleCtx {
+        std::vector<std::string*> module_names;
+    };
+
     struct AnalysisCtx {
         
         enum class Scope {
@@ -24,6 +28,7 @@ namespace trove {
         u1 r_value; // e.g. x = 123, the 123 would be an r_value
         u1 l_value;
         std::optional<Type*> required_type;
+        Pass1ModuleCtx module_ctx;
     };
 
     struct AnalysisUnit {
@@ -65,6 +70,7 @@ namespace trove {
         AnalysisUnit analyse(FnAST&);
         AnalysisUnit analyse(NumAST&);
         AnalysisUnit analyse_initialiser_list(AST*);
+        AnalysisUnit analyse_struct_access(AST*);
 
     private:
         CompilationUnit* m_compilation_unit;
