@@ -334,11 +334,17 @@ namespace trove {
             auto var_value = ast->as_call().callee->as_var().token->value;
             
             if(var_value=="include"){
-                // TODO assert if there are no args
+
+                if(ast->as_call().args.size()==0){
+                    m_compilation_unit->err_reporter().compile_error("include must have at least 1 argument", ast->source_position);
+                    return {};
+                }
+
                 auto module = new Type(TypeBuilder::builder().base_type(Type::BaseType::MODULE).build());
                 auto include_file = ast->as_call().args[0]->as_str().token->value;
-                auto module_src = load_file(include_file.c_str());
-                auto compilation_unit = CompilationUnit(module_src);
+                auto working_dir = m_compilation_unit->working_dir();
+                auto module_src = load_file_with_working_dir(working_dir, include_file);
+                auto compilation_unit = CompilationUnit(module_src, m_compilation_unit->working_dir());
                 auto module_ast = compilation_unit.up_to_pass1();
                 auto new_ast = new AST(AST::Type::MODULE, ast->source_position, ModuleAST({module_ast}));
                 *ast = *new_ast;

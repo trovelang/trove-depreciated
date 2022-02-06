@@ -47,7 +47,7 @@ namespace trove {
 
 	class CompilationUnit {
 	public:
-		CompilationUnit(std::string source) : m_source(source){
+		CompilationUnit(std::string source, std::string working_dir) : m_source(source), m_working_dir(working_dir) {
 			m_err_reporter = ErrorReporter(this);
 		}
 		std::vector<Token>* lex();
@@ -60,11 +60,15 @@ namespace trove {
 		std::string& source(){
 			return m_source;
 		}
+		std::string& working_dir(){
+			return m_working_dir;
+		}
 		ErrorReporter& err_reporter(){
 			return m_err_reporter;
 		}
 	private:
 		std::string m_source;
+		std::string m_working_dir;
 		ErrorReporter m_err_reporter;
 		std::vector<Token>* m_tokens;
 		AST* m_ast;

@@ -1,5 +1,5 @@
-file1 :: include("c:/trovelang/trove/tests/trove/test1.trove")
+io :: include("io.trove")
 
 main :: fn {
-    printf("hello, world! %d %d", file1.x, file1.file2.y)
+    io.println()
 }

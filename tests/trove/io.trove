@@ -1,0 +1,6 @@
+
+test :: 123
+
+println :: fn () {
+    printf("this is println")
+}
