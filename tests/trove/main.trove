@@ -1,5 +1,8 @@
-umm :: include("test1.trove")
+
+test :: include("test1.trove")
+include("io.trove")
 
 main :: fn {
-    umm.x()
+    x := test.my_variable
+    println(x)
 }

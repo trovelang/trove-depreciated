@@ -334,6 +334,7 @@ namespace trove {
     AnalysisUnit Pass1::analyse_var(AST* ast){
         auto var = ast->as_var();
         auto type = m_symtable.lookup(var.token->value);
+
         IF_NO_VALUE(type) {
             m_compilation_unit->err_reporter().compile_error("unknown variable", ast->source_position);
         }
@@ -363,8 +364,11 @@ namespace trove {
                 auto include_file = ast->as_call().args[0]->as_str().token->value;
                 auto working_dir = m_compilation_unit->working_dir();
                 auto module_src = load_file_with_working_dir(working_dir, include_file);
-
-                auto compilation_unit = CompilationUnit(include_file, module_src, m_compilation_unit->working_dir());
+                if(!module_src.has_value()){
+                    m_compilation_unit->err_reporter().compile_error("include file does not exist", ast->source_position);
+                    return {};
+                }
+                auto compilation_unit = CompilationUnit(include_file, module_src.value(), m_compilation_unit->working_dir());
                 auto pass1_result = compilation_unit.up_to_pass1();
 
                 // merge our sym tables together

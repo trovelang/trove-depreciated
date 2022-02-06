@@ -1,5 +1,1 @@
-
-
-x :: fn () {
-    printf("x\n")
-}
+my_variable :: 8888

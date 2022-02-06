@@ -40,12 +40,14 @@ std::string load_file(std::string& file){
 	return buffer.str();
 }
 
-std::string load_file_with_working_dir(std::string& working_dir, std::string& file){
+std::optional<std::string> load_file_with_working_dir(std::string& working_dir, std::string& file){
 	auto full_path = working_dir.append(file);
 	if(std::filesystem::exists(full_path)){
 		return load_file(full_path);
+	}else if(std::filesystem::exists(file)){
+		return load_file(file);
 	}
-	return load_file(file);
+	return std::optional<std::string>();
 }
 
 u32 num_lines(std::string& source) {
