@@ -1,0 +1,14 @@
+// include("io.trove")
+
+x :: fn (val : u32) {
+    printf("%d", val)
+}
+x :: fn (val : string) {
+    printf("%s", val)
+}
+
+
+main :: fn {
+
+    x(123)
+}

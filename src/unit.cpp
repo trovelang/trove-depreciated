@@ -37,7 +37,7 @@ Pass1Result CompilationUnit::up_to_pass1(){
 }
 
 void CompilationUnit::compile(){
-    auto cgenerator = CGenerator(m_pass1_result.ast);
+    auto cgenerator = CGenerator(this, m_pass1_result.ast);
     cgenerator.gen();
 }
 

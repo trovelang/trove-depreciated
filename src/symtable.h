@@ -58,7 +58,7 @@ public:
 		return m_values[m_index].size();
 	}
 
-	std::optional<u32> lookup_level(std::string key) {
+	std::optional<u32> lookup_level(std::string& key) {
 		for (s32 i = m_index; i >= 0; i--) {
 			if (m_values[i].contains(key)) {
 				return i;
@@ -67,13 +67,24 @@ public:
 		return std::optional<u32>();
 	}
 
-	std::optional<T> lookup(std::string key) {
+	std::optional<T> lookup(std::string& key) {
 		for (s32 i = m_index; i >= 0; i--) {
 			if (m_values[i].contains(key)) {
 				return m_values[i][key];
 			}
 		}
 		return std::optional<T>();
+	}
+
+	std::optional<T> lookup_only_level(std::string& key, u32 level){
+		if(m_values[level].contains(key)){
+			return m_values[level][key];
+		}
+		return std::optional<T>();
+	}
+
+	u32& level(){
+		return m_index;
 	}
 
 private:

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <symtable.h>
+#include <unit.h>
 
 #define UHHH
 
@@ -24,7 +25,8 @@ namespace trove {
     class CGenerator {
     public:
         std::string execute(const char* cmd);
-        CGenerator(AST* ast) : m_ast(ast) {}
+        CGenerator(CompilationUnit* compilation_unit, AST* ast) 
+        : m_compilation_unit(compilation_unit), m_ast(ast) {}
         std::string type_to_str(Type type);
         void emit_raw(std::string code);
         void emit_c_str(std::string str);
@@ -53,6 +55,7 @@ namespace trove {
         void gen_initialiser_list(CGeneratorContext&, AST*);
         void gen_module(CGeneratorContext&, AST*);
     private:
+        CompilationUnit* m_compilation_unit;
         AST* m_ast;
         SymTable<std::string> m_symtable;
         std::stringstream m_output_stream;

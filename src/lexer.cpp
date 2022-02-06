@@ -351,12 +351,13 @@ namespace trove {
 			auto c = next();
 			// check for escape sequences
 			if (c == '\\') {
-				switch (next()) {
-				case 'n': {ss << '\n'; break; }
-				case 'r': {ss << '\r'; break; }
-				case '\'': {ss << '\''; break; }
-				case '\t': {ss << '\t'; break; }
-				}
+				ss << "\\";
+				// switch (next()) {
+				// case 'n': {ss << "\\n"; break; }
+				// case 'r': {ss << "\\r"; break; }
+				// case '\'': {ss << "\\"; break; }
+				// case '\t': {ss << "\\"; break; }
+				// }
 			}
 			else {
 				ss << c;

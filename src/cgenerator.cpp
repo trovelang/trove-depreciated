@@ -297,6 +297,19 @@ namespace trove {
 	}
 
 	void CGenerator::gen_call(CGeneratorContext& ctx, AST* ast) {
+		
+		// TODO mangle the identifier
+		if(ast->as_call().callee->get_type()==AST::Type::VAR){
+
+			// how do we get the type???
+
+			
+			// ast->as_call().callee->as_var().token->value = 
+			// Type::mangle_identifier(
+			// 	ast->as_call().callee->as_var().token->value,
+			// 	m_co); 
+		}
+
 		gen(ctx, ast->as_call().callee);
 		emit_raw("(");
 		for (u32 i = 0; i < ast->as_call().args.size(); i++) {

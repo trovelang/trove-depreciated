@@ -1,8 +1,7 @@
+print :: fn (value : u32) {
+    printf("%d", value)
+}
 
-test :: 123
-
-x := undefined
-
-println :: fn () {
-    printf("this is println")
+print :: fn (value : string) {
+    printf("%s", value)
 }

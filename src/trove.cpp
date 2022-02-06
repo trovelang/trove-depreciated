@@ -125,8 +125,8 @@ s32 output_ast(std::string& source_name){
 	
 	auto working_dir = "c:/trovelang/trove/tests/trove/";
 	auto compilation_unit = trove::CompilationUnit(source_name, source, working_dir);
-	auto parse_result = compilation_unit.up_to_parse();
-	logger.info() << parse_result.ast->to_string() << "\n";
+	auto pass1_result = compilation_unit.up_to_pass1();
+	logger.info() << pass1_result.ast->to_string() << "\n";
 	return 0;
 }
 

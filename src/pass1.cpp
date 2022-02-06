@@ -156,6 +156,19 @@ namespace trove {
                 // set the global mod name
                 value_analysis_unit.type->associated_token = decl.token;
             }
+            if(m_symtable.lookup_only_level(decl.token->value, m_symtable.level()).has_value()){
+                if(decl.type.value().base_type==Type::BaseType::FN){
+
+                    // FIXME check for overloading
+                    // the problem here is we loose track of the 
+                    auto type_mangling = decl.type.value().mangled_to_string();
+                    ast->as_decl().token->value.append(type_mangling);
+
+                }else{
+                    m_compilation_unit->err_reporter().compile_error("variable already defined", ast->get_position());
+                    return {};
+                }
+            }
             
         }
 
@@ -165,7 +178,12 @@ namespace trove {
             type = &decl.type.value();
         }
 
-        m_symtable.place(decl.token->value, &ast->as_decl().type.value());
+        // if we encounter a function then mangle it
+        if(decl.token->value!="main" && decl.type.value().base_type==Type::BaseType::FN){
+            ast->as_decl().token->value = Type::mangle_identifier_with_type(ast->as_decl().token->value, decl.type.value());
+        }
+
+        m_symtable.place(ast->as_decl().token->value, &ast->as_decl().type.value());
         return AnalysisUnit{ &ast->as_decl().type.value() };
     }
 
@@ -328,7 +346,6 @@ namespace trove {
 
     AnalysisUnit Pass1::analyse_call(AST* ast) {
 
-
         // check for builtins
         if(ast->as_call().callee->type==AST::Type::VAR){
             auto var_value = ast->as_call().callee->as_var().token->value;
@@ -355,6 +372,22 @@ namespace trove {
                 *ast = *new_ast;
 
                 return AnalysisUnit{module};
+            }
+        }
+
+        std::vector<Type> param_types;
+        for(auto& arg : ast->as_call().args){
+            auto new_ctx = SAME_CTX();
+            param_types.push_back(*(analyse(new_ctx, arg).type));
+        }
+
+        if(ast->as_call().callee->get_type()==AST::Type::VAR){
+            // check for intrinsics
+            if(ast->as_call().callee->as_var().token->value!="printf"){
+                auto mangled_name = Type::mangle_identifier_with_types(
+                    ast->as_call().callee->as_var().token->value.append("_FN"), 
+                    param_types);
+                ast->as_call().callee->as_var().token->value = mangled_name;
             }
         }
 

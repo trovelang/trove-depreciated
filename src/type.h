@@ -36,7 +36,12 @@ namespace trove {
 
 		u1 equals(Type other);
 		std::string to_string();
+		std::string mangled_to_string();
 		void coerce(Type& other);
+
+		static std::string mangle_identifier_with_type(std::string& identifier, Type& type);
+		static std::string mangle_identifier_with_types(std::string& identifier, std::vector<Type>& types);
+		static std::string mangle_types(std::vector<Type>& types);
 
 		u1 complete = true;  // 'var u32' is complete, 'var' alone is not
 		BaseType base_type;
