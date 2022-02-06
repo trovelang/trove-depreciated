@@ -1,7 +1,15 @@
-print :: fn (value : u32) {
-    printf("%d", value)
+print :: fn (val : u32) {
+    printf("%d", val)
 }
 
-print :: fn (value : string) {
-    printf("%s", value)
+print :: fn (val : bool) {
+    if val {
+        printf("true")
+    }else {
+        printf("false")
+    }
+}
+
+print :: fn (val : string) {
+    printf("%s", val)
 }
