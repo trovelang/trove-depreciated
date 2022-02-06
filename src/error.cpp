@@ -3,6 +3,7 @@
 #include <sstream>
 #include <spdlog/spdlog.h>
 #include <unit.h>
+#include <log.h>
 
 namespace trove {
 
@@ -18,28 +19,36 @@ namespace trove {
 	}
 
 	void ErrorReporter::compile_error(std::string err, SourcePosition position) {
-		std::cout << "compile_error" << std::endl;
+		logger.errr() << "compile_error in " << m_compilation_unit->source_name() 
+		<< " [" << position.line_start << ":" << position.index_start << "]" 
+		<< "\n\n";
 
 		std::stringstream ss;
 
 		auto lines = split_string_by_newline(m_compilation_unit->source());
 
-		for (u32 line = position.line_start; line <= position.line_end; line++) {
-			for (u32 i = position.index_start; i < position.index_end; i++) {
+		for(u32 line=position.line_start;line<=position.line_end;line++){
+			for(u32 i=0;i<position.index_end;i++){
+				if(i==position.index_start)
+					ss << logger.RED;
 				ss << lines[line][i];
+				if(i==position.index_end)
+					ss << logger.END;
 			}
 		}
 		
-		std::cout << ss.str() << std::endl;
+		logger.errr() << ss.str() << "\n\n";
 		ss.str("");
 		
-		for (u32 i = 0; i < position.index_end - position.index_start; i++) {
-			ss << "^";
+		for (u32 i = 0; i < position.index_end; i++) {
+			if(i<position.index_start)
+				ss << " ";
+			else
+				ss << "^";
 		}
-		std::cout << ss.str();
-		ss.str("");
+		ss << " ";
 
-		std::cout << err << std::endl;
+		logger.errr() << ss.str() << err << "\n";
 
 		exit(0);
 	}

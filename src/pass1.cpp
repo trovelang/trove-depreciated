@@ -345,7 +345,7 @@ namespace trove {
                 auto working_dir = m_compilation_unit->working_dir();
                 auto module_src = load_file_with_working_dir(working_dir, include_file);
 
-                auto compilation_unit = CompilationUnit(module_src, m_compilation_unit->working_dir());
+                auto compilation_unit = CompilationUnit(include_file, module_src, m_compilation_unit->working_dir());
                 auto pass1_result = compilation_unit.up_to_pass1();
 
                 // merge our sym tables together

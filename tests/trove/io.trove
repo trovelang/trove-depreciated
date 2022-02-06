@@ -1,6 +1,8 @@
 
 test :: 123
 
+x := undefined
+
 println :: fn () {
     printf("this is println")
 }

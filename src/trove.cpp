@@ -56,12 +56,14 @@ u32 num_lines(std::string& source) {
 	return line_counter;
 }
 
-s32 compile(std::string source){
+s32 compile(std::string& source_name){
+
+	auto source = load_file(source_name);
 	auto n_lines = num_lines(source);
 
 	auto working_dir = "c:/trovelang/trove/tests/trove/";
 
-	auto compilation_unit = trove::CompilationUnit(source, working_dir);
+	auto compilation_unit = trove::CompilationUnit(source_name, source, working_dir);
 
 	auto start_parse = std::chrono::high_resolution_clock::now();
 	compilation_unit.up_to_compile(); 
@@ -101,11 +103,13 @@ s32 compile(std::string source){
 	*/
 }
 
-s32 output_tokens(std::string source){
+s32 output_tokens(std::string& source_name){
+
+	auto source = load_file(source_name);
 	auto n_lines = num_lines(source);
 
 	auto working_dir = "c:/trovelang/trove/tests/trove/";
-	auto compilation_unit = trove::CompilationUnit(source, working_dir);
+	auto compilation_unit = trove::CompilationUnit(source_name, source, working_dir);
 	auto tokens = compilation_unit.lex();
 
 	for(auto& token : *tokens)
@@ -114,10 +118,13 @@ s32 output_tokens(std::string source){
 	return 0;
 }
 
-s32 output_ast(std::string source){
+s32 output_ast(std::string& source_name){
+
+	auto source = load_file(source_name);
 	auto n_lines = num_lines(source);
+	
 	auto working_dir = "c:/trovelang/trove/tests/trove/";
-	auto compilation_unit = trove::CompilationUnit(source, working_dir);
+	auto compilation_unit = trove::CompilationUnit(source_name, source, working_dir);
 	auto parse_result = compilation_unit.up_to_parse();
 	logger.info() << parse_result.ast->to_string() << "\n";
 	return 0;
@@ -143,22 +150,25 @@ s32 args_parser(int argc, char** argv){
 	}else{
 		if(std::string(argv[1])=="-h"){
 			help();
+			return 0;
 		}
-		else if(std::string(argv[1])=="-c"){
-			auto filename = std::string(argv[2]);
-			compile(load_file(filename));
+
+		auto filename = std::string(argv[2]);
+		
+		if(std::string(argv[1])=="-c"){
+			compile(filename);
 		}else if(std::string(argv[1])=="-r"){
 			auto filename = std::string(argv[2]);
-			compile(load_file(filename));
+			compile(filename);
 			system("c:/trovelang/trove/tmp/tmp.exe");
 		}else if(std::string(argv[1])=="-i"){
 			logger.warn() << "This feature is not implemented yet\n";
 		}else if(std::string(argv[1])=="-t"){
 			auto filename = std::string(argv[2]);
-			output_tokens(load_file(filename));
+			output_tokens(filename);
 		}else if(std::string(argv[1])=="-a"){
 			auto filename = std::string(argv[2]);
-			output_ast(load_file(filename));
+			output_ast(filename);
 		}
 	}
 	return 0;
