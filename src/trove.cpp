@@ -40,7 +40,7 @@ std::string load_file(std::string& file){
 	return buffer.str();
 }
 
-std::optional<std::string> load_file_with_working_dir(std::string& working_dir, std::string& file){
+std::optional<std::string> load_file_with_working_dir(std::string working_dir, std::string& file){
 	auto full_path = working_dir.append(file);
 	if(std::filesystem::exists(full_path)){
 		return load_file(full_path);
@@ -60,12 +60,16 @@ u32 num_lines(std::string& source) {
 
 s32 compile(std::string& source_name){
 
-	auto source = load_file(source_name);
-	auto n_lines = num_lines(source);
+	std::string working_dir = "c:/trovelang/trove/tests/trove/";
 
-	auto working_dir = "c:/trovelang/trove/tests/trove/";
+	auto source = load_file_with_working_dir(working_dir, source_name);
 
-	auto compilation_unit = trove::CompilationUnit(source_name, source, working_dir);
+	assert(source.has_value());
+
+	auto n_lines = num_lines(source.value());
+
+
+	auto compilation_unit = trove::CompilationUnit(source_name, source.value(), working_dir);
 
 	auto start_parse = std::chrono::high_resolution_clock::now();
 	compilation_unit.up_to_compile(); 
@@ -107,11 +111,11 @@ s32 compile(std::string& source_name){
 
 s32 output_tokens(std::string& source_name){
 
-	auto source = load_file(source_name);
-	auto n_lines = num_lines(source);
+	std::string working_dir = "c:/trovelang/trove/tests/trove/";
+	auto source = load_file_with_working_dir(working_dir, source_name);
+	auto n_lines = num_lines(source.value());
 
-	auto working_dir = "c:/trovelang/trove/tests/trove/";
-	auto compilation_unit = trove::CompilationUnit(source_name, source, working_dir);
+	auto compilation_unit = trove::CompilationUnit(source_name, source.value(), working_dir);
 	auto tokens = compilation_unit.lex();
 
 	for(auto& token : *tokens)
@@ -122,11 +126,11 @@ s32 output_tokens(std::string& source_name){
 
 s32 output_ast(std::string& source_name){
 
-	auto source = load_file(source_name);
-	auto n_lines = num_lines(source);
+	std::string working_dir = "c:/trovelang/trove/tests/trove/";
+	auto source = load_file_with_working_dir(working_dir, source_name);
+	auto n_lines = num_lines(source.value());
 	
-	auto working_dir = "c:/trovelang/trove/tests/trove/";
-	auto compilation_unit = trove::CompilationUnit(source_name, source, working_dir);
+	auto compilation_unit = trove::CompilationUnit(source_name, source.value(), working_dir);
 	auto pass1_result = compilation_unit.up_to_pass1();
 	logger.info() << pass1_result.ast->to_string() << "\n";
 	return 0;

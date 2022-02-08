@@ -4,5 +4,5 @@ include("io.trove")
 
 main :: fn {
     x := test.my_variable
-    println(x)
+    println(x+3)
 }
