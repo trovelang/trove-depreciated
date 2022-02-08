@@ -23,6 +23,7 @@ namespace trove {
 		u1 is_type(Token::Type t);
 		Type parse_type();
 		AST* parse_stmt_expr();
+		AST* parse_annotation();
 		AST* parse_comp();
 		AST* parse_watchman();
 		AST* parse_if();

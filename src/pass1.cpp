@@ -43,6 +43,7 @@ namespace trove {
         AnalysisUnit res{};
         switch (ast->get_type()) {
         case AST::Type::PROGRAM: res = analyse_program_ast(ast); break;
+        case AST::Type::ANNOTATION: res = analyse_annotation(ast); break;
         case AST::Type::BLOCK: res = analyse_block(ast); break;
         case AST::Type::STATEMENT: res = analyse_statement(ast); break;
         case AST::Type::DECL: res = analyse_decl_ast(ast); break;
@@ -68,6 +69,11 @@ namespace trove {
         m_analysis_context.pop();
 
         return res;
+    }
+
+    AnalysisUnit Pass1::analyse_annotation(AST* ast) {
+        auto new_ctx = SAME_CTX();
+        return analyse(new_ctx, ast->as_annotation().body);
     }
 
     AnalysisUnit Pass1::analyse_statement(AST* ast) {

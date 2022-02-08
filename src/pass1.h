@@ -49,6 +49,7 @@ namespace trove {
         void register_builtins();
         Pass1Result analyse();
         AnalysisUnit analyse(AnalysisCtx, AST*);
+        AnalysisUnit analyse_annotation(AST*);
         AnalysisUnit analyse_statement(AST*);
         AnalysisUnit analyse_decl_ast(AST*);
         AnalysisUnit analyse_block(AST*);

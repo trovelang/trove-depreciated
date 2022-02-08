@@ -20,6 +20,15 @@ namespace trove {
 		std::vector<AST*> body;
 	};
 
+	// do we want to have this as an ast, or have it as an annoatation on the ast
+	struct AnnotationAST {
+		AnnotationAST(){}
+		AnnotationAST(Token* annotation_name, AST* body) : annotation_name(annotation_name), body(body){}
+		std::string to_string();
+		Token* annotation_name;
+		AST* body;
+	};
+
 	struct BlockAST {
 		BlockAST() {}
 		BlockAST(std::vector<AST*> body) : body(body) {}
@@ -278,6 +287,7 @@ namespace trove {
 
 		enum class Type : u8 {
 			PROGRAM,
+			ANNOTATION,
 			BLOCK,
 			STATEMENT,
 			WATCHMAN,
@@ -304,6 +314,7 @@ namespace trove {
 
 		using ASTValue = std::variant<
 			ProgramAST,
+			AnnotationAST,
 			BlockAST,
 			StatementAST,
 			WatchmanAST,
@@ -343,6 +354,10 @@ namespace trove {
 
 		ProgramAST& as_program() {
 			return std::get<ProgramAST>(value);
+		}
+
+		AnnotationAST& as_annotation() {
+			return std::get<AnnotationAST>(value);
 		}
 
 		BlockAST& as_block() {
@@ -436,6 +451,7 @@ namespace trove {
 		std::string to_string() {
 			switch (type) {
 			case Type::PROGRAM: return as_program().to_string();
+			case Type::ANNOTATION: return as_annotation().to_string();
 			case Type::BLOCK: return as_block().to_string();
 			case Type::STATEMENT: return as_statement().to_string();
 			case Type::DECL: return as_decl().to_string();

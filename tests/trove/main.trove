@@ -1,8 +1,12 @@
+
+inlined :: fn @this_is_an_annotation { 
+    printf("this is inlined!")
+}
+
 main :: fn {
 
-    sub :: fn {
-        printf("im in a lamdba!")
-    }
+    x := @add1 1 + 1
 
-    sub()
+    printf("x %d\n", x)
+
 }

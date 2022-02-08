@@ -43,6 +43,12 @@ namespace trove {
 		return ss.str();
 	}
 
+	std::string AnnotationAST::to_string() {
+		std::stringstream ss;
+		ss << "AnnotationAST " << body->to_string() << "\n";
+		return ss.str();
+	}
+
 	std::string BlockAST::to_string() {
 		std::stringstream ss;
 		ss << "BlockAST\n";

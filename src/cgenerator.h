@@ -49,6 +49,7 @@ namespace trove {
         void gen_runtime();
         void gen();
         void gen(CGeneratorContext&, AST*);
+        void gen_annotation(CGeneratorContext&, AST*);
         void gen_statement(CGeneratorContext&, AST*);
         void gen(CGeneratorContext&, DeclAST&);
         void gen(CGeneratorContext&, AssignAST&);

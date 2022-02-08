@@ -117,10 +117,20 @@ namespace trove {
 		return new AST(AST::Type::STATEMENT, child->get_position(), StatementAST(child));
 	}
 
+	AST* Parser::parse_annotation(){
+		auto annot = consume(Token::Type::DIRECTIVE);
+		auto annotation_name = consume(Token::Type::IDENTIFIER);
+		auto body = parse_expr();
+		return new AST(AST::Type::ANNOTATION, annot.value()->source_position.merge(body->source_position), AnnotationAST(annotation_name.value(), body));
+	}
+
 	AST* Parser::parse_expr() {
 		AST* child = nullptr;
 		auto peeking = peek();
 		switch (peek()->type) {
+		case Token::Type::DIRECTIVE:
+			child = parse_annotation();
+			break;
 		/*case Token::Type::LCURLY:
 			child = parse_block();
 			break;*/

@@ -123,6 +123,7 @@ namespace trove {
 	void CGenerator::gen(CGeneratorContext& ctx, AST* ast) {
 		switch (ast->get_type()) {
 		case AST::Type::PROGRAM: gen(ctx, ast->as_program()); break;
+		case AST::Type::ANNOTATION: gen_annotation(ctx, ast); break;
 		case AST::Type::BLOCK: gen(ctx, ast->as_block()); break;
 		case AST::Type::STATEMENT: gen_statement(ctx, ast); break;
 		case AST::Type::DECL: gen(ctx, ast->as_decl()); break;
@@ -155,6 +156,12 @@ namespace trove {
 		for (auto& expr : ast.body) {
 			gen(ctx, expr);
 		}
+	}
+
+	void CGenerator::gen_annotation(CGeneratorContext& ctx, AST* ast) {
+		if(ast->as_annotation().annotation_name->value=="add1")
+			emit_raw("1+");
+		gen(ctx, ast->as_annotation().body);
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, BlockAST& ast) {
