@@ -50,6 +50,17 @@ std::optional<std::string> load_file_with_working_dir(std::string working_dir, s
 	return std::optional<std::string>();
 }
 
+std::optional<std::string> get_working_dir(std::string current_path, std::string& file_name){
+	auto filename_stripped = file_name.substr(0, file_name.find_last_of("\\/")+1);
+	auto full_path = current_path.append(filename_stripped);
+	if(std::filesystem::exists(full_path)){
+		return full_path;
+	}else if(std::filesystem::exists(file_name)){
+		return filename_stripped;
+	}
+	return std::optional<std::string>();
+}
+
 u32 num_lines(std::string& source) {
 	u32 line_counter = 1;
 	for (auto& c : source)
@@ -58,18 +69,21 @@ u32 num_lines(std::string& source) {
 	return line_counter;
 }
 
-s32 compile(std::string& source_name){
+s32 compile(std::string& current_path, std::string& source_name){
 
-	std::string working_dir = "c:/trovelang/trove/tests/trove/";
+	auto working_dir = get_working_dir(current_path, source_name);
 
-	auto source = load_file_with_working_dir(working_dir, source_name);
+	if(!working_dir.has_value()){
+		logger.errr() << "file doesn't exist "<<source_name<<".\n";
+	}
+
+	auto source = load_file_with_working_dir(working_dir.value(), source_name);
 
 	assert(source.has_value());
 
 	auto n_lines = num_lines(source.value());
 
-
-	auto compilation_unit = trove::CompilationUnit(source_name, source.value(), working_dir);
+	auto compilation_unit = trove::CompilationUnit(source_name, source.value(), working_dir.value());
 
 	auto start_parse = std::chrono::high_resolution_clock::now();
 	compilation_unit.up_to_compile(); 
@@ -78,44 +92,23 @@ s32 compile(std::string& source_name){
 	spdlog::info("Compiled {} lines in {}", n_lines, time_to_str(std::chrono::duration_cast<std::chrono::microseconds>(end_gen - start_parse).count()));
 
 	return 0;
-
-	/*
-
-	auto start_parse = std::chrono::high_resolution_clock::now();
-
-	auto lexer = trove::Lexer(&compilation_unit, source);
-	auto tokens = lexer.lex();
-
-	auto parser = trove::Parser(&compilation_unit, tokens);
-	auto ast = parser.parse();
-
-	auto type_checker = trove::Pass1(&compilation_unit, ast);
-	type_checker.analyse();
-
-	auto end_parse = std::chrono::high_resolution_clock::now();
-
-	spdlog::info("Parsed {} lines in {}...", n_lines, time_to_str(std::chrono::duration_cast<std::chrono::microseconds>(end_parse - start_parse).count()));
-
-	auto start_gen = std::chrono::high_resolution_clock::now();
-	auto cgenerator = trove::CGenerator(ast);
-	cgenerator.gen();
-	auto end_gen = std::chrono::high_resolution_clock::now();
-
-	spdlog::info("Generated {} lines in {}...", n_lines, time_to_str(std::chrono::duration_cast<std::chrono::microseconds>(end_gen - start_gen).count()));
-	spdlog::info("Compiled {} lines in {}", n_lines, time_to_str(std::chrono::duration_cast<std::chrono::microseconds>(end_gen - start_parse).count()));	
-
-	return 0;
-
-	*/
 }
 
-s32 output_tokens(std::string& source_name){
+s32 output_tokens(std::string& current_path, std::string& source_name){
 
-	std::string working_dir = "c:/trovelang/trove/tests/trove/";
-	auto source = load_file_with_working_dir(working_dir, source_name);
+	auto working_dir = get_working_dir(current_path, source_name);
+
+	if(!working_dir.has_value()){
+		logger.errr() << "file doesn't exist "<<source_name<<".\n";
+	}
+
+	auto source = load_file_with_working_dir(working_dir.value(), source_name);
+
+	assert(source.has_value());
+
 	auto n_lines = num_lines(source.value());
 
-	auto compilation_unit = trove::CompilationUnit(source_name, source.value(), working_dir);
+	auto compilation_unit = trove::CompilationUnit(source_name, source.value(), working_dir.value());
 	auto tokens = compilation_unit.lex();
 
 	for(auto& token : *tokens)
@@ -124,13 +117,21 @@ s32 output_tokens(std::string& source_name){
 	return 0;
 }
 
-s32 output_ast(std::string& source_name){
+s32 output_ast(std::string& current_path, std::string& source_name){
 
-	std::string working_dir = "c:/trovelang/trove/tests/trove/";
-	auto source = load_file_with_working_dir(working_dir, source_name);
+	auto working_dir = get_working_dir(current_path, source_name);
+
+	if(!working_dir.has_value()){
+		logger.errr() << "file doesn't exist "<<source_name<<".\n";
+	}
+
+	auto source = load_file_with_working_dir(working_dir.value(), source_name);
+
+	assert(source.has_value());
+
 	auto n_lines = num_lines(source.value());
 	
-	auto compilation_unit = trove::CompilationUnit(source_name, source.value(), working_dir);
+	auto compilation_unit = trove::CompilationUnit(source_name, source.value(), working_dir.value());
 	auto pass1_result = compilation_unit.up_to_pass1();
 	logger.info() << pass1_result.ast->to_string() << "\n";
 	return 0;
@@ -152,6 +153,8 @@ s32 args_parser(int argc, char** argv){
 	//output_ast(f);
 	//return 0;
 
+	auto current_path = std::filesystem::current_path().string();
+
 	if(argc==1){
 		help();
 	}else{
@@ -163,19 +166,19 @@ s32 args_parser(int argc, char** argv){
 		auto filename = std::string(argv[2]);
 		
 		if(std::string(argv[1])=="-c"){
-			compile(filename);
+			compile(current_path, filename);
 		}else if(std::string(argv[1])=="-r"){
 			auto filename = std::string(argv[2]);
-			compile(filename);
+			compile(current_path, filename);
 			system("c:/trovelang/trove/tmp/tmp.exe");
 		}else if(std::string(argv[1])=="-i"){
 			logger.warn() << "This feature is not implemented yet\n";
 		}else if(std::string(argv[1])=="-t"){
 			auto filename = std::string(argv[2]);
-			output_tokens(filename);
+			output_tokens(current_path, filename);
 		}else if(std::string(argv[1])=="-a"){
 			auto filename = std::string(argv[2]);
-			output_ast(filename);
+			output_ast(current_path, filename);
 		}
 	}
 	return 0;
