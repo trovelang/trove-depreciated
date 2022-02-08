@@ -3,10 +3,21 @@ inlined :: fn @this_is_an_annotation {
     printf("this is inlined!")
 }
 
+
+vec :: type {
+    x : u32
+    y : u32
+    z : u32
+}
+
 main :: fn {
 
-    x := @add1 1 + 1
+    // x := @add1 1 + 1
 
-    printf("x %d\n", x)
+    first :: "james"
+    last :: "clarke" // we could add @join "james" to ensure they are stored in the same string
 
+    printf("%s %s\n", first, last)
+
+    v : vec
 }

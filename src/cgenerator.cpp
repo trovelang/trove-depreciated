@@ -351,7 +351,7 @@ namespace trove {
 		}
 		emit_raw("){\n");
 		gen(ctx, fn_ast.body);
-		emit_raw("}");
+		emit_raw("};");
 
 		// we add 1 as we have inserted a block
 		m_block_ptr = old_block_ptr+1;
@@ -408,7 +408,12 @@ namespace trove {
 	}
 
 	void CGenerator::gen_struct_def(CGeneratorContext& ctx, AST* ast) {
-		
+		auto old_block_ptr = m_block_ptr;
+
+		// add another block before us
+		m_blocks.insert(m_blocks.begin() + m_block_ptr, CGeneratorBlock{});
+		m_block_ptr = m_block_ptr;
+	
 		auto struct_def = ast->as_struct_def();
 		emit_raw("struct ");
 		emit_raw(struct_def.type.associated_token->value);
@@ -417,8 +422,9 @@ namespace trove {
 			gen(ctx, member);
 			emit_raw(";\n");
 		}
-		emit_raw("}");
+		emit_raw("};");
 
+		m_block_ptr=old_block_ptr+1;
 	}
 
 	void CGenerator::gen_struct_literal(CGeneratorContext& ctx, AST* ast) {
@@ -438,12 +444,17 @@ namespace trove {
 	void CGenerator::gen_struct_access(CGeneratorContext& ctx, AST* ast) {
 
 		// first look up the 
-		if (true) {
+		u1 nmspc = false;
+		if (nmspc) {
 
 			// then create the name
 			std::stringstream ss;
 			ss << ast->as_struct_access().obj->as_var().token->value << "_";
 			emit_raw(ss.str());
+			gen(ctx, ast->as_struct_access().member);
+		}else{
+			gen(ctx, ast->as_struct_access().obj);
+			emit_raw(".");
 			gen(ctx, ast->as_struct_access().member);
 		}
 	}

@@ -203,8 +203,7 @@ namespace trove {
 
 	std::string StructAccessAST::to_string() {
 		std::stringstream ss;
-		//ss << "StructAccessAST "<< obj->to_string() << " " << member->to_string() << "\n";
-		ss << "StructAccessAST";
+		ss << "StructAccessAST "<< obj->to_string() << " " << member->to_string() << "\n";
 		return ss.str();
 	}
 
