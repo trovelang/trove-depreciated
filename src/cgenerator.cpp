@@ -9,6 +9,16 @@
 namespace trove {
 
 
+
+	void CGenerator::push_block(){
+		m_blocks.push_back({});
+		m_block_ptr++;
+	}
+
+	void CGenerator::push_block_before(){
+
+	}
+
 	void CGenerator::emit_c_str(std::string str) {
 		emit_raw("\"");
 		emit_raw(str);
@@ -66,16 +76,38 @@ namespace trove {
 	}
 
 	void CGenerator::emit_raw(std::string code) {
-		m_output_stream << code;
+		m_blocks[m_block_ptr].ss << code;
+	}
+
+	
+	void CGenerator::emit_raw(std::string code, u32 block_ptr){
+		auto& block = m_blocks[block_ptr];
+		block.ss << code;
+	}
+
+	std::string CGenerator::merge_blocks(){
+		std::stringstream ss;
+		for(auto& block : m_blocks)
+			ss << "//block_start\n"<<block.ss.str()<<"//block_end\n";
+		return ss.str();
 	}
 
 	void CGenerator::gen() {
 		CGeneratorContext ctx;
 		ctx.in_global = true;
+
+		m_blocks.push_back({});
+
 		gen_runtime();
+
+		push_block();
+
 		gen(ctx, m_ast);
-		auto code = m_output_stream.str();
+
+		auto code = merge_blocks();
+		
 		std::ofstream myfile;
+		
 		myfile.open("c:/trovelang/trove/tmp/tmp.c");
 		myfile << code;
 		myfile.close();
@@ -86,8 +118,6 @@ namespace trove {
 		#ifdef CODEGEN_GCC
 		system("gcc -w c:/trovelang/trove/tmp/tmp.c -o c:/trovelang/trove/tmp/tmp.exe");
 		#endif 
-		
-		// execute("c:/trovelang/trove/tmp/tmp.exe");
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, AST* ast) {
@@ -149,7 +179,7 @@ namespace trove {
 			gen(ctx, ast.value.value());
 		}else if (ast.type.value().base_type == Type::BaseType::FN
 			&& ast.type.value().mutability == Type::Mutability::MUT) {
-
+			// as this is a lambda, we need to gen it at the global scope
 			gen(ctx, ast.value.value());
 
 			auto return_type = ast.type.value().contained_types.at(ast.type.value().contained_types.size() - 1);
@@ -289,6 +319,12 @@ namespace trove {
 	}
 
 	void CGenerator::gen(CGeneratorContext& ctx, FnAST& fn_ast) {
+		auto old_block_ptr = m_block_ptr;
+
+		// add another block before us
+		m_blocks.insert(m_blocks.begin() + m_block_ptr, CGeneratorBlock{});
+		m_block_ptr = m_block_ptr;
+
 		emit_raw(type_to_str(fn_ast.type.contained_types.at(fn_ast.type.contained_types.size() - 1)));
 		emit_raw(" ");
 		std::stringstream ss;
@@ -309,6 +345,9 @@ namespace trove {
 		emit_raw("){\n");
 		gen(ctx, fn_ast.body);
 		emit_raw("}");
+
+		// we add 1 as we have inserted a block
+		m_block_ptr = old_block_ptr+1;
 	}
 	
 	void CGenerator::gen(CGeneratorContext&, NumAST& ast) {

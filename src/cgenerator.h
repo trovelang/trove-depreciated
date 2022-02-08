@@ -22,13 +22,29 @@ namespace trove {
         ModuleCtx module_ctx;
     };
 
+
+    // These are used to push statements to end of blocks etc
+    // 
+    //  st
+    // 
+    //
+    struct CGeneratorBlock{
+        std::stringstream ss;
+    };
+
     class CGenerator {
     public:
         std::string execute(const char* cmd);
         CGenerator(CompilationUnit* compilation_unit, AST* ast) 
         : m_compilation_unit(compilation_unit), m_ast(ast) {}
         std::string type_to_str(Type type);
+
+        void push_block();
+        void push_block_before();
+
         void emit_raw(std::string code);
+        void emit_raw(std::string code, u32 block_ptr);
+        std::string merge_blocks();
         void emit_c_str(std::string str);
         void gen_runtime();
         void gen();
@@ -59,6 +75,8 @@ namespace trove {
         AST* m_ast;
         SymTable<std::string> m_symtable;
         std::stringstream m_output_stream;
+        u32 m_block_ptr {0};
+        std::vector<CGeneratorBlock> m_blocks;
     };
 
 }

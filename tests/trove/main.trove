@@ -1,14 +1,8 @@
-
-test :: include("test1.trove")
-test2 :: include("sub/test2.trove")
-include("io.trove")
-
 main :: fn {
-    x := test.my_variable
-    
-    
-    println(x+3)
 
-    
-    println(test2.y)
+    sub :: fn {
+        printf("im in a lamdba!")
+    }
+
+    sub()
 }
